@@ -10,15 +10,9 @@ func (s *sqlStore) UpdateImportNote(
 	ctx context.Context,
 	id string,
 	data *importnotemodel.ImportNoteUpdate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Where("id = ?", id).Updates(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

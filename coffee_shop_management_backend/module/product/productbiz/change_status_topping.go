@@ -5,8 +5,8 @@ import (
 	"context"
 )
 
-type ChangeStatusToppingStore interface {
-	UpdateTopping(
+type ChangeStatusToppingRepo interface {
+	ChangeStatusTopping(
 		ctx context.Context,
 		id string,
 		data *productmodel.ToppingUpdate,
@@ -14,22 +14,19 @@ type ChangeStatusToppingStore interface {
 }
 
 type changeStatusToppingBiz struct {
-	store ChangeStatusToppingStore
+	repo ChangeStatusToppingRepo
 }
 
-func NewChangeStatusToppingBiz(store ChangeStatusToppingStore) *changeStatusToppingBiz {
-	return &changeStatusToppingBiz{store: store}
+func NewChangeStatusToppingBiz(repo ChangeStatusToppingRepo) *changeStatusToppingBiz {
+	return &changeStatusToppingBiz{repo: repo}
 }
 
 func (biz *changeStatusToppingBiz) ChangeStatusTopping(
 	ctx context.Context,
 	id string,
-	toValue bool) error {
-
-	var data productmodel.ToppingUpdate
-	data.IsActive = &toValue
-
-	err := biz.store.UpdateTopping(ctx, id, &data)
-
-	return err
+	data *productmodel.ToppingUpdate) error {
+	if err := biz.repo.ChangeStatusTopping(ctx, id, data); err != nil {
+		return err
+	}
+	return nil
 }

@@ -29,14 +29,16 @@ func (biz *createCategoryBiz) CreateCategory(
 		return err
 	}
 
-	idAddress, err := common.IdProcess(data.Id)
+	idAddress, err := common.GenerateId()
 	if err != nil {
 		return err
 	}
 
 	data.Id = idAddress
 
-	errStorage := biz.store.CreateCategory(ctx, data)
+	if err := biz.store.CreateCategory(ctx, data); err != nil {
+		return err
+	}
 
-	return errStorage
+	return nil
 }

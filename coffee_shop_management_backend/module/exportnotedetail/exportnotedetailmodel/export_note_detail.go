@@ -17,19 +17,19 @@ func (*ExportNoteDetail) TableName() string {
 }
 
 var (
-	ErrIngredientIdInvalid = common.NewCustomError(
+	ErrExportDetailIngredientIdInvalid = common.NewCustomError(
 		errors.New("id of ingredient is invalid"),
 		"id of ingredient is invalid",
-		"ErrIngredientIdInvalid",
+		"ErrExportDetailIngredientIdInvalid",
 	)
-	ErrExpiryDateInvalid = common.NewCustomError(
+	ErrExportDetailExpiryDateInvalid = common.NewCustomError(
 		errors.New("expiry date is invalid"),
 		"expiry date is invalid",
-		"ErrExpiryDateInvalid",
+		"ErrExportDetailExpiryDateInvalid",
 	)
-	ErrAmountExportIsNotPositiveNumber = common.NewCustomError(
+	ErrExportDetailAmountExportIsNotPositiveNumber = common.NewCustomError(
 		errors.New("amount export is not positive number"),
 		"amount export is not positive number",
-		"ErrAmountExportIsNotPositiveNumber",
+		"ErrExportDetailAmountExportIsNotPositiveNumber",
 	)
 )

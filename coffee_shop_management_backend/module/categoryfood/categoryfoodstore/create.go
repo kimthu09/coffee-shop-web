@@ -9,15 +9,9 @@ import (
 func (s *sqlStore) CreateCategoryFood(
 	ctx context.Context,
 	data *categoryfoodmodel.CategoryFoodCreate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Create(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

@@ -13,22 +13,15 @@ func (s *sqlStore) UpdateIngredientDetail(
 	ingredientId string,
 	expiryDate string,
 	data *ingredientdetailmodel.IngredientDetailUpdate) error {
-
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.
 		Table(common.TableIngredientDetail).
 		Where("ingredientId = ? and expiryDate = ?", ingredientId, expiryDate).
 		Update("amount", gorm.Expr("amount + ?", data.Amount)).Error; err != nil {
-		db.Rollback()
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return common.ErrRecordNotFound()
 		}
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

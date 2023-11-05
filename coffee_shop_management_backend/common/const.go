@@ -15,6 +15,8 @@ const (
 	TableCancelNoteDetail string = "CancelNoteDetail"
 	TableSupplier         string = "Supplier"
 	TableSupplierDebt     string = "SupplierDebt"
+	TableCustomer         string = "Customer"
+	TableCustomerDebt     string = "CustomerDebt"
 	TableImportNote       string = "ImportNote"
 	TableImportNoteDetail string = "ImportNoteDetail"
 	TableExportNote       string = "ExportNote"

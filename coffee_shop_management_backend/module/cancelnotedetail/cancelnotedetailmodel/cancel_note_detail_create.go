@@ -18,16 +18,16 @@ func (*CancelNoteDetailCreate) TableName() string {
 
 func (data *CancelNoteDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
-		return ErrIngredientIdInvalid
+		return ErrCancelDetailIngredientIdInvalid
 	}
 	if !common.ValidateDateString(data.ExpiryDate) {
-		return ErrExpiryDateInvalid
+		return ErrCancelDetailExpiryDateInvalid
 	}
 	if data.Reason == nil {
-		return ErrCancelReasonEmpty
+		return ErrCancelDetailCancelReasonEmpty
 	}
 	if common.ValidateNotPositiveNumber(data.AmountCancel) {
-		return ErrAmountCancelIsNotPositiveNumber
+		return ErrCancelDetailAmountCancelIsNotPositiveNumber
 	}
 	return nil
 }

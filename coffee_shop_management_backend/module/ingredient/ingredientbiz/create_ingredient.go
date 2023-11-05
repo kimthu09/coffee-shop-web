@@ -6,7 +6,7 @@ import (
 	"context"
 )
 
-type CreateIngredientStorage interface {
+type CreateIngredientStore interface {
 	CreateIngredient(
 		ctx context.Context,
 		data *ingredientmodel.IngredientCreate,
@@ -14,10 +14,10 @@ type CreateIngredientStorage interface {
 }
 
 type createIngredientBiz struct {
-	store CreateIngredientStorage
+	store CreateIngredientStore
 }
 
-func NewCreateIngredientBiz(store CreateIngredientStorage) *createIngredientBiz {
+func NewCreateIngredientBiz(store CreateIngredientStore) *createIngredientBiz {
 	return &createIngredientBiz{store: store}
 }
 
@@ -36,7 +36,9 @@ func (biz *createIngredientBiz) CreateIngredient(
 
 	data.Id = idAddress
 
-	errStorage := biz.store.CreateIngredient(ctx, data)
+	if err := biz.store.CreateIngredient(ctx, data); err != nil {
+		return err
+	}
 
-	return errStorage
+	return nil
 }

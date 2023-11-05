@@ -8,6 +8,7 @@ import (
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
+	"coffee_shop_management_backend/module/product/productrepo"
 	"coffee_shop_management_backend/module/product/productstore"
 	"coffee_shop_management_backend/module/recipe/recipestore"
 	"coffee_shop_management_backend/module/recipedetail/recipedetailstore"
@@ -24,14 +25,17 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		foodStore := productstore.NewSQLStore(appCtx.GetMainDBConnection())
-		categoryFoodStore := categoryfoodstore.NewSQLStore(appCtx.GetMainDBConnection())
-		categoryStore := categorystore.NewSQLStore(appCtx.GetMainDBConnection())
-		sizeFoodStore := sizefoodstore.NewSQLStore(appCtx.GetMainDBConnection())
-		recipeStore := recipestore.NewSQLStore(appCtx.GetMainDBConnection())
-		ingredientStore := ingredientstore.NewSQLStore(appCtx.GetMainDBConnection())
-		recipeDetailStore := recipedetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-		business := productbiz.NewCreateFoodBiz(
+		db := appCtx.GetMainDBConnection().Begin()
+
+		foodStore := productstore.NewSQLStore(db)
+		categoryFoodStore := categoryfoodstore.NewSQLStore(db)
+		categoryStore := categorystore.NewSQLStore(db)
+		sizeFoodStore := sizefoodstore.NewSQLStore(db)
+		recipeStore := recipestore.NewSQLStore(db)
+		ingredientStore := ingredientstore.NewSQLStore(db)
+		recipeDetailStore := recipedetailstore.NewSQLStore(db)
+
+		repo := productrepo.NewCreateFoodRepo(
 			foodStore,
 			categoryFoodStore,
 			categoryStore,
@@ -41,7 +45,15 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			recipeDetailStore,
 		)
 
+		business := productbiz.NewCreateFoodBiz(repo)
+
 		if err := business.CreateFood(c.Request.Context(), &data); err != nil {
+			db.Rollback()
+			panic(err)
+		}
+
+		if err := db.Commit().Error; err != nil {
+			db.Rollback()
 			panic(err)
 		}
 

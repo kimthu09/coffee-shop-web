@@ -10,7 +10,7 @@ import (
 
 func (s *sqlStore) FindListImportNoteDetail(ctx context.Context,
 	conditions map[string]interface{},
-	moreKeys ...string) (*[]importnotedetailmodel.ImportNoteDetail, error) {
+	moreKeys ...string) ([]importnotedetailmodel.ImportNoteDetail, error) {
 	var data []importnotedetailmodel.ImportNoteDetail
 	db := s.db
 
@@ -28,5 +28,5 @@ func (s *sqlStore) FindListImportNoteDetail(ctx context.Context,
 		return nil, common.ErrDB(err)
 	}
 
-	return &data, nil
+	return data, nil
 }

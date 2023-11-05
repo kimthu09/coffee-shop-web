@@ -6,10 +6,10 @@ import (
 )
 
 type ExportNoteCreate struct {
-	Id                string                                         `json:"-" gorm:"column:id;"`
+	Id                *string                                        `json:"id" gorm:"column:id;"`
 	TotalPrice        float32                                        `json:"-" gorm:"column:totalPrice;"`
 	CreateBy          string                                         `json:"-" gorm:"column:createBy;"`
-	ExportNoteDetails []exportnotedetailmodel.ExportNoteDetailCreate `json:"exportNoteDetails" gorm:"-"`
+	ExportNoteDetails []exportnotedetailmodel.ExportNoteDetailCreate `json:"details" gorm:"-"`
 }
 
 func (*ExportNoteCreate) TableName() string {
@@ -17,12 +17,15 @@ func (*ExportNoteCreate) TableName() string {
 }
 
 func (data *ExportNoteCreate) Validate() *common.AppError {
+	if !common.ValidateId(data.Id) {
+		return ErrExportNoteIdInvalid
+	}
 	if data.ExportNoteDetails == nil || len(data.ExportNoteDetails) == 0 {
-		return ErrImportNoteDetailsEmpty
+		return ErrExportNoteDetailsEmpty
 	}
 
-	for _, importNoteDetail := range data.ExportNoteDetails {
-		if err := importNoteDetail.Validate(); err != nil {
+	for _, v := range data.ExportNoteDetails {
+		if err := v.Validate(); err != nil {
 			return err
 		}
 	}

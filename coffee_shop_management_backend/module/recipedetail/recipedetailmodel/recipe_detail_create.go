@@ -14,10 +14,10 @@ func (*RecipeDetailCreate) TableName() string {
 
 func (data *RecipeDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
-		return ErrIngredientIdInvalid
+		return ErrRecipeDetailIngredientIdInvalid
 	}
 	if common.ValidateNotPositiveNumber(data.AmountNeed) {
-		return ErrAmountNeedIsNotPositiveNumber
+		return ErrRecipeDetailAmountNeedIsNotPositiveNumber
 	}
 	return nil
 }

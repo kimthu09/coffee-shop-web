@@ -11,18 +11,14 @@ func (s *sqlStore) UpdateAmountProductCategory(
 	ctx context.Context,
 	id string,
 	data *categorymodel.CategoryUpdateAmountProduct) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Table(common.TableCategory).
 		Where("id = ?", id).
-		Update("amountProduct", gorm.Expr("amountProduct + ?", data.AmountProduct)).
+		Update("amountProduct", gorm.Expr(
+			"amountProduct + ?", data.AmountProduct,
+		)).
 		Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

@@ -11,18 +11,12 @@ func (s *sqlStore) UpdateSupplierDebt(
 	ctx context.Context,
 	id string,
 	data *suppliermodel.SupplierUpdateDebt) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Table(common.TableSupplier).
 		Where("id = ?", id).
 		Update("debt", gorm.Expr("debt + ?", data.Amount)).
 		Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

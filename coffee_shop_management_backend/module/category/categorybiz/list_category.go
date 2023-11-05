@@ -35,7 +35,7 @@ func (biz *listCategoryBiz) ListCategory(ctx context.Context,
 		paging)
 
 	if err != nil {
-		return nil, common.ErrCannotListEntity(common.TableCategory, err)
+		return nil, err
 	}
 
 	return result, nil

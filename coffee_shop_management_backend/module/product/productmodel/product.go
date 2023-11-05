@@ -9,25 +9,25 @@ type Product struct {
 	Id           string `json:"id" gorm:"column:id;"`
 	Name         string `json:"name" gorm:"column:name;"`
 	Description  string `json:"description" gorm:"column:description;"`
-	ProductSizes *Sizes `json:"sizes" gorm:"column:sizes;"`
+	CookingGuide string `json:"cookingGuide" gorm:"column:cookingGuide"`
 	IsActive     bool   `json:"isActive" gorm:"column:isActive;"`
 }
 
 var (
-	ErrIdInvalid = common.NewCustomError(
-		errors.New("id of product is empty"),
-		"id of product is empty",
-		"ErrIdInvalid",
+	ErrProductIdInvalid = common.NewCustomError(
+		errors.New("id of product is invalid"),
+		"id of product is invalid",
+		"ErrProductIdInvalid",
 	)
-	ErrNameEmpty = common.NewCustomError(
+	ErrProductNameEmpty = common.NewCustomError(
 		errors.New("name of product is empty"),
 		"name of product is empty",
-		"ErrNameEmpty",
+		"ErrProductNameEmpty",
 	)
-	ErrSizeNotExist = common.NewCustomError(
-		errors.New("size of product has not been included"),
-		"size of product has not been included",
-		"ErrSizeNotExist",
+	ErrProductIsActiveEmpty = common.NewCustomError(
+		errors.New("status of product is empty"),
+		"status of product is invalid",
+		"ErrProductIsActiveEmpty",
 	)
 	ErrProductInactive = common.NewCustomError(
 		errors.New("product has been inactive"),

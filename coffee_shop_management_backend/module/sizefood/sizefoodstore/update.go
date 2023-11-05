@@ -11,17 +11,11 @@ func (s *sqlStore) UpdateSizeFood(
 	foodId string,
 	sizeId string,
 	data *sizefoodmodel.SizeFoodUpdate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.
 		Where("foodId = ? and sizeId = ?", foodId, sizeId).
 		Updates(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

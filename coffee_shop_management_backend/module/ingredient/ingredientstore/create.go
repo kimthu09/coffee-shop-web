@@ -9,15 +9,17 @@ import (
 func (s *sqlStore) CreateIngredient(
 	ctx context.Context,
 	data *ingredientmodel.IngredientCreate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Create(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
+		if gormErr := common.GetGormErr(err); gormErr != nil {
+			switch key := gormErr.GetDuplicateErrorKey("PRIMARY", "name"); key {
+			case "PRIMARY":
+				return ingredientmodel.ErrIngredientIdDuplicate
+			case "name":
+				return ingredientmodel.ErrIngredientNameDuplicate
+			}
+		}
 		return common.ErrDB(err)
 	}
 

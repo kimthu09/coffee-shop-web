@@ -6,11 +6,11 @@ import (
 )
 
 type ImportNoteCreate struct {
-	Id                string                                         `json:"-" gorm:"column:id;"`
+	Id                *string                                        `json:"id" gorm:"column:id;"`
 	TotalPrice        float32                                        `json:"-" gorm:"column:totalPrice;"`
 	SupplierId        string                                         `json:"supplierId" gorm:"column:supplierId"`
 	CreateBy          string                                         `json:"-" gorm:"column:createBy;"`
-	ImportNoteDetails []importnotedetailmodel.ImportNoteDetailCreate `json:"importNoteDetails" gorm:"-"`
+	ImportNoteDetails []importnotedetailmodel.ImportNoteDetailCreate `json:"details" gorm:"-"`
 }
 
 func (*ImportNoteCreate) TableName() string {
@@ -18,16 +18,26 @@ func (*ImportNoteCreate) TableName() string {
 }
 
 func (data *ImportNoteCreate) Validate() *common.AppError {
+	if !common.ValidateId(data.Id) {
+		return ErrImportNoteIdInvalid
+	}
 	if !common.ValidateNotNilId(&data.SupplierId) {
-		return ErrSupplierIdInvalid
+		return ErrImportNoteSupplierIdInvalid
 	}
 	if data.ImportNoteDetails == nil || len(data.ImportNoteDetails) == 0 {
 		return ErrImportNoteDetailsEmpty
 	}
 
+	mapIngredientUpdatePriceTimes := make(map[string]int)
 	for _, importNoteDetail := range data.ImportNoteDetails {
 		if err := importNoteDetail.Validate(); err != nil {
 			return err
+		}
+		if importNoteDetail.IsReplacePrice {
+			mapIngredientUpdatePriceTimes[importNoteDetail.IngredientId]++
+			if mapIngredientUpdatePriceTimes[importNoteDetail.IngredientId] > 1 {
+				return ErrImportNoteHasSameIngredientBothUpdatePrice
+			}
 		}
 	}
 	return nil

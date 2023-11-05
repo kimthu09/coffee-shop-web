@@ -11,15 +11,15 @@ func (s *sqlStore) UpdateFood(
 	id string,
 	data *productmodel.FoodUpdate) error {
 
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Where("id = ?", id).Updates(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
+		if gormErr := common.GetGormErr(err); gormErr != nil {
+			switch key := gormErr.GetDuplicateErrorKey("name"); key {
+			case "name":
+				return productmodel.ErrFoodNameDuplicate
+			}
+		}
 		return common.ErrDB(err)
 	}
 

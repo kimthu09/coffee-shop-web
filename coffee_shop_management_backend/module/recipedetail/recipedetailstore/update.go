@@ -11,17 +11,11 @@ func (s *sqlStore) UpdateRecipeDetail(
 	idRecipe string,
 	idIngredient string,
 	data *recipedetailmodel.RecipeDetailUpdate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.
-		Where("idRecipe = ? and idIngredient = ?", idRecipe, idIngredient).
+		Where("recipeId = ? and ingredientId = ?", idRecipe, idIngredient).
 		Updates(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

@@ -14,29 +14,35 @@ func (*Food) TableName() string {
 }
 
 var (
-	ErrCategoryEmpty = common.NewCustomError(
+	ErrFoodIdDuplicate = common.ErrDuplicateKey(
+		errors.New("id of food is duplicate"),
+	)
+	ErrFoodNameDuplicate = common.ErrDuplicateKey(
+		errors.New("name of food is duplicate"),
+	)
+	ErrFoodCategoryEmpty = common.NewCustomError(
 		errors.New("category of food is empty"),
 		"category of food is empty",
-		"ErrCategoryEmpty",
+		"ErrFoodCategoryEmpty",
 	)
-	ErrExistDuplicateCategory = common.NewCustomError(
+	ErrFoodExistDuplicateCategory = common.NewCustomError(
 		errors.New("exist duplicate category"),
 		"exist duplicate category",
-		"ErrExistDuplicateCategory",
+		"ErrFoodExistDuplicateCategory",
 	)
-	ErrSizeEmpty = common.NewCustomError(
+	ErrFoodSizeEmpty = common.NewCustomError(
 		errors.New("list size of food is empty"),
 		"list size of food is empty",
-		"ErrSizeEmpty",
+		"ErrFoodSizeEmpty",
 	)
-	ErrExistDuplicateSize = common.NewCustomError(
+	ErrFoodExistDuplicateSize = common.NewCustomError(
 		errors.New("exist duplicate size"),
 		"exist duplicate size",
-		"ErrExistDuplicateSize",
+		"ErrFoodExistDuplicateSize",
 	)
-	ErrSizeIdInvalid = common.NewCustomError(
+	ErrFoodSizeIdInvalid = common.NewCustomError(
 		errors.New("size id is invalid"),
 		"size id is invalid",
-		"ErrSizeIdInvalid",
+		"ErrFoodSizeIdInvalid",
 	)
 )

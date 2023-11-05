@@ -9,15 +9,9 @@ import (
 func (s *sqlStore) CreateListCancelNoteDetail(
 	ctx context.Context,
 	data []cancelnotedetailmodel.CancelNoteDetailCreate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.CreateInBatches(data, len(data)).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

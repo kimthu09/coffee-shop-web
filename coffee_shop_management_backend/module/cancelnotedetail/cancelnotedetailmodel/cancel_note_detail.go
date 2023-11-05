@@ -18,24 +18,24 @@ func (*CancelNoteDetail) TableName() string {
 }
 
 var (
-	ErrIngredientIdInvalid = common.NewCustomError(
+	ErrCancelDetailIngredientIdInvalid = common.NewCustomError(
 		errors.New("id of ingredient is invalid"),
 		"id of ingredient is invalid",
-		"ErrIngredientIdInvalid",
+		"ErrCancelDetailIngredientIdInvalid",
 	)
-	ErrExpiryDateInvalid = common.NewCustomError(
+	ErrCancelDetailExpiryDateInvalid = common.NewCustomError(
 		errors.New("expiry date is invalid"),
 		"expiry date is invalid",
-		"ErrExpiryDateInvalid",
+		"ErrCancelDetailExpiryDateInvalid",
 	)
-	ErrCancelReasonEmpty = common.NewCustomError(
+	ErrCancelDetailCancelReasonEmpty = common.NewCustomError(
 		errors.New("cancel reason is empty"),
 		"cancel reason is empty",
-		"ErrCancelReasonEmpty",
+		"ErrCancelDetailCancelReasonEmpty",
 	)
-	ErrAmountCancelIsNotPositiveNumber = common.NewCustomError(
+	ErrCancelDetailAmountCancelIsNotPositiveNumber = common.NewCustomError(
 		errors.New("amount cancel is not positive number"),
 		"amount cancel is not positive number",
-		"ErrAmountCancelIsNotPositiveNumber",
+		"ErrCancelDetailAmountCancelIsNotPositiveNumber",
 	)
 )

@@ -22,24 +22,34 @@ func (*ImportNote) TableName() string {
 }
 
 var (
-	ErrSupplierIdInvalid = common.NewCustomError(
+	ErrImportNoteIdInvalid = common.NewCustomError(
+		errors.New("id of import note is invalid"),
+		"id of import note is invalid",
+		"ErrImportNoteIdInvalid",
+	)
+	ErrImportNoteSupplierIdInvalid = common.NewCustomError(
 		errors.New("id of supplier is invalid"),
 		"id of supplier is invalid",
-		"ErrSupplierIdInvalid",
+		"ErrImportNoteSupplierIdInvalid",
 	)
 	ErrImportNoteDetailsEmpty = common.NewCustomError(
 		errors.New("list import note details are empty"),
 		"list import note details are empty",
 		"ErrImportNoteDetailsEmpty",
 	)
-	ErrImportStatusEmpty = common.NewCustomError(
+	ErrImportNoteStatusEmpty = common.NewCustomError(
 		errors.New("import's status is empty"),
 		"import's status is empty",
-		"ErrImportStatusEmpty",
+		"ErrImportNoteStatusEmpty",
 	)
-	ErrImportStatusInvalid = common.NewCustomError(
+	ErrImportNoteStatusInvalid = common.NewCustomError(
 		errors.New("import's status is invalid"),
 		"import's status is invalid",
-		"ErrImportStatusInvalid",
+		"ErrImportNoteStatusInvalid",
+	)
+	ErrImportNoteHasSameIngredientBothUpdatePrice = common.NewCustomError(
+		errors.New("exist one ingredient need to update price twice"),
+		"exist one ingredient need to update price twice",
+		"ErrImportNoteHasSameIngredientBothUpdatePrice",
 	)
 )

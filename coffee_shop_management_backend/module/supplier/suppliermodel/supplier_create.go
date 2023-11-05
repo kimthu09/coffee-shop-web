@@ -15,16 +15,16 @@ func (*SupplierCreate) TableName() string {
 
 func (data *SupplierCreate) Validate() *common.AppError {
 	if !common.ValidateId(data.Id) {
-		return ErrIdInvalid
+		return ErrSupplierIdInvalid
 	}
 	if common.ValidateEmptyString(data.Name) {
-		return ErrNameEmpty
+		return ErrSupplierNameEmpty
 	}
-	if !common.ValidateEmail(data.Email) {
-		return ErrEmailInvalid
+	if data.Email != "" && !common.ValidateEmail(data.Email) {
+		return ErrSupplierEmailInvalid
 	}
 	if !common.ValidatePhone(data.Phone) {
-		return ErrPhoneInvalid
+		return ErrSupplierPhoneInvalid
 	}
 	return nil
 }

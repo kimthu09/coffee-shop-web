@@ -2,13 +2,14 @@ package supplierbiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/common/enum"
 	"coffee_shop_management_backend/component/asyncjob"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebtmodel"
 	"context"
 )
 
-type PaySupplierStorage interface {
+type PaySupplierStore interface {
 	GetDebtSupplier(
 		ctx context.Context,
 		supplierId string) (*float32, error)
@@ -19,21 +20,21 @@ type PaySupplierStorage interface {
 	) error
 }
 
-type CreateSupplierDebtStorage interface {
+type CreateSupplierDebtStore interface {
 	CreateSupplierDebt(
 		ctx context.Context,
 		data *supplierdebtmodel.SupplierDebtCreate) error
 }
 
 type paySupplierBiz struct {
-	supplierStore     PaySupplierStorage
-	supplierDebtStore CreateSupplierDebtStorage
+	supplierStore     PaySupplierStore
+	supplierDebtStore CreateSupplierDebtStore
 	requester         common.Requester
 }
 
 func NewUpdatePayBiz(
-	supplierStore PaySupplierStorage,
-	supplierDebtStore CreateSupplierDebtStorage,
+	supplierStore PaySupplierStore,
+	supplierDebtStore CreateSupplierDebtStore,
 	requester common.Requester) *paySupplierBiz {
 	return &paySupplierBiz{
 		supplierStore:     supplierStore,
@@ -47,6 +48,10 @@ func (biz *paySupplierBiz) PaySupplier(
 	data *suppliermodel.SupplierUpdateDebt) (*string, error) {
 	if err := data.Validate(); err != nil {
 		return nil, err
+	}
+
+	if *data.Amount <= 0 {
+		return nil, suppliermodel.ErrDebtPayIsInvalid
 	}
 
 	debtCurrent, err := biz.supplierStore.GetDebtSupplier(
@@ -64,26 +69,26 @@ func (biz *paySupplierBiz) PaySupplier(
 		return nil, errGenerateId
 	}
 
-	supplierDebtType := supplierdebtmodel.Pay
+	debtType := enum.Pay
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
-		Id:               id,
-		IdSupplier:       idSupplier,
-		Amount:           amountPay,
-		AmountLeft:       amountLeft,
-		SupplierDebtType: &supplierDebtType,
-		CreateBy:         biz.requester.GetUserId(),
+		Id:         id,
+		IdSupplier: idSupplier,
+		Amount:     amountPay,
+		AmountLeft: amountLeft,
+		DebtType:   &debtType,
+		CreateBy:   biz.requester.GetUserId(),
 	}
 
 	jobUpdateSupplier := asyncjob.NewJob(func(ctx context.Context) error {
 		return biz.supplierStore.UpdateSupplierDebt(ctx, idSupplier, data)
 	})
-	jobCreateSupplierDetail := asyncjob.NewJob(func(ctx context.Context) error {
+	jobCreateSupplierDebt := asyncjob.NewJob(func(ctx context.Context) error {
 		return biz.supplierDebtStore.CreateSupplierDebt(ctx, &supplierDebtCreate)
 	})
 	group := asyncjob.NewGroup(
 		false,
 		jobUpdateSupplier,
-		jobCreateSupplierDetail)
+		jobCreateSupplierDebt)
 	if err := group.Run(context.Background()); err != nil {
 		return nil, err
 	}

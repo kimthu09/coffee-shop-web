@@ -2,173 +2,99 @@ package exportnotebiz
 
 import (
 	"coffee_shop_management_backend/common"
-	"coffee_shop_management_backend/component/asyncjob"
-	importnotemodel "coffee_shop_management_backend/module/exportnote/exportnotemodel"
-	"coffee_shop_management_backend/module/exportnotedetail/exportnotedetailmodel"
-	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
-	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailmodel"
+	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
 	"context"
 )
 
-type CreateExportNoteStorage interface {
-	CreateExportNote(
-		ctx context.Context,
-		data *importnotemodel.ExportNoteCreate,
-	) error
-}
-
-type CreateExportNoteDetailStorage interface {
-	CreateListExportNoteDetail(
-		ctx context.Context,
-		data []exportnotedetailmodel.ExportNoteDetailCreate,
-	) error
-}
-
-type UpdateIngredientStorage interface {
+type CreateExportNoteRepo interface {
 	GetPriceIngredient(
 		ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*float32, error)
-	UpdateIngredient(
-		ctx context.Context,
-		id string,
-		data *ingredientmodel.IngredientUpdate,
-	) error
-}
-
-type UpdateIngredientDetailStorage interface {
-	UpdateIngredientDetail(
-		ctx context.Context,
 		ingredientId string,
-		expiryDate string,
-		data *ingredientdetailmodel.IngredientDetailUpdate,
+	) (*float32, error)
+	HandleExportNote(
+		ctx context.Context,
+		data *exportnotemodel.ExportNoteCreate,
+	) error
+	HandleIngredientDetail(
+		ctx context.Context,
+		data *exportnotemodel.ExportNoteCreate,
+	) error
+	HandleIngredientTotalAmount(
+		ctx context.Context,
+		ingredientTotalAmountNeedUpdate map[string]float32,
 	) error
 }
 
 type createExportNoteBiz struct {
-	exportNoteStore       CreateExportNoteStorage
-	exportNoteDetailStore CreateExportNoteDetailStorage
-	ingredientStore       UpdateIngredientStorage
-	ingredientDetailStore UpdateIngredientDetailStorage
+	repo CreateExportNoteRepo
 }
 
 func NewCreateExportNoteBiz(
-	exportNoteStore CreateExportNoteStorage,
-	exportNoteDetailStore CreateExportNoteDetailStorage,
-	ingredientStore UpdateIngredientStorage,
-	ingredientDetailStore UpdateIngredientDetailStorage) *createExportNoteBiz {
+	repo CreateExportNoteRepo) *createExportNoteBiz {
 	return &createExportNoteBiz{
-		exportNoteStore:       exportNoteStore,
-		exportNoteDetailStore: exportNoteDetailStore,
-		ingredientStore:       ingredientStore,
-		ingredientDetailStore: ingredientDetailStore,
+		repo: repo,
 	}
 }
 
 func (biz *createExportNoteBiz) CreateExportNote(
 	ctx context.Context,
-	data *importnotemodel.ExportNoteCreate) error {
-
-	//validate data
+	data *exportnotemodel.ExportNoteCreate) error {
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	//handle id import note
-	idExportNote, errGenerateIdExportNote := common.GenerateId()
-	if errGenerateIdExportNote != nil {
-		return errGenerateIdExportNote
+	if err := handleExportNoteId(data); err != nil {
+		return err
 	}
 
-	data.Id = idExportNote
-
-	//handle export detail
-	mapIngredient := map[string]float32{}
-
-	for i, ingredientDetail := range data.ExportNoteDetails {
-		data.ExportNoteDetails[i].ExportNoteId = idExportNote
-
-		mapIngredient[ingredientDetail.IngredientId] +=
-			ingredientDetail.AmountExport
-	}
-
-	//handle totalPrice
+	mapIngredient := getMapIngredientExist(data)
 	var totalPrice float32 = 0
 	for ingredientId, totalAmountOfIngredientId := range mapIngredient {
-		priceIngredient, err := biz.ingredientStore.GetPriceIngredient(
-			ctx,
-			map[string]interface{}{"id": ingredientId},
+		price, err := biz.repo.GetPriceIngredient(
+			ctx, ingredientId,
 		)
 		if err != nil {
 			return err
 		}
-		totalPrice += *priceIngredient * totalAmountOfIngredientId
+
+		totalPrice += *price * totalAmountOfIngredientId
 	}
 	data.TotalPrice = totalPrice
 
-	//handle store data
-	///handle define job create export note
-	jobCreateExportNote := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.exportNoteStore.CreateExportNote(ctx, data)
-	})
-
-	///handle define job create import note detail
-	jobCreateExportNoteDetail := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.exportNoteDetailStore.CreateListExportNoteDetail(ctx, data.ExportNoteDetails)
-	})
-
-	///handle define job update ingredient detail
-	var ingredientDetailJobs []asyncjob.Job
-	mapIngredientAmount := map[string]float32{}
-	for _, v := range data.ExportNoteDetails {
-		mapIngredientAmount[v.IngredientId] += v.AmountExport
-		tempJob := asyncjob.NewJob(func(
-			exportNoteDetailCreate exportnotedetailmodel.ExportNoteDetailCreate,
-		) func(ctx context.Context) error {
-			return func(ctx context.Context) error {
-				dataUpdate := ingredientdetailmodel.IngredientDetailUpdate{
-					Amount: -exportNoteDetailCreate.AmountExport,
-				}
-				return biz.ingredientDetailStore.UpdateIngredientDetail(
-					ctx,
-					exportNoteDetailCreate.IngredientId,
-					exportNoteDetailCreate.ExpiryDate,
-					&dataUpdate,
-				)
-			}
-		}(v))
-		ingredientDetailJobs = append(ingredientDetailJobs, tempJob)
+	if err := biz.repo.HandleExportNote(ctx, data); err != nil {
+		return err
 	}
 
-	///handle define job update total amount for ingredient
-	var ingredientJobs []asyncjob.Job
-	for key, value := range mapIngredientAmount {
-		tempJob := asyncjob.NewJob(func(amount float32, id string) func(ctx context.Context) error {
-			return func(ctx context.Context) error {
-				ingredientUpdate := ingredientmodel.IngredientUpdate{Amount: -amount}
-				return biz.ingredientStore.UpdateIngredient(ctx, id, &ingredientUpdate)
-			}
-		}(value, key))
-		ingredientJobs = append(ingredientJobs, tempJob)
+	if err := biz.repo.HandleIngredientDetail(ctx, data); err != nil {
+		return err
 	}
 
-	///combine all job
-	jobs := []asyncjob.Job{
-		jobCreateExportNote,
-		jobCreateExportNoteDetail,
-	}
-	jobs = append(jobs, ingredientJobs...)
-	jobs = append(jobs, ingredientDetailJobs...)
-
-	///run jobs
-	group := asyncjob.NewGroup(
-		false,
-		jobs...,
-	)
-	if err := group.Run(context.Background()); err != nil {
+	if err := biz.repo.HandleIngredientTotalAmount(ctx, mapIngredient); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func handleExportNoteId(data *exportnotemodel.ExportNoteCreate) error {
+	idCancelNote, errGenerateIdCancelNote := common.IdProcess(data.Id)
+	if errGenerateIdCancelNote != nil {
+		return errGenerateIdCancelNote
+	}
+	data.Id = idCancelNote
+
+	for i := range data.ExportNoteDetails {
+		data.ExportNoteDetails[i].ExportNoteId = *idCancelNote
+	}
+
+	return nil
+}
+
+func getMapIngredientExist(data *exportnotemodel.ExportNoteCreate) map[string]float32 {
+	mapIngredientExist := make(map[string]float32)
+	for _, v := range data.ExportNoteDetails {
+		mapIngredientExist[v.IngredientId] += v.AmountExport
+	}
+
+	return mapIngredientExist
 }

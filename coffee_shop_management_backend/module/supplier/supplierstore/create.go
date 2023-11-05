@@ -7,15 +7,17 @@ import (
 )
 
 func (s *sqlStore) CreateSupplier(ctx context.Context, data *suppliermodel.SupplierCreate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Create(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
+		if gormErr := common.GetGormErr(err); gormErr != nil {
+			switch key := gormErr.GetDuplicateErrorKey("PRIMARY", "phone"); key {
+			case "PRIMARY":
+				return suppliermodel.ErrSupplierIdDuplicate
+			case "phone":
+				return suppliermodel.ErrSupplierPhoneDuplicate
+			}
+		}
 		return common.ErrDB(err)
 	}
 
