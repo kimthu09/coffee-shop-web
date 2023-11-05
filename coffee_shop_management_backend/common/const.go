@@ -21,6 +21,8 @@ const (
 	TableImportNoteDetail string = "ImportNoteDetail"
 	TableExportNote       string = "ExportNote"
 	TableExportNoteDetail string = "ExportNoteDetail"
+	TableInvoice          string = "Invoice"
+	TableInvoiceDetail    string = "InvoiceDetail"
 )
 
 const CurrentUserStr = "current_user"

@@ -7,6 +7,8 @@ import (
 
 type ToppingCreate struct {
 	*ProductCreate `json:",inline"`
+	Cost           float32                   `json:"cost" gorm:"column:cost;"`
+	Price          float32                   `json:"price" gorm:"column:price;"`
 	RecipeId       string                    `json:"-" gorm:"column:recipeId;"`
 	Recipe         *recipemodel.RecipeCreate `json:"recipe" gorm:"-"`
 }
@@ -18,6 +20,12 @@ func (*ToppingCreate) TableName() string {
 func (data *ToppingCreate) Validate() error {
 	if err := (*data.ProductCreate).Validate(); err != nil {
 		return err
+	}
+	if common.ValidateNegativeNumber(data.Cost) {
+		return ErrToppingCostIsNegativeNumber
+	}
+	if common.ValidateNegativeNumber(data.Price) {
+		return ErrToppingPriceIsNegativeNumber
 	}
 	if data.Recipe == nil {
 		return ErrRecipeEmpty

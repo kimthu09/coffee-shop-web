@@ -10,6 +10,7 @@ import (
 	"coffee_shop_management_backend/module/importnote/importnotetransport/ginimportnote"
 	"coffee_shop_management_backend/module/ingredient/ingredienttransport/giningredient"
 	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailtransport/giningredientdetail"
+	"coffee_shop_management_backend/module/invoice/invoicetransport/gininvoice"
 	"coffee_shop_management_backend/module/product/producttransport/ginproduct"
 	"coffee_shop_management_backend/module/supplier/suppliertransport/ginsupplier"
 	"coffee_shop_management_backend/module/user/usertransport/gin_user"
@@ -97,6 +98,11 @@ func main() {
 	cancelNotes := v1.Group("/cancelNotes", middleware.RequireAuth(appCtx))
 	{
 		cancelNotes.POST("", gincancelnote.CreateCancelNote(appCtx))
+	}
+
+	invoices := v1.Group("/invoices", middleware.RequireAuth(appCtx))
+	{
+		invoices.POST("", gininvoice.CreateInvoice(appCtx))
 	}
 
 	err = r.Run(":8080")
