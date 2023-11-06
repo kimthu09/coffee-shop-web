@@ -1,4 +1,4 @@
-package userstorage
+package userstore
 
 import (
 	"coffee_shop_management_backend/common"
@@ -8,7 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) FindUser(ctx context.Context, conditions map[string]interface{}, moreInfo ...string) (*usermodel.User, error) {
+func (s *sqlStore) FindUser(
+	ctx context.Context,
+	conditions map[string]interface{},
+	moreInfo ...string) (*usermodel.User, error) {
 	db := s.db.Table(common.TableUser)
 
 	for i := range moreInfo {

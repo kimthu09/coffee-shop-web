@@ -1,4 +1,4 @@
-package gin_user
+package ginuser
 
 import (
 	"coffee_shop_management_backend/common"
@@ -7,7 +7,8 @@ import (
 	"coffee_shop_management_backend/component/token_provider/jwt"
 	"coffee_shop_management_backend/module/user/userbiz"
 	"coffee_shop_management_backend/module/user/usermodel"
-	"coffee_shop_management_backend/module/user/userstorage"
+	"coffee_shop_management_backend/module/user/userrepo"
+	"coffee_shop_management_backend/module/user/userstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -20,13 +21,16 @@ func Login(appCtx appctx.AppContext) gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, common.ErrInvalidRequest(err))
 		}
 
-		db := appCtx.GetMainDBConnection()
+		db := appCtx.GetMainDBConnection().Begin()
+
 		tokenProvider := jwt.NewTokenJWTProvider(appCtx.GetSecretKey())
 
-		store := userstorage.NewSQLStore(db)
+		store := userstore.NewSQLStore(db)
+		repo := userrepo.NewLoginRepo(store)
+
 		md5 := hasher.NewMd5Hash()
 
-		business := userbiz.NewLoginBusiness(appCtx, store, 60*60*24*30, tokenProvider, md5)
+		business := userbiz.NewLoginBiz(appCtx, repo, 60*60*24*30, tokenProvider, md5)
 		account, err := business.Login(c.Request.Context(), &data)
 
 		if err != nil {

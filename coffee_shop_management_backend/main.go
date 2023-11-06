@@ -4,6 +4,7 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotetransport/gincancelnote"
+	"coffee_shop_management_backend/module/cancelnotedetail/cancelnotedetailtransport/gincancelnotedetail"
 	"coffee_shop_management_backend/module/category/categorytransport/gincategory"
 	"coffee_shop_management_backend/module/customer/customertransport/gincustomer"
 	"coffee_shop_management_backend/module/exportnote/exportnotetransport/ginexportnote"
@@ -12,8 +13,9 @@ import (
 	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailtransport/giningredientdetail"
 	"coffee_shop_management_backend/module/invoice/invoicetransport/gininvoice"
 	"coffee_shop_management_backend/module/product/producttransport/ginproduct"
+	"coffee_shop_management_backend/module/role/roletransport/ginrole"
 	"coffee_shop_management_backend/module/supplier/suppliertransport/ginsupplier"
-	"coffee_shop_management_backend/module/user/usertransport/gin_user"
+	"coffee_shop_management_backend/module/user/usertransport/ginuser"
 	"github.com/gin-gonic/gin"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -39,8 +41,20 @@ func main() {
 
 	v1 := r.Group("/v1")
 	{
-		v1.POST("/register", gin_user.Register(appCtx))
-		v1.POST("/login", gin_user.Login(appCtx))
+		v1.POST("/login", ginuser.Login(appCtx))
+	}
+
+	users := v1.Group("/users", middleware.RequireAuth(appCtx))
+	{
+		users.PATCH("/:id/info", ginuser.UpdateInfoUser(appCtx))
+		users.PATCH("/:id/status", ginuser.ChangeStatusUser(appCtx))
+		users.PATCH("/:id/role", ginuser.ChangeRoleUser(appCtx))
+		users.PATCH("/:id/reset", ginuser.ResetPassword(appCtx))
+	}
+
+	profile := v1.Group("/profile", middleware.RequireAuth(appCtx))
+	{
+		profile.PATCH("/password", ginuser.UpdatePassword(appCtx))
 	}
 
 	categories := v1.Group("/categories", middleware.RequireAuth(appCtx))
@@ -98,11 +112,18 @@ func main() {
 	cancelNotes := v1.Group("/cancelNotes", middleware.RequireAuth(appCtx))
 	{
 		cancelNotes.POST("", gincancelnote.CreateCancelNote(appCtx))
+		cancelNotes.GET("/:id", gincancelnotedetail.ListIngredientDetailById(appCtx))
 	}
 
 	invoices := v1.Group("/invoices", middleware.RequireAuth(appCtx))
 	{
 		invoices.POST("", gininvoice.CreateInvoice(appCtx))
+	}
+
+	roles := v1.Group("/roles", middleware.RequireAuth(appCtx))
+	{
+		roles.POST("", ginrole.CreateRole(appCtx))
+		roles.PATCH("/:id", ginrole.UpdateRole(appCtx))
 	}
 
 	err = r.Run(":8080")
