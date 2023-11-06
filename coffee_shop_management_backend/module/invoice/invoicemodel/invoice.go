@@ -42,4 +42,7 @@ var (
 		"list import note details are empty",
 		"ErrInvoiceDetailsEmpty",
 	)
+	ErrInvoiceCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create invoice"),
+	)
 )
