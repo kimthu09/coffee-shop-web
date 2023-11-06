@@ -2,6 +2,8 @@ package importnotebiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
 	"context"
 )
@@ -27,19 +29,29 @@ type CreateImportNoteRepo interface {
 }
 
 type createImportNoteBiz struct {
-	repo CreateImportNoteRepo
+	gen       generator.IdGenerator
+	repo      CreateImportNoteRepo
+	requester middleware.Requester
 }
 
 func NewCreateImportNoteBiz(
-	repo CreateImportNoteRepo) *createImportNoteBiz {
+	gen generator.IdGenerator,
+	repo CreateImportNoteRepo,
+	requester middleware.Requester) *createImportNoteBiz {
 	return &createImportNoteBiz{
-		repo: repo,
+		gen:       gen,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
 func (biz *createImportNoteBiz) CreateImportNote(
 	ctx context.Context,
 	data *importnotemodel.ImportNoteCreate) error {
+	if !biz.requester.IsHasFeature(common.ImportNoteCreateFeatureCode) {
+		return importnotemodel.ErrImportNoteCreateNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -50,7 +62,7 @@ func (biz *createImportNoteBiz) CreateImportNote(
 		}
 	}
 
-	if err := handleImportNoteCreateId(data); err != nil {
+	if err := handleImportNoteCreateId(biz.gen, data); err != nil {
 		return err
 	}
 
@@ -77,8 +89,10 @@ func (biz *createImportNoteBiz) CreateImportNote(
 	return nil
 }
 
-func handleImportNoteCreateId(data *importnotemodel.ImportNoteCreate) error {
-	idImportNote, err := common.IdProcess(data.Id)
+func handleImportNoteCreateId(
+	gen generator.IdGenerator,
+	data *importnotemodel.ImportNoteCreate) error {
+	idImportNote, err := gen.IdProcess(data.Id)
 	if err != nil {
 		return err
 	}

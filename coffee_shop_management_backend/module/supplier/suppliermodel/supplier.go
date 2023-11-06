@@ -54,4 +54,13 @@ var (
 	ErrSupplierPhoneDuplicate = common.ErrDuplicateKey(
 		errors.New("phone of supplier is duplicate"),
 	)
+	ErrSupplierCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create supplier"),
+	)
+	ErrSupplierPayNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to pay supplier"),
+	)
+	ErrSupplierUpdateInfoNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to update info supplier"),
+	)
 )

@@ -45,4 +45,13 @@ var (
 		"size id is invalid",
 		"ErrFoodSizeIdInvalid",
 	)
+	ErrFoodCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create food"),
+	)
+	ErrFoodUpdateInfoNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to update info food"),
+	)
+	ErrFoodChangeStatusNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to change status food"),
+	)
 )

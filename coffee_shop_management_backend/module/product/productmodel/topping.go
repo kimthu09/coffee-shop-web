@@ -35,9 +35,18 @@ var (
 	ErrToppingNameDuplicate = common.ErrDuplicateKey(
 		errors.New("name of topping is duplicate"),
 	)
-	ErrRecipeEmpty = common.NewCustomError(
+	ErrToppingRecipeEmpty = common.NewCustomError(
 		errors.New("recipe is empty"),
 		"recipe is empty",
-		"ErrRecipeEmpty",
+		"ErrToppingRecipeEmpty",
+	)
+	ErrToppingCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create topping"),
+	)
+	ErrToppingUpdateInfoNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to update info topping"),
+	)
+	ErrToppingChangeStatusNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to change status topping"),
 	)
 )

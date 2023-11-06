@@ -54,4 +54,13 @@ var (
 	ErrCustomerPhoneDuplicate = common.ErrDuplicateKey(
 		errors.New("phone of customer is duplicate"),
 	)
+	ErrCustomerCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create customer"),
+	)
+	ErrCustomerUpdateInfoNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to update info customer"),
+	)
+	ErrCustomerPayNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to pay customer"),
+	)
 )

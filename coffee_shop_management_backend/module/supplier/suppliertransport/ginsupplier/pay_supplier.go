@@ -3,8 +3,11 @@ package ginsupplier
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/supplierbiz"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
+	"coffee_shop_management_backend/module/supplier/supplierrepo"
 	"coffee_shop_management_backend/module/supplier/supplierstore"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebtstore"
 	"github.com/gin-gonic/gin"
@@ -21,15 +24,28 @@ func PaySupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+		data.CreateBy = requester.GetUserId()
 
-		supplierStore := supplierstore.NewSQLStore(appCtx.GetMainDBConnection())
-		supplierDebtStore := supplierdebtstore.NewSQLStore(appCtx.GetMainDBConnection())
-		business := supplierbiz.NewUpdatePayBiz(supplierStore, supplierDebtStore, requester)
+		db := appCtx.GetMainDBConnection().Begin()
+
+		supplierStore := supplierstore.NewSQLStore(db)
+		supplierDebtStore := supplierdebtstore.NewSQLStore(db)
+		repo := supplierrepo.NewUpdatePayRepo(supplierStore, supplierDebtStore)
+
+		gen := generator.NewShortIdGenerator()
+
+		business := supplierbiz.NewUpdatePayBiz(gen, repo, requester)
 
 		idSupplierDebt, err := business.PaySupplier(c.Request.Context(), id, &data)
 
 		if err != nil {
+			db.Rollback()
+			panic(err)
+		}
+
+		if err := db.Commit().Error; err != nil {
+			db.Rollback()
 			panic(err)
 		}
 

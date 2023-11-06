@@ -3,7 +3,8 @@ package suppliermodel
 import "coffee_shop_management_backend/common"
 
 type SupplierUpdateDebt struct {
-	Amount *float32 `json:"amount" gorm:"-"`
+	Amount   *float32 `json:"amount" gorm:"-"`
+	CreateBy string   `json:"-" gorm:"-"`
 }
 
 func (*SupplierUpdateDebt) TableName() string {

@@ -4,12 +4,20 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/component/token_provider/jwt"
-	userstorage "coffee_shop_management_backend/module/user/userstorage"
+	"coffee_shop_management_backend/module/role/rolemodel"
+	userstorage "coffee_shop_management_backend/module/user/userstore"
 	"errors"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 )
+
+type Requester interface {
+	GetUserId() string
+	GetEmail() string
+	GetRole() rolemodel.Role
+	IsHasFeature(featureCode string) bool
+}
 
 func ErrWrongAuthHeader(err error) *common.AppError {
 	return common.NewCustomError(
@@ -52,7 +60,13 @@ func RequireAuth(appCtx appctx.AppContext) func(ctx *gin.Context) {
 			panic(err)
 		}
 
-		user, err := store.FindUser(c.Request.Context(), map[string]interface{}{"id": payload.UserId})
+		user, err := store.FindUser(
+			c.Request.Context(),
+			map[string]interface{}{
+				"id": payload.UserId,
+			},
+			"Role.RoleFeatures",
+		)
 
 		if err != nil {
 			//c.AbortWithStatusJSON(http.StatusUnauthorized, err)

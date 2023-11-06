@@ -3,8 +3,10 @@ package ginsupplier
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/supplierbiz"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
+	"coffee_shop_management_backend/module/supplier/supplierrepo"
 	"coffee_shop_management_backend/module/supplier/supplierstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -20,10 +22,22 @@ func UpdateInfoSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		store := supplierstore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := supplierbiz.NewUpdateInfoSupplierBiz(store)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
-		if err := biz.UpdateInfoSupplier(c.Request.Context(), id, &data); err != nil {
+		db := appCtx.GetMainDBConnection().Begin()
+
+		store := supplierstore.NewSQLStore(db)
+		repo := supplierrepo.NewUpdateInfoSupplierRepo(store)
+
+		business := supplierbiz.NewUpdateInfoSupplierBiz(repo, requester)
+
+		if err := business.UpdateInfoSupplier(c.Request.Context(), id, &data); err != nil {
+			db.Rollback()
+			panic(err)
+		}
+
+		if err := db.Commit().Error; err != nil {
+			db.Rollback()
 			panic(err)
 		}
 

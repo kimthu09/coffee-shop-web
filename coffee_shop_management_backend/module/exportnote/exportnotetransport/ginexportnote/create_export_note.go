@@ -3,6 +3,8 @@ package ginexportnote
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/exportnote/exportnotebiz"
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
 	"coffee_shop_management_backend/module/exportnote/exportnoterepo"
@@ -22,7 +24,7 @@ func CreateExportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 		data.CreateBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
@@ -39,7 +41,9 @@ func CreateExportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			ingredientDetailStore,
 		)
 
-		business := exportnotebiz.NewCreateExportNoteBiz(repo)
+		gen := generator.NewShortIdGenerator()
+
+		business := exportnotebiz.NewCreateExportNoteBiz(gen, repo, requester)
 
 		if err := business.CreateExportNote(c.Request.Context(), &data); err != nil {
 			db.Rollback()

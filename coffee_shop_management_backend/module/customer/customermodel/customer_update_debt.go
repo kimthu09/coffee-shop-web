@@ -3,7 +3,8 @@ package customermodel
 import "coffee_shop_management_backend/common"
 
 type CustomerUpdateDebt struct {
-	Amount *float32 `json:"amount" gorm:"-"`
+	Amount   *float32 `json:"amount" gorm:"-"`
+	CreateBy string   `json:"-" gorm:"-"`
 }
 
 func (*CustomerUpdateDebt) TableName() string {

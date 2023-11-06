@@ -2,6 +2,8 @@ package cancelnotebiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotemodel"
 	"context"
 )
@@ -26,24 +28,34 @@ type CreateCancelNoteRepo interface {
 }
 
 type createCancelNoteBiz struct {
-	repo CreateCancelNoteRepo
+	gen       generator.IdGenerator
+	repo      CreateCancelNoteRepo
+	requester middleware.Requester
 }
 
 func NewCreateCancelNoteBiz(
-	repo CreateCancelNoteRepo) *createCancelNoteBiz {
+	generator generator.IdGenerator,
+	repo CreateCancelNoteRepo,
+	requester middleware.Requester) *createCancelNoteBiz {
 	return &createCancelNoteBiz{
-		repo: repo,
+		gen:       generator,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
 func (biz *createCancelNoteBiz) CreateCancelNote(
 	ctx context.Context,
 	data *cancelnotemodel.CancelNoteCreate) error {
+	if !biz.requester.IsHasFeature(common.CancelNoteCreateFeatureCode) {
+		return cancelnotemodel.ErrCancelNoteCreateNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	if err := handleCancelNoteId(data); err != nil {
+	if err := handleCancelNoteId(biz.gen, data); err != nil {
 		return err
 	}
 
@@ -76,8 +88,10 @@ func (biz *createCancelNoteBiz) CreateCancelNote(
 	return nil
 }
 
-func handleCancelNoteId(data *cancelnotemodel.CancelNoteCreate) error {
-	idCancelNote, errGenerateIdCancelNote := common.IdProcess(data.Id)
+func handleCancelNoteId(
+	gen generator.IdGenerator,
+	data *cancelnotemodel.CancelNoteCreate) error {
+	idCancelNote, errGenerateIdCancelNote := gen.IdProcess(data.Id)
 	if errGenerateIdCancelNote != nil {
 		return errGenerateIdCancelNote
 	}

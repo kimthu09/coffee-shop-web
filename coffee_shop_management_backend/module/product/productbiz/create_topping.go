@@ -2,6 +2,8 @@ package productbiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"context"
 )
@@ -18,19 +20,28 @@ type CreateToppingRepo interface {
 }
 
 type createToppingBiz struct {
-	repo CreateToppingRepo
+	gen       generator.IdGenerator
+	repo      CreateToppingRepo
+	requester middleware.Requester
 }
 
 func NewCreateToppingBiz(
-	repo CreateToppingRepo) *createToppingBiz {
+	gen generator.IdGenerator,
+	repo CreateToppingRepo,
+	requester middleware.Requester) *createToppingBiz {
 	return &createToppingBiz{
-		repo: repo,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
 func (biz *createToppingBiz) CreateTopping(
 	ctx context.Context,
 	data *productmodel.ToppingCreate) error {
+	if !biz.requester.IsHasFeature(common.ToppingCreateFeatureCode) {
+		return productmodel.ErrToppingCreateNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -39,7 +50,7 @@ func (biz *createToppingBiz) CreateTopping(
 		return err
 	}
 
-	if err := handleId(data); err != nil {
+	if err := handleId(biz.gen, data); err != nil {
 		return err
 	}
 
@@ -49,20 +60,20 @@ func (biz *createToppingBiz) CreateTopping(
 	return nil
 }
 
-func handleId(data *productmodel.ToppingCreate) error {
-	if err := handleToppingId(data); err != nil {
+func handleId(gen generator.IdGenerator, data *productmodel.ToppingCreate) error {
+	if err := handleToppingId(gen, data); err != nil {
 		return err
 	}
 
-	if err := handleRecipeId(data); err != nil {
+	if err := handleRecipeId(gen, data); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func handleToppingId(data *productmodel.ToppingCreate) error {
-	idTopping, err := common.IdProcess(data.Id)
+func handleToppingId(gen generator.IdGenerator, data *productmodel.ToppingCreate) error {
+	idTopping, err := gen.IdProcess(data.Id)
 	if err != nil {
 		return err
 	}
@@ -70,8 +81,8 @@ func handleToppingId(data *productmodel.ToppingCreate) error {
 	return nil
 }
 
-func handleRecipeId(data *productmodel.ToppingCreate) error {
-	idRecipe, err := common.IdProcess(&data.RecipeId)
+func handleRecipeId(gen generator.IdGenerator, data *productmodel.ToppingCreate) error {
+	idRecipe, err := gen.IdProcess(&data.RecipeId)
 	if err != nil {
 		return err
 	}

@@ -50,4 +50,7 @@ var (
 	ErrIngredientNameDuplicate = common.ErrDuplicateKey(
 		errors.New("name of ingredient is duplicate"),
 	)
+	ErrIngredientCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create import note"),
+	)
 )

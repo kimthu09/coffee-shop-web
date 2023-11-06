@@ -2,17 +2,21 @@ package importnotebiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
 	"coffee_shop_management_backend/module/importnotedetail/importnotedetailmodel"
 	"context"
-	"errors"
 )
 
 type ChangeStatusImportNoteRepo interface {
-	HandleSupplier(
+	UpdateDebtSupplier(
 		ctx context.Context,
-		data *importnotemodel.ImportNoteUpdate,
-	) error
+		importNote *importnotemodel.ImportNoteUpdate) error
+	CreateSupplierDebt(
+		ctx context.Context,
+		supplierDebtId string,
+		importNote *importnotemodel.ImportNoteUpdate) error
 	FindImportNote(
 		ctx context.Context,
 		importNoteId string,
@@ -37,13 +41,19 @@ type ChangeStatusImportNoteRepo interface {
 }
 
 type changeStatusImportNoteRepo struct {
-	repo ChangeStatusImportNoteRepo
+	gen       generator.IdGenerator
+	repo      ChangeStatusImportNoteRepo
+	requester middleware.Requester
 }
 
 func NewChangeStatusImportNoteBiz(
-	repo ChangeStatusImportNoteRepo) *changeStatusImportNoteRepo {
+	gen generator.IdGenerator,
+	repo ChangeStatusImportNoteRepo,
+	requester middleware.Requester) *changeStatusImportNoteRepo {
 	return &changeStatusImportNoteRepo{
-		repo: repo,
+		gen:       gen,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
@@ -51,32 +61,45 @@ func (biz *changeStatusImportNoteRepo) ChangeStatusImportNote(
 	ctx context.Context,
 	importNoteId string,
 	data *importnotemodel.ImportNoteUpdate) error {
+	if !biz.requester.IsHasFeature(common.ImportNoteChangeStatusFeatureCode) {
+		return importnotemodel.ErrImportNoteChangeStatusNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	importNote, errCheckInProgress := biz.repo.FindImportNote(ctx, importNoteId)
-	if errCheckInProgress != nil {
-		return errCheckInProgress
+	importNote, errGetImportNote := biz.repo.FindImportNote(ctx, importNoteId)
+	if errGetImportNote != nil {
+		return errGetImportNote
 	}
 	data.Id = importNoteId
 	data.TotalPrice = importNote.TotalPrice
 	data.SupplierId = importNote.SupplierId
 
 	if *importNote.Status != importnotemodel.InProgress {
-		return common.ErrInternal(errors.New("import note already has been closed"))
+		return importnotemodel.ErrImportNoteClosed
 	}
 
 	if *data.Status == importnotemodel.Done {
+		supplierDebtId, errGenerateId := biz.gen.GenerateId()
+		if errGenerateId != nil {
+			return errGenerateId
+		}
+
+		if err := biz.repo.CreateSupplierDebt(ctx, supplierDebtId, data); err != nil {
+			return err
+		}
+
+		if err := biz.repo.UpdateDebtSupplier(ctx, data); err != nil {
+			return err
+		}
+
 		importNoteDetails, errGetImportNoteDetails := biz.repo.FindListImportNoteDetail(
 			ctx,
 			importNoteId)
 		if errGetImportNoteDetails != nil {
 			return errGetImportNoteDetails
-		}
-
-		if err := biz.repo.HandleSupplier(ctx, data); err != nil {
-			return err
 		}
 
 		if err := biz.repo.HandleIngredientDetails(ctx, importNoteDetails); err != nil {

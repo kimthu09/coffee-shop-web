@@ -28,7 +28,7 @@ func (data *ToppingCreate) Validate() error {
 		return ErrToppingPriceIsNegativeNumber
 	}
 	if data.Recipe == nil {
-		return ErrRecipeEmpty
+		return ErrToppingRecipeEmpty
 	}
 	if err := data.Recipe.Validate(); err != nil {
 		return err

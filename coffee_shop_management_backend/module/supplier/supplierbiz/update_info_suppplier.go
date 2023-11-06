@@ -1,46 +1,52 @@
 package supplierbiz
 
 import (
+	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 )
 
-type UpdateInfoSupplierStore interface {
-	FindSupplier(
+type UpdateInfoSupplierRepo interface {
+	CheckExist(
 		ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*suppliermodel.Supplier, error)
+		supplierId string,
+	) error
 	UpdateSupplierInfo(
 		ctx context.Context,
-		id string,
+		supplierId string,
 		data *suppliermodel.SupplierUpdateInfo,
 	) error
 }
 
 type updateInfoSupplierBiz struct {
-	store UpdateInfoSupplierStore
+	repo      UpdateInfoSupplierRepo
+	requester middleware.Requester
 }
 
-func NewUpdateInfoSupplierBiz(store UpdateInfoSupplierStore) *updateInfoSupplierBiz {
-	return &updateInfoSupplierBiz{store: store}
+func NewUpdateInfoSupplierBiz(
+	repo UpdateInfoSupplierRepo,
+	requester middleware.Requester) *updateInfoSupplierBiz {
+	return &updateInfoSupplierBiz{repo: repo, requester: requester}
 }
 
 func (biz *updateInfoSupplierBiz) UpdateInfoSupplier(
 	ctx context.Context,
 	id string,
 	data *suppliermodel.SupplierUpdateInfo) error {
+	if !biz.requester.IsHasFeature(common.SupplierUpdateInfoFeatureCode) {
+		return suppliermodel.ErrSupplierUpdateInfoNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	_, err := biz.store.FindSupplier(ctx, map[string]interface{}{"id": id})
-
-	if err != nil {
+	if err := biz.repo.CheckExist(ctx, id); err != nil {
 		return err
 	}
 
-	if err := biz.store.UpdateSupplierInfo(ctx, id, data); err != nil {
+	if err := biz.repo.UpdateSupplierInfo(ctx, id, data); err != nil {
 		return err
 	}
 

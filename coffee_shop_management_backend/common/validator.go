@@ -135,6 +135,10 @@ func ValidateNotPositiveNumber(number interface{}) bool {
 	}
 }
 
+func ValidatePassword(pass *string) bool {
+	return pass != nil && len(*pass) >= 6
+}
+
 func ValidatePositiveNumber(number interface{}) bool {
 	switch v := number.(type) {
 	case int:

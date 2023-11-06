@@ -3,6 +3,7 @@ package ginproduct
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
@@ -25,19 +26,21 @@ func UpdateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		data.IsActive = nil
 
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
 		db := appCtx.GetMainDBConnection().Begin()
 
 		toppingStore := productstore.NewSQLStore(db)
 		ingredientStore := ingredientstore.NewSQLStore(db)
 		recipeDetailStore := recipedetailstore.NewSQLStore(db)
 
-		updateToppingRepo := productrepo.NewUpdateToppingRepo(
+		repo := productrepo.NewUpdateToppingRepo(
 			toppingStore,
 			ingredientStore,
 			recipeDetailStore,
 		)
 
-		biz := productbiz.NewUpdateToppingBiz(updateToppingRepo)
+		biz := productbiz.NewUpdateToppingBiz(repo, requester)
 
 		if err := biz.UpdateTopping(c.Request.Context(), id, &data); err != nil {
 			db.Rollback()

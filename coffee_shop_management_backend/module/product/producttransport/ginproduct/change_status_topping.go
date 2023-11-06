@@ -3,6 +3,7 @@ package ginproduct
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/product/productrepo"
@@ -29,11 +30,13 @@ func ChangeStatusTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 		data.CookingGuide = nil
 		data.Recipe = nil
 
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
 		db := appCtx.GetMainDBConnection().Begin()
 
 		store := productstore.NewSQLStore(db)
 		repo := productrepo.NewChangeStatusToppingRepo(store)
-		business := productbiz.NewChangeStatusToppingBiz(repo)
+		business := productbiz.NewChangeStatusToppingBiz(repo, requester)
 
 		if err := business.ChangeStatusTopping(c.Request.Context(), id, &data); err != nil {
 			db.Rollback()

@@ -52,4 +52,15 @@ var (
 		"exist one ingredient need to update price twice",
 		"ErrImportNoteHasSameIngredientBothUpdatePrice",
 	)
+	ErrImportNoteClosed = common.NewCustomError(
+		errors.New("import note has been closed"),
+		"import note has been closed",
+		"ErrImportNoteClosed",
+	)
+	ErrImportNoteCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create import note"),
+	)
+	ErrImportNoteChangeStatusNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to change status import note"),
+	)
 )

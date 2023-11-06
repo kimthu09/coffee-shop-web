@@ -12,7 +12,7 @@ import (
 
 func ListIngredientDetailById(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cancelNoteId := c.Param("cancelNoteId")
+		cancelNoteId := c.Param("id")
 
 		var filter cancelnotedetailmodel.Filter
 		if err := c.ShouldBind(&filter); err != nil {

@@ -15,7 +15,7 @@ func (s *sqlStore) ListCancelNote(
 ) ([]cancelnotedetailmodel.CancelNoteDetail, error) {
 	var result []cancelnotedetailmodel.CancelNoteDetail
 
-	db := s.db.Table(common.TableIngredientDetail).Where(condition)
+	db := s.db.Table(common.TableCancelNoteDetail).Where(condition)
 
 	//if filterValue := filter; filterValue != nil {
 	//	if filterValue.IsGetEmptyIngredientDetails {

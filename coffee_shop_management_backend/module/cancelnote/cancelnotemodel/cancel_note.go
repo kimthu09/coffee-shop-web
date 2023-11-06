@@ -33,4 +33,7 @@ var (
 		"amount cancel is over stock",
 		"ErrCancelNoteAmountCancelIsOverTheStock",
 	)
+	ErrCancelNoteCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create cancel note"),
+	)
 )
