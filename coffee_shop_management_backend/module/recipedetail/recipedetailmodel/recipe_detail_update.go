@@ -3,8 +3,8 @@ package recipedetailmodel
 import "coffee_shop_management_backend/common"
 
 type RecipeDetailUpdate struct {
-	IngredientId *string  `json:"ingredientId" gorm:"-"`
-	AmountNeed   *float32 `json:"amountNeed" gorm:"column:amountNeed;"`
+	IngredientId string  `json:"ingredientId" gorm:"-"`
+	AmountNeed   float32 `json:"amountNeed" gorm:"column:amountNeed;"`
 }
 
 func (*RecipeDetailUpdate) TableName() string {
@@ -12,14 +12,11 @@ func (*RecipeDetailUpdate) TableName() string {
 }
 
 func (data *RecipeDetailUpdate) Validate() *common.AppError {
-	if !common.ValidateNotNilId(data.IngredientId) {
-		return ErrIngredientIdInvalid
-	}
-	if data.AmountNeed == nil {
-		return ErrAmountNeedInvalid
+	if !common.ValidateNotNilId(&data.IngredientId) {
+		return ErrRecipeDetailIngredientIdInvalid
 	}
 	if common.ValidateNotPositiveNumber(data.AmountNeed) {
-		return ErrAmountNeedIsNotPositiveNumber
+		return ErrRecipeDetailAmountNeedIsNotPositiveNumber
 	}
 	return nil
 }

@@ -6,9 +6,9 @@ import (
 )
 
 type RecipeDetail struct {
-	RecipeId     string `json:"recipeId" gorm:"column:recipeId;"`
-	IngredientId string `json:"ingredientId" gorm:"column:ingredientId;"`
-	AmountNeed   string `json:"amountNeed" gorm:"column:amountNeed;"`
+	RecipeId     string  `json:"recipeId" gorm:"column:recipeId;"`
+	IngredientId string  `json:"ingredientId" gorm:"column:ingredientId;"`
+	AmountNeed   float32 `json:"amountNeed" gorm:"column:amountNeed;"`
 }
 
 func (*RecipeDetail) TableName() string {
@@ -16,19 +16,14 @@ func (*RecipeDetail) TableName() string {
 }
 
 var (
-	ErrIngredientIdInvalid = common.NewCustomError(
+	ErrRecipeDetailIngredientIdInvalid = common.NewCustomError(
 		errors.New("id of ingredient is invalid"),
 		"id of ingredient is invalid",
-		"ErrIngredientIdInvalid",
+		"ErrRecipeDetailIngredientIdInvalid",
 	)
-	ErrAmountNeedInvalid = common.NewCustomError(
-		errors.New("amount need is invalid"),
-		"amount need is invalid",
-		"ErrAmountNeedInvalid",
-	)
-	ErrAmountNeedIsNotPositiveNumber = common.NewCustomError(
+	ErrRecipeDetailAmountNeedIsNotPositiveNumber = common.NewCustomError(
 		errors.New("amount need is not positive number"),
 		"amount need is not positive number",
-		"ErrAmountNeedIsNotPositiveNumber",
+		"ErrRecipeDetailAmountNeedIsNotPositiveNumber",
 	)
 )

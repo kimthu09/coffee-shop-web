@@ -2,9 +2,7 @@ package productbiz
 
 import (
 	"coffee_shop_management_backend/common"
-	"coffee_shop_management_backend/component/asyncjob"
 	"coffee_shop_management_backend/module/category/categorymodel"
-	"coffee_shop_management_backend/module/categoryfood/categoryfoodmodel"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/recipe/recipemodel"
 	"coffee_shop_management_backend/module/recipedetail/recipedetailmodel"
@@ -12,11 +10,46 @@ import (
 	"context"
 )
 
-type UpdateFoodStore interface {
-	FindFood(ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
+type UpdateFoodRepo interface {
+	FindFood(
+		ctx context.Context,
+		id string,
 	) (*productmodel.Food, error)
+	CheckCategoryExist(
+		ctx context.Context,
+		data *productmodel.FoodUpdate,
+	) error
+	FindCategories(
+		ctx context.Context,
+		foodId string,
+	) ([]categorymodel.SimpleCategory, error)
+	HandleCategory(
+		ctx context.Context,
+		foodId string,
+		deletedCategoryFood []categorymodel.SimpleCategory,
+		createdCategoryFood []categorymodel.SimpleCategory,
+	) error
+	CheckIngredientExist(
+		ctx context.Context,
+		data *productmodel.FoodUpdate,
+	) error
+	FindSizeFoods(
+		ctx context.Context,
+		foodId string,
+	) ([]sizefoodmodel.SizeFood, error)
+	FindRecipeDetails(
+		ctx context.Context,
+		recipeId string,
+	) ([]recipedetailmodel.RecipeDetail, error)
+	HandleSizeFoods(
+		ctx context.Context,
+		foodId string,
+		deletedSizeFood []sizefoodmodel.SizeFood,
+		updatedSizeFood []sizefoodmodel.SizeFoodUpdate,
+		mapDeletedRecipeDetails map[string][]recipedetailmodel.RecipeDetail,
+		mapUpdatedRecipeDetails map[string][]recipedetailmodel.RecipeDetailUpdate,
+		mapCreatedRecipeDetails map[string][]recipedetailmodel.RecipeDetailCreate,
+		createdSizeFood []sizefoodmodel.SizeFoodCreate) error
 	UpdateFood(
 		ctx context.Context,
 		id string,
@@ -24,100 +57,13 @@ type UpdateFoodStore interface {
 	) error
 }
 
-type CreateOrDeleteCategoryFoodStore interface {
-	FindListCategories(
-		ctx context.Context,
-		foodId string,
-	) (*[]categorymodel.SimpleCategory, error)
-	CreateCategoryFood(
-		ctx context.Context,
-		data *categoryfoodmodel.CategoryFoodCreate,
-	) error
-	DeleteCategoryFood(
-		ctx context.Context,
-		conditions map[string]interface{},
-	) error
-}
-
-type UpdateSizeFoodStore interface {
-	FindListSizeFood(
-		ctx context.Context,
-		foodId string,
-	) (*[]sizefoodmodel.SizeFood, error)
-	CreateSizeFood(
-		ctx context.Context,
-		data *sizefoodmodel.SizeFoodCreate,
-	) error
-	DeleteSizeFood(
-		ctx context.Context,
-		conditions map[string]interface{},
-	) error
-	UpdateSizeFood(
-		ctx context.Context,
-		foodId string,
-		sizeId string,
-		data *sizefoodmodel.SizeFoodUpdate,
-	) error
-}
-
-type UpdateRecipeStore interface {
-	CreateRecipe(
-		ctx context.Context,
-		data *recipemodel.RecipeCreate,
-	) error
-	DeleteRecipe(
-		ctx context.Context,
-		conditions map[string]interface{},
-	) error
-}
-
-type UpdateRecipeDetailStore interface {
-	UpdateRecipeDetail(
-		ctx context.Context,
-		idRecipe string,
-		idIngredient string,
-		data *recipedetailmodel.RecipeDetailUpdate,
-	) error
-	CreateListRecipeDetail(
-		ctx context.Context,
-		data []recipedetailmodel.RecipeDetailCreate,
-	) error
-	FindListRecipeDetail(ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*[]recipedetailmodel.RecipeDetail, error)
-	DeleteRecipeDetail(
-		ctx context.Context,
-		conditions map[string]interface{},
-	) error
-}
-
 type updateFoodBiz struct {
-	foodStore         UpdateFoodStore
-	categoryFoodStore CreateOrDeleteCategoryFoodStore
-	categoryStore     UpdateCategoryStore
-	sizeFoodStore     UpdateSizeFoodStore
-	recipeStore       UpdateRecipeStore
-	ingredientStore   CheckIngredientStore
-	recipeDetailStore UpdateRecipeDetailStore
+	repo UpdateFoodRepo
 }
 
-func NewUpdateFoodBiz(
-	foodStore UpdateFoodStore,
-	categoryFoodStore CreateOrDeleteCategoryFoodStore,
-	categoryStore UpdateCategoryStore,
-	sizeFoodStore UpdateSizeFoodStore,
-	recipeStore UpdateRecipeStore,
-	ingredientStore CheckIngredientStore,
-	recipeDetailStore UpdateRecipeDetailStore) *updateFoodBiz {
+func NewUpdateFoodBiz(repo UpdateFoodRepo) *updateFoodBiz {
 	return &updateFoodBiz{
-		foodStore:         foodStore,
-		categoryFoodStore: categoryFoodStore,
-		categoryStore:     categoryStore,
-		sizeFoodStore:     sizeFoodStore,
-		recipeStore:       recipeStore,
-		ingredientStore:   ingredientStore,
-		recipeDetailStore: recipeDetailStore,
+		repo: repo,
 	}
 }
 
@@ -130,7 +76,7 @@ func (biz *updateFoodBiz) UpdateFood(
 		return err
 	}
 
-	result, err := biz.foodStore.FindFood(ctx, map[string]interface{}{"id": id})
+	result, err := biz.repo.FindFood(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -140,115 +86,68 @@ func (biz *updateFoodBiz) UpdateFood(
 	}
 
 	//handle update category
-	var categoryProductJobs []asyncjob.Job
-	var categoryJobs []asyncjob.Job
 	if data.Categories != nil {
+		var deletedCategories []categorymodel.SimpleCategory
+		var createdCategories []categorymodel.SimpleCategory
+
 		///check category exists
-		for _, v := range *data.Categories {
-			if _, err := biz.categoryStore.FindCategory(
-				ctx,
-				map[string]interface{}{"id": v}); err != nil {
-				return err
-			}
+		if err := biz.repo.CheckCategoryExist(ctx, data); err != nil {
+			return err
 		}
 
 		///handle get change of amount product
-		var simpleCategories *[]categorymodel.SimpleCategory
-		simpleCategories, err = biz.categoryFoodStore.FindListCategories(ctx, id)
+		simpleCategories, err := biz.repo.FindCategories(ctx, id)
 		if err != nil {
 			return err
 		}
 
 		mapCategoriesAmountProduct := make(map[string]int)
-		for _, v := range *simpleCategories {
+		for _, v := range simpleCategories {
 			mapCategoriesAmountProduct[v.CategoryId]--
 		}
 		for _, v := range *data.Categories {
 			mapCategoriesAmountProduct[v]++
 		}
 
-		///handle define job create or delete category product
 		for key, value := range mapCategoriesAmountProduct {
-			tempJob := asyncjob.NewJob(func(
-				productId string,
-				categoryId string,
-				amount int,
-			) func(ctx context.Context) error {
-				return func(ctx context.Context) error {
-					if amount == 0 {
-						return nil
-					}
-					if amount == 1 {
-						categoryFoodCreate := categoryfoodmodel.CategoryFoodCreate{
-							FoodId:     &productId,
-							CategoryId: &categoryId,
-						}
-						return biz.categoryFoodStore.CreateCategoryFood(
-							ctx,
-							&categoryFoodCreate)
-					}
-					if amount == -1 {
-						return biz.categoryFoodStore.DeleteCategoryFood(
-							ctx,
-							map[string]interface{}{
-								"productId":  productId,
-								"categoryId": categoryId,
-							})
-					}
-					return nil
+			if value == 0 {
+				continue
+			} else {
+				simpleCategories := categorymodel.SimpleCategory{
+					CategoryId: key,
 				}
-			}(id, key, value))
-			categoryProductJobs = append(categoryProductJobs, tempJob)
+				if value == 1 {
+					createdCategories = append(createdCategories, simpleCategories)
+				} else if value == -1 {
+					deletedCategories = append(deletedCategories, simpleCategories)
+				}
+			}
 		}
 
-		///handle define job update amount product of category
-		for key, value := range mapCategoriesAmountProduct {
-			tempJob := asyncjob.NewJob(func(
-				categoryId string,
-				amount int,
-			) func(ctx context.Context) error {
-				return func(ctx context.Context) error {
-					if value == 0 {
-						return nil
-					}
-					categoryUpdateAmountProduct := categorymodel.CategoryUpdateAmountProduct{
-						AmountProduct: &amount,
-					}
-					return biz.categoryStore.UpdateAmountProductCategory(
-						ctx,
-						categoryId,
-						&categoryUpdateAmountProduct)
-				}
-			}(key, value))
-			categoryJobs = append(categoryJobs, tempJob)
+		if err := biz.repo.HandleCategory(
+			ctx,
+			id,
+			deletedCategories,
+			createdCategories); err != nil {
+			return err
 		}
 	}
 
-	//handle update size food
-	var sizeFoodJobs []asyncjob.Job
-	var recipeDetailJobs []asyncjob.Job
-	var recipeJobs []asyncjob.Job
 	if data.Sizes != nil {
+		var deletedSizes []sizefoodmodel.SizeFood
+		var updatedSizes []sizefoodmodel.SizeFoodUpdate
+		var createdSizes []sizefoodmodel.SizeFoodCreate
+		mapDeletedRecipeDetails := make(map[string][]recipedetailmodel.RecipeDetail)
+		mapUpdatedRecipeDetails := make(map[string][]recipedetailmodel.RecipeDetailUpdate)
+		mapCreatedRecipeDetails := make(map[string][]recipedetailmodel.RecipeDetailCreate)
+
 		///check ingredients exists
-		for _, size := range *data.Sizes {
-			if *size.Recipe.Details == nil {
-				continue
-			}
-			for _, recipeDetail := range *size.Recipe.Details {
-				if _, err := biz.ingredientStore.FindIngredient(
-					ctx,
-					map[string]interface{}{"id": recipeDetail.IngredientId},
-				); err != nil {
-					return err
-				}
-			}
+		if err := biz.repo.CheckIngredientExist(ctx, data); err != nil {
+			return err
 		}
 
 		///get current size foods
-		currentSizeFoods, err := biz.sizeFoodStore.FindListSizeFood(
-			ctx,
-			id,
-		)
+		currentSizeFoods, err := biz.repo.FindSizeFoods(ctx, id)
 		if err != nil {
 			return err
 		}
@@ -257,321 +156,146 @@ func (biz *updateFoodBiz) UpdateFood(
 		mapExistSize := make(map[string]int)
 		mapSizeFoodUpdate := make(map[string]sizefoodmodel.SizeFoodUpdate)
 		mapSizeFood := make(map[string]sizefoodmodel.SizeFood)
-		var sizeFoodNeedCreate []sizefoodmodel.SizeFoodUpdate
 
-		for _, v := range *currentSizeFoods {
+		for _, v := range currentSizeFoods {
 			mapExistSize[v.SizeId]--
 			mapSizeFood[v.SizeId] = v
 		}
-
 		for _, v := range *data.Sizes {
 			if v.SizeId == nil {
-				sizeFoodNeedCreate = append(sizeFoodNeedCreate, v)
+				sizeCreate, errCreate := getSizeFoodCreateFromSizeFoodUpdate(id, v)
+				if errCreate != nil {
+					return errCreate
+				}
+
+				if err := sizeCreate.Validate(); err != nil {
+					return err
+				}
+
+				createdSizes = append(createdSizes, *sizeCreate)
 			} else {
 				mapExistSize[*v.SizeId]++
 				if mapExistSize[*v.SizeId] == 1 {
-					return common.ErrInternal(productmodel.ErrSizeIdInvalid)
+					return common.ErrInternal(productmodel.ErrFoodSizeIdInvalid)
 				}
 				mapSizeFoodUpdate[*v.SizeId] = v
 			}
-		}
-
-		///create size food
-		for _, size := range sizeFoodNeedCreate {
-			sizeId, err := common.GenerateId()
-			if err != nil {
-				return err
-			}
-
-			name := ""
-			if size.Name != nil {
-				name = *size.Name
-			}
-
-			cost := -1.0
-			if size.Cost != nil {
-				cost = *size.Cost
-			}
-
-			price := -1.0
-			if size.Price != nil {
-				cost = *size.Price
-			}
-
-			var recipe *recipemodel.RecipeCreate
-			if size.Recipe != nil && size.Recipe.Details != nil {
-				recipeId, err := common.GenerateId()
-				if err != nil {
-					return err
-				}
-				var details []recipedetailmodel.RecipeDetailCreate
-				for _, detailUpdate := range *size.Recipe.Details {
-					ingredientId := ""
-					amountNeed := float32(-1.0)
-					if detailUpdate.IngredientId != nil {
-						ingredientId = *detailUpdate.IngredientId
-					}
-					if detailUpdate.AmountNeed != nil {
-						amountNeed = *detailUpdate.AmountNeed
-					}
-					detail := recipedetailmodel.RecipeDetailCreate{
-						RecipeId:     recipeId,
-						IngredientId: ingredientId,
-						AmountNeed:   amountNeed,
-					}
-					details = append(details, detail)
-				}
-				recipe = &recipemodel.RecipeCreate{
-					Id:      recipeId,
-					Details: &details,
-				}
-			}
-
-			receiptId := ""
-			if recipe != nil {
-				receiptId = recipe.Id
-			}
-
-			sizeCreate := sizefoodmodel.SizeFoodCreate{
-				FoodId:   id,
-				SizeId:   sizeId,
-				Name:     name,
-				Cost:     cost,
-				Price:    price,
-				RecipeId: receiptId,
-				Recipe:   recipe,
-			}
-
-			////validate data
-			if err := sizeCreate.Validate(); err != nil {
-				return err
-			}
-
-			////define job
-			/////for size Food
-			sizeFoodJob := asyncjob.NewJob(func(
-				sizeFoodCreate sizefoodmodel.SizeFoodCreate,
-			) func(ctx context.Context) error {
-				return func(ctx context.Context) error {
-					return biz.sizeFoodStore.CreateSizeFood(
-						ctx,
-						&sizeFoodCreate)
-				}
-			}(sizeCreate))
-			sizeFoodJobs = append(sizeFoodJobs, sizeFoodJob)
-
-			/////for recipe
-			recipeJob := asyncjob.NewJob(func(
-				recipe *recipemodel.RecipeCreate,
-			) func(ctx context.Context) error {
-				return func(ctx context.Context) error {
-					return biz.recipeStore.CreateRecipe(
-						ctx,
-						recipe)
-				}
-			}(recipe))
-			recipeJobs = append(recipeJobs, recipeJob)
-
-			/////for recipe detail
-			recipeDetailJob := asyncjob.NewJob(func(
-				recipeDetails []recipedetailmodel.RecipeDetailCreate,
-			) func(ctx context.Context) error {
-				return func(ctx context.Context) error {
-					return biz.recipeDetailStore.CreateListRecipeDetail(
-						ctx,
-						recipeDetails)
-				}
-			}(*recipe.Details))
-			recipeDetailJobs = append(recipeDetailJobs, recipeDetailJob)
 		}
 
 		for key, value := range mapExistSize {
 			currentSize := mapSizeFood[key]
 			if value == 0 {
 				size := mapSizeFoodUpdate[key]
-				////define job
-				/////for size Food
-				sizeFoodJob := asyncjob.NewJob(func(
-					foodId string,
-					sizeId string,
-					sizeFoodUpdate *sizefoodmodel.SizeFoodUpdate,
-				) func(ctx context.Context) error {
-					return func(ctx context.Context) error {
-						return biz.sizeFoodStore.UpdateSizeFood(
-							ctx,
-							foodId,
-							sizeId,
-							sizeFoodUpdate)
-					}
-				}(id, *size.SizeId, &size))
-				sizeFoodJobs = append(sizeFoodJobs, sizeFoodJob)
+				size.RecipeId = &currentSize.RecipeId
+				updatedSizes = append(updatedSizes, size)
 
-				/////for recipe detail
 				if size.Recipe != nil &&
 					size.Recipe.Details != nil &&
-					len(*size.Recipe.Details) != 0 {
-					//////get current receipt detail
-					currentReceiptDetails, err := biz.recipeDetailStore.FindListRecipeDetail(
+					len(size.Recipe.Details) != 0 {
+					currentReceiptDetails, err := biz.repo.FindRecipeDetails(
 						ctx,
-						map[string]interface{}{"recipeId": currentSize.RecipeId})
+						currentSize.RecipeId)
 					if err != nil {
 						return err
 					}
 
-					//////classify recipe detail
-					mapExistRecipeDetail := make(map[string]int)
-					mapRecipeDetailUpdate := make(map[string]recipedetailmodel.RecipeDetailUpdate)
-					mapRecipeDetail := make(map[string]recipedetailmodel.RecipeDetail)
-					for _, v := range *size.Recipe.Details {
-						mapExistRecipeDetail[*v.IngredientId]++
-						mapRecipeDetailUpdate[*v.IngredientId] = v
-					}
-					for _, v := range *currentReceiptDetails {
-						mapExistRecipeDetail[v.IngredientId]--
-						mapRecipeDetail[v.IngredientId] = v
-					}
+					deletedRecipeDetails, updatedRecipeDetails, createRecipeDetails :=
+						classifyDetails(
+							*size.RecipeId,
+							currentReceiptDetails,
+							size.Recipe.Details,
+						)
 
-					//////define jobs
-					var notExistRecipeDetails []recipedetailmodel.RecipeDetailCreate
-					for receiptDetailKey, receiptDetailExistTimes := range mapExistRecipeDetail {
-						if receiptDetailExistTimes == -1 {
-							currentReceiptDetail := mapRecipeDetail[receiptDetailKey]
-							//////job delete recipe detail
-							recipeDetailJob := asyncjob.NewJob(func(
-								recipeId string,
-								ingredientId string,
-							) func(ctx context.Context) error {
-								return func(ctx context.Context) error {
-									return biz.recipeDetailStore.DeleteRecipeDetail(
-										ctx,
-										map[string]interface{}{
-											"recipeId":     recipeId,
-											"ingredientId": ingredientId,
-										})
-								}
-							}(currentReceiptDetail.RecipeId,
-								currentReceiptDetail.IngredientId,
-							))
-							recipeDetailJobs = append(recipeDetailJobs, recipeDetailJob)
-						}
-						if receiptDetailExistTimes == 0 {
-							recipeDetailNeedUpdate := mapRecipeDetailUpdate[receiptDetailKey]
-							//////job update recipe detail
-							recipeDetailJob := asyncjob.NewJob(func(
-								recipeId string,
-								ingredientId string,
-								recipeDetailUpdate *recipedetailmodel.RecipeDetailUpdate,
-							) func(ctx context.Context) error {
-								return func(ctx context.Context) error {
-									return biz.recipeDetailStore.UpdateRecipeDetail(
-										ctx,
-										recipeId,
-										ingredientId,
-										recipeDetailUpdate)
-								}
-							}(
-								currentSize.RecipeId,
-								*recipeDetailNeedUpdate.IngredientId,
-								&recipeDetailNeedUpdate,
-							))
-							recipeDetailJobs = append(recipeDetailJobs, recipeDetailJob)
-						}
-						if receiptDetailExistTimes == 1 {
-							recipeDetailNeedCreate := mapRecipeDetailUpdate[receiptDetailKey]
-							recipeDetailCreate := recipedetailmodel.RecipeDetailCreate{
-								RecipeId:     currentSize.RecipeId,
-								IngredientId: *recipeDetailNeedCreate.IngredientId,
-								AmountNeed:   *recipeDetailNeedCreate.AmountNeed,
-							}
-							notExistRecipeDetails = append(
-								notExistRecipeDetails,
-								recipeDetailCreate,
-							)
-						}
-					}
-
-					//////job create recipe detail
-					recipeDetailJob := asyncjob.NewJob(func(
-						recipeDetails []recipedetailmodel.RecipeDetailCreate,
-					) func(ctx context.Context) error {
-						return func(ctx context.Context) error {
-							return biz.recipeDetailStore.CreateListRecipeDetail(
-								ctx,
-								recipeDetails)
-						}
-					}(notExistRecipeDetails))
-					recipeDetailJobs = append(recipeDetailJobs, recipeDetailJob)
+					mapDeletedRecipeDetails[*size.RecipeId] = deletedRecipeDetails
+					mapUpdatedRecipeDetails[*size.RecipeId] = updatedRecipeDetails
+					mapCreatedRecipeDetails[*size.RecipeId] = createRecipeDetails
 				}
 			}
 			if value == -1 {
-				////define job
-				/////for size food
-				sizeFoodJob := asyncjob.NewJob(func(
-					foodId string,
-					sizeId string,
-				) func(ctx context.Context) error {
-					return func(ctx context.Context) error {
-						return biz.sizeFoodStore.DeleteSizeFood(
-							ctx,
-							map[string]interface{}{
-								"foodId": foodId,
-								"sizeId": sizeId,
-							})
-					}
-				}(id, currentSize.SizeId))
-				sizeFoodJobs = append(sizeFoodJobs, sizeFoodJob)
-
-				////for recipe
-				recipeJob := asyncjob.NewJob(func(
-					recipeId string,
-				) func(ctx context.Context) error {
-					return func(ctx context.Context) error {
-						return biz.recipeStore.DeleteRecipe(
-							ctx,
-							map[string]interface{}{"recipeId": recipeId},
-						)
-					}
-				}(currentSize.RecipeId))
-				recipeJobs = append(recipeJobs, recipeJob)
-
-				////for recipe detail
-				recipeDetailJob := asyncjob.NewJob(func(
-					recipeId string,
-				) func(ctx context.Context) error {
-					return func(ctx context.Context) error {
-						return biz.recipeDetailStore.DeleteRecipeDetail(
-							ctx,
-							map[string]interface{}{"recipeId": recipeId},
-						)
-					}
-				}(currentSize.RecipeId))
-				recipeDetailJobs = append(recipeDetailJobs, recipeDetailJob)
+				deletedSizes = append(deletedSizes, currentSize)
 			}
+		}
+
+		if err := biz.repo.HandleSizeFoods(
+			ctx,
+			id,
+			deletedSizes,
+			updatedSizes,
+			mapDeletedRecipeDetails,
+			mapUpdatedRecipeDetails,
+			mapCreatedRecipeDetails,
+			createdSizes); err != nil {
+			return err
 		}
 	}
 
-	//handle define job update food
-	jobUpdateFood := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.foodStore.UpdateFood(ctx, id, data)
-	})
-
-	//combine all job
-	jobs := []asyncjob.Job{
-		jobUpdateFood,
-	}
-	jobs = append(jobs, categoryProductJobs...)
-	jobs = append(jobs, categoryJobs...)
-	jobs = append(jobs, sizeFoodJobs...)
-	jobs = append(jobs, recipeJobs...)
-	jobs = append(jobs, recipeDetailJobs...)
-
-	//run jobs
-	group := asyncjob.NewGroup(
-		false,
-		jobs...)
-	if err := group.Run(context.Background()); err != nil {
+	if err := biz.repo.UpdateFood(ctx, id, data); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func getSizeFoodCreateFromSizeFoodUpdate(
+	foodId string,
+	size sizefoodmodel.SizeFoodUpdate) (*sizefoodmodel.SizeFoodCreate, error) {
+	sizeId, err := common.GenerateId()
+	if err != nil {
+		return nil, err
+	}
+
+	name := ""
+	if size.Name != nil {
+		name = *size.Name
+	}
+
+	cost := float32(-1.0)
+	if size.Cost != nil {
+		cost = *size.Cost
+	}
+
+	price := float32(-1.0)
+	if size.Price != nil {
+		price = *size.Price
+	}
+
+	var recipe *recipemodel.RecipeCreate
+	if size.Recipe != nil && size.Recipe.Details != nil {
+		recipeId, err := common.GenerateId()
+		if err != nil {
+			return nil, err
+		}
+		var details []recipedetailmodel.RecipeDetailCreate
+		for _, detailUpdate := range size.Recipe.Details {
+			ingredientId := detailUpdate.IngredientId
+			amountNeed := detailUpdate.AmountNeed
+			detail := recipedetailmodel.RecipeDetailCreate{
+				RecipeId:     recipeId,
+				IngredientId: ingredientId,
+				AmountNeed:   amountNeed,
+			}
+			details = append(details, detail)
+		}
+		recipe = &recipemodel.RecipeCreate{
+			Id:      recipeId,
+			Details: details,
+		}
+	}
+
+	receiptId := ""
+	if recipe != nil {
+		receiptId = recipe.Id
+	}
+
+	sizeCreate := sizefoodmodel.SizeFoodCreate{
+		FoodId:   foodId,
+		SizeId:   sizeId,
+		Name:     name,
+		Cost:     cost,
+		Price:    price,
+		RecipeId: receiptId,
+		Recipe:   recipe,
+	}
+
+	return &sizeCreate, nil
 }

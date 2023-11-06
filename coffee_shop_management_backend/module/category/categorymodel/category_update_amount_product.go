@@ -12,7 +12,7 @@ func (*CategoryUpdateAmountProduct) TableName() string {
 
 func (data *CategoryUpdateAmountProduct) Validate() error {
 	if data == nil {
-		return ErrAmountProductCategoryNotExist
+		return ErrCategoryAmountProductCategoryNotExist
 	}
 	return nil
 }

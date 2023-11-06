@@ -18,9 +18,19 @@ func (*CancelNote) TableName() string {
 }
 
 var (
-	ErrArrCancelNoteDetailsEmpty = common.NewCustomError(
+	ErrCancelNoteIdInvalid = common.NewCustomError(
+		errors.New("id of cancel note is invalid"),
+		"id of cancel note is invalid",
+		"ErrCancelNoteIdInvalid",
+	)
+	ErrCancelNoteDetailsEmpty = common.NewCustomError(
 		errors.New("the list cancel note details are empty"),
 		"the list cancel note details are empty",
-		"ErrArrCancelNoteDetailsEmpty",
+		"ErrCancelNoteDetailsEmpty",
+	)
+	ErrCancelNoteAmountCancelIsOverTheStock = common.NewCustomError(
+		errors.New("amount cancel is over stock"),
+		"amount cancel is over stock",
+		"ErrCancelNoteAmountCancelIsOverTheStock",
 	)
 )

@@ -6,8 +6,8 @@ import (
 )
 
 type RecipeCreate struct {
-	Id      string                                  `json:"-" gorm:"column:id;"`
-	Details *[]recipedetailmodel.RecipeDetailCreate `json:"details" gorm:"-"`
+	Id      string                                 `json:"-" gorm:"column:id;"`
+	Details []recipedetailmodel.RecipeDetailCreate `json:"details" gorm:"-"`
 }
 
 func (*RecipeCreate) TableName() string {
@@ -15,17 +15,17 @@ func (*RecipeCreate) TableName() string {
 }
 
 func (data *RecipeCreate) Validate() *common.AppError {
-	if data.Details == nil || len(*data.Details) == 0 {
-		return ErrDetailsEmpty
+	if data.Details == nil || len(data.Details) == 0 {
+		return ErrRecipeDetailsEmpty
 	}
 	mapAmountExist := make(map[string]int)
-	for _, v := range *data.Details {
+	for _, v := range data.Details {
 		if err := v.Validate(); err != nil {
 			return err
 		}
 		mapAmountExist[v.IngredientId]++
 		if mapAmountExist[v.IngredientId] >= 2 {
-			return ErrDuplicateIngredient
+			return ErrRecipeIngredientDuplicate
 		}
 	}
 	return nil

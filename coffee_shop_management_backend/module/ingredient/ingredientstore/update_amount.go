@@ -7,22 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) UpdateIngredient(
+func (s *sqlStore) UpdateAmountIngredient(
 	ctx context.Context,
 	id string,
-	data *ingredientmodel.IngredientUpdate) error {
-	db := s.db.Begin()
+	data *ingredientmodel.IngredientUpdateAmount) error {
+	db := s.db
 
 	if err := db.Table(common.TableIngredient).
 		Where("id = ?", id).
 		Update("totalAmount", gorm.Expr("totalAmount + ?", data.Amount)).
 		Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
 		return common.ErrDB(err)
 	}
 

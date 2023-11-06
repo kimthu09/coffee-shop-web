@@ -1,7 +1,6 @@
 package supplierbiz
 
 import (
-	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 )
@@ -31,14 +30,13 @@ func (biz *updateInfoSupplierBiz) UpdateInfoSupplier(
 	ctx context.Context,
 	id string,
 	data *suppliermodel.SupplierUpdateInfo) error {
+	if err := data.Validate(); err != nil {
+		return err
+	}
 
 	_, err := biz.store.FindSupplier(ctx, map[string]interface{}{"id": id})
 
 	if err != nil {
-		return common.ErrCannotGetEntity(common.TableCategory, err)
-	}
-
-	if err := data.Validate(); err != nil {
 		return err
 	}
 

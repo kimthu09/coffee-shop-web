@@ -1,4 +1,4 @@
-package common
+package enum
 
 import (
 	"database/sql/driver"
@@ -12,9 +12,10 @@ type MeasureType int
 const (
 	Weight MeasureType = iota
 	Volume
+	Unit
 )
 
-var allMeasureType = [2]string{"Weight", "Volume"}
+var allMeasureType = [3]string{"Weight", "Volume", "Unit"}
 
 func (measureType *MeasureType) String() string {
 	return allMeasureType[*measureType]

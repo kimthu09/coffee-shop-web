@@ -2,111 +2,98 @@ package importnotebiz
 
 import (
 	"coffee_shop_management_backend/common"
-	"coffee_shop_management_backend/component/asyncjob"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
-	"coffee_shop_management_backend/module/importnotedetail/importnotedetailmodel"
 	"context"
 )
 
-type CreateImportNoteStorage interface {
-	CreateImportNote(
+type CreateImportNoteRepo interface {
+	CheckIngredient(
+		ctx context.Context,
+		ingredientId string,
+	) error
+	HandleCreateImportNote(
 		ctx context.Context,
 		data *importnotemodel.ImportNoteCreate,
 	) error
-}
-
-type CreateImportNoteDetailStorage interface {
-	CreateListImportNoteDetail(
+	UpdatePriceIngredient(
 		ctx context.Context,
-		data []importnotedetailmodel.ImportNoteDetailCreate,
+		ingredientId string,
+		price float32,
+	) error
+	CheckSupplier(
+		ctx context.Context,
+		supplierId string,
 	) error
 }
 
-type GetTotalPriceIngredientStorage interface {
-	GetPriceIngredient(
-		ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*float32, error)
-}
-
 type createImportNoteBiz struct {
-	importNoteStore              CreateImportNoteStorage
-	importNoteDetailStore        CreateImportNoteDetailStorage
-	getTotalPriceIngredientStore GetTotalPriceIngredientStorage
+	repo CreateImportNoteRepo
 }
 
 func NewCreateImportNoteBiz(
-	importNoteStore CreateImportNoteStorage,
-	importNoteDetailStore CreateImportNoteDetailStorage,
-	getTotalPriceIngredientStore GetTotalPriceIngredientStorage) *createImportNoteBiz {
+	repo CreateImportNoteRepo) *createImportNoteBiz {
 	return &createImportNoteBiz{
-		importNoteStore:              importNoteStore,
-		importNoteDetailStore:        importNoteDetailStore,
-		getTotalPriceIngredientStore: getTotalPriceIngredientStore,
+		repo: repo,
 	}
 }
 
 func (biz *createImportNoteBiz) CreateImportNote(
 	ctx context.Context,
 	data *importnotemodel.ImportNoteCreate) error {
-
-	//validate data
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	//handle id import note
-	idImportNote, errGenerateIdImportNote := common.GenerateId()
-	if errGenerateIdImportNote != nil {
-		return errGenerateIdImportNote
-	}
-
-	data.Id = idImportNote
-
-	//handle import detail
-	mapIngredient := map[string]float32{}
-
-	for i, ingredientDetail := range data.ImportNoteDetails {
-		data.ImportNoteDetails[i].ImportNoteId = idImportNote
-
-		mapIngredient[ingredientDetail.IngredientId] +=
-			ingredientDetail.AmountImport
-	}
-
-	//handle totalPrice
-	var totalPrice float32 = 0
-	for ingredientId, totalAmountOfIngredientId := range mapIngredient {
-		priceIngredient, err := biz.getTotalPriceIngredientStore.GetPriceIngredient(
-			ctx,
-			map[string]interface{}{"id": ingredientId},
-		)
-		if err != nil {
+	for _, v := range data.ImportNoteDetails {
+		if err := biz.repo.CheckIngredient(ctx, v.IngredientId); err != nil {
 			return err
 		}
-		totalPrice += *priceIngredient * totalAmountOfIngredientId
 	}
-	data.TotalPrice = totalPrice
 
-	//handle store data
-	///handle define job create import note
-	jobCreateImportNote := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.importNoteStore.CreateImportNote(ctx, data)
-	})
-
-	///handle define job create import note detail
-	jobCreateImportNoteDetail := asyncjob.NewJob(func(ctx context.Context) error {
-		return biz.importNoteDetailStore.CreateListImportNoteDetail(ctx, data.ImportNoteDetails)
-	})
-
-	///run jobs
-	group := asyncjob.NewGroup(
-		false,
-		jobCreateImportNote,
-		jobCreateImportNoteDetail)
-	if err := group.Run(context.Background()); err != nil {
+	if err := handleImportNoteCreateId(data); err != nil {
 		return err
 	}
 
+	if err := biz.repo.CheckSupplier(ctx, data.SupplierId); err != nil {
+		return err
+	}
+
+	handleTotalPrice(data)
+
+	if err := biz.repo.HandleCreateImportNote(ctx, data); err != nil {
+		return err
+	}
+
+	for _, v := range data.ImportNoteDetails {
+		if v.IsReplacePrice {
+			if err := biz.repo.UpdatePriceIngredient(
+				ctx, v.IngredientId, v.Price,
+			); err != nil {
+				return err
+			}
+		}
+	}
+
 	return nil
+}
+
+func handleImportNoteCreateId(data *importnotemodel.ImportNoteCreate) error {
+	idImportNote, err := common.IdProcess(data.Id)
+	if err != nil {
+		return err
+	}
+	data.Id = idImportNote
+
+	for i := range data.ImportNoteDetails {
+		data.ImportNoteDetails[i].ImportNoteId = *idImportNote
+	}
+	return nil
+}
+
+func handleTotalPrice(data *importnotemodel.ImportNoteCreate) {
+	var totalPrice float32 = 0
+	for _, importNoteDetail := range data.ImportNoteDetails {
+		totalPrice += importNoteDetail.Price * importNoteDetail.AmountImport
+	}
+	data.TotalPrice = totalPrice
 }

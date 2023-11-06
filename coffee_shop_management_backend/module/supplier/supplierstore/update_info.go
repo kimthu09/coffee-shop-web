@@ -10,15 +10,15 @@ func (s *sqlStore) UpdateSupplierInfo(
 	ctx context.Context,
 	id string,
 	data *suppliermodel.SupplierUpdateInfo) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Where("id = ?", id).Updates(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
+		if gormErr := common.GetGormErr(err); gormErr != nil {
+			switch key := gormErr.GetDuplicateErrorKey("phone"); key {
+			case "phone":
+				return suppliermodel.ErrSupplierPhoneDuplicate
+			}
+		}
 		return common.ErrDB(err)
 	}
 

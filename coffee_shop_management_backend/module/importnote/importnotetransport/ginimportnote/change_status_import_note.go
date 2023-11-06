@@ -5,6 +5,7 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/module/importnote/importnotebiz"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/importnote/importnoterepo"
 	"coffee_shop_management_backend/module/importnote/importnotestore"
 	"coffee_shop_management_backend/module/importnotedetail/importnotedetailstore"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
@@ -29,17 +30,19 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		importNoteStore := importnotestore.NewSQLStore(appCtx.GetMainDBConnection())
-		importNoteDetailStore := importnotedetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-		ingredientDetailStore := ingredientdetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-		ingredientStore := ingredientstore.NewSQLStore(appCtx.GetMainDBConnection())
-		supplierStore := supplierstore.NewSQLStore(appCtx.GetMainDBConnection())
-		supplierDebtStore := supplierdebtstore.NewSQLStore(appCtx.GetMainDBConnection())
-
 		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
 		data.CloseBy = requester.GetUserId()
 
-		business := importnotebiz.NewChangeStatusImportNoteBiz(
+		db := appCtx.GetMainDBConnection().Begin()
+
+		importNoteStore := importnotestore.NewSQLStore(db)
+		importNoteDetailStore := importnotedetailstore.NewSQLStore(db)
+		ingredientDetailStore := ingredientdetailstore.NewSQLStore(db)
+		ingredientStore := ingredientstore.NewSQLStore(db)
+		supplierStore := supplierstore.NewSQLStore(db)
+		supplierDebtStore := supplierdebtstore.NewSQLStore(db)
+
+		repo := importnoterepo.NewChangeStatusImportNoteRepo(
 			importNoteStore,
 			importNoteDetailStore,
 			ingredientStore,
@@ -48,10 +51,19 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			supplierDebtStore,
 		)
 
+		business := importnotebiz.NewChangeStatusImportNoteBiz(repo)
+
 		if err := business.ChangeStatusImportNote(
 			c.Request.Context(),
-			idImportNote, &data,
+			idImportNote,
+			&data,
 		); err != nil {
+			db.Rollback()
+			panic(err)
+		}
+
+		if err := db.Commit().Error; err != nil {
+			db.Rollback()
 			panic(err)
 		}
 

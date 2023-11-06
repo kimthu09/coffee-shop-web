@@ -5,8 +5,8 @@ import (
 	"context"
 )
 
-type ChangeStatusFoodStore interface {
-	UpdateFood(
+type ChangeStatusFoodRepo interface {
+	ChangeStatusFood(
 		ctx context.Context,
 		id string,
 		data *productmodel.FoodUpdate,
@@ -14,22 +14,20 @@ type ChangeStatusFoodStore interface {
 }
 
 type changeStatusFoodBiz struct {
-	store ChangeStatusFoodStore
+	repo ChangeStatusFoodRepo
 }
 
-func NewChangeStatusFoodBiz(store ChangeStatusFoodStore) *changeStatusFoodBiz {
-	return &changeStatusFoodBiz{store: store}
+func NewChangeStatusFoodBiz(repo ChangeStatusFoodRepo) *changeStatusFoodBiz {
+	return &changeStatusFoodBiz{repo: repo}
 }
 
 func (biz *changeStatusFoodBiz) ChangeStatusFood(
 	ctx context.Context,
 	id string,
-	toValue bool) error {
+	data *productmodel.FoodUpdate) error {
 
-	var data productmodel.FoodUpdate
-	data.IsActive = &toValue
-
-	err := biz.store.UpdateFood(ctx, id, &data)
-
-	return err
+	if err := biz.repo.ChangeStatusFood(ctx, id, data); err != nil {
+		return err
+	}
+	return nil
 }

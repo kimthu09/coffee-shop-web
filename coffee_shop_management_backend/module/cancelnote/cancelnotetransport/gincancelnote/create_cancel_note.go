@@ -5,6 +5,7 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotebiz"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotemodel"
+	"coffee_shop_management_backend/module/cancelnote/cancelnoterepo"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotestore"
 	"coffee_shop_management_backend/module/cancelnotedetail/cancelnotedetailstore"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
@@ -21,22 +22,32 @@ func CreateCancelNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		cancelNoteStore := cancelnotestore.NewSQLStore(appCtx.GetMainDBConnection())
-		cancelNoteDetailStore := cancelnotedetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-		ingredientStore := ingredientstore.NewSQLStore(appCtx.GetMainDBConnection())
-		ingredientDetailStore := ingredientdetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-
 		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
 		data.CreateBy = requester.GetUserId()
 
-		business := cancelnotebiz.NewCreateCancelNoteBiz(
+		db := appCtx.GetMainDBConnection().Begin()
+
+		cancelNoteStore := cancelnotestore.NewSQLStore(db)
+		cancelNoteDetailStore := cancelnotedetailstore.NewSQLStore(db)
+		ingredientStore := ingredientstore.NewSQLStore(db)
+		ingredientDetailStore := ingredientdetailstore.NewSQLStore(db)
+
+		repo := cancelnoterepo.NewCreateCancelNoteRepo(
 			cancelNoteStore,
 			cancelNoteDetailStore,
 			ingredientStore,
 			ingredientDetailStore,
 		)
 
+		business := cancelnotebiz.NewCreateCancelNoteBiz(repo)
+
 		if err := business.CreateCancelNote(c.Request.Context(), &data); err != nil {
+			db.Rollback()
+			panic(err)
+		}
+
+		if err := db.Commit().Error; err != nil {
+			db.Rollback()
 			panic(err)
 		}
 

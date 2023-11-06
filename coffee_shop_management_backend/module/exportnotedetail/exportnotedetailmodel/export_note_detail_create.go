@@ -15,13 +15,13 @@ func (*ExportNoteDetailCreate) TableName() string {
 
 func (data *ExportNoteDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
-		return ErrIngredientIdInvalid
+		return ErrExportDetailIngredientIdInvalid
 	}
 	if !common.ValidateDateString(data.ExpiryDate) {
-		return ErrExpiryDateInvalid
+		return ErrExportDetailExpiryDateInvalid
 	}
 	if common.ValidateNotPositiveNumber(data.AmountExport) {
-		return ErrAmountExportIsNotPositiveNumber
+		return ErrExportDetailAmountExportIsNotPositiveNumber
 	}
 	return nil
 }

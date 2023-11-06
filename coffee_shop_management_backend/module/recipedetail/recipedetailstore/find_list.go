@@ -10,7 +10,7 @@ import (
 
 func (s *sqlStore) FindListRecipeDetail(ctx context.Context,
 	conditions map[string]interface{},
-	moreKeys ...string) (*[]recipedetailmodel.RecipeDetail, error) {
+	moreKeys ...string) ([]recipedetailmodel.RecipeDetail, error) {
 	var data []recipedetailmodel.RecipeDetail
 	db := s.db
 
@@ -28,5 +28,5 @@ func (s *sqlStore) FindListRecipeDetail(ctx context.Context,
 		return nil, common.ErrDB(err)
 	}
 
-	return &data, nil
+	return data, nil
 }

@@ -5,9 +5,11 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/module/importnote/importnotebiz"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/importnote/importnoterepo"
 	"coffee_shop_management_backend/module/importnote/importnotestore"
 	"coffee_shop_management_backend/module/importnotedetail/importnotedetailstore"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
+	"coffee_shop_management_backend/module/supplier/supplierstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -20,20 +22,32 @@ func CreateImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		importNoteStore := importnotestore.NewSQLStore(appCtx.GetMainDBConnection())
-		importNoteDetailStore := importnotedetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-		ingredientStore := ingredientstore.NewSQLStore(appCtx.GetMainDBConnection())
-
 		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
 		data.CreateBy = requester.GetUserId()
 
-		business := importnotebiz.NewCreateImportNoteBiz(
+		db := appCtx.GetMainDBConnection().Begin()
+
+		importNoteStore := importnotestore.NewSQLStore(db)
+		importNoteDetailStore := importnotedetailstore.NewSQLStore(db)
+		ingredientStore := ingredientstore.NewSQLStore(db)
+		supplierStore := supplierstore.NewSQLStore(db)
+
+		repo := importnoterepo.NewCreateImportNoteRepo(
 			importNoteStore,
 			importNoteDetailStore,
 			ingredientStore,
+			supplierStore,
 		)
 
+		business := importnotebiz.NewCreateImportNoteBiz(repo)
+
 		if err := business.CreateImportNote(c.Request.Context(), &data); err != nil {
+			db.Rollback()
+			panic(err)
+		}
+
+		if err := db.Commit().Error; err != nil {
+			db.Rollback()
 			panic(err)
 		}
 

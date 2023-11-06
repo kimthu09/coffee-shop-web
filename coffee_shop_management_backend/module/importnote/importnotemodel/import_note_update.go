@@ -5,8 +5,11 @@ import (
 )
 
 type ImportNoteUpdate struct {
-	CloseBy string            `json:"-" gorm:"column:closeBy;"`
-	Status  *ImportNoteStatus `json:"status" gorm:"column:status;"`
+	CloseBy    string            `json:"-" gorm:"column:closeBy;"`
+	Id         string            `json:"-" gorm:"-"`
+	SupplierId string            `json:"-" gorm:"-"`
+	TotalPrice float32           `json:"-" gorm:"-"`
+	Status     *ImportNoteStatus `json:"status" gorm:"column:status;"`
 }
 
 func (*ImportNoteUpdate) TableName() string {
@@ -15,10 +18,10 @@ func (*ImportNoteUpdate) TableName() string {
 
 func (data *ImportNoteUpdate) Validate() *common.AppError {
 	if data.Status == nil {
-		return ErrImportStatusEmpty
+		return ErrImportNoteStatusEmpty
 	}
 	if *data.Status == InProgress {
-		return ErrImportStatusInvalid
+		return ErrImportNoteStatusInvalid
 	}
 	return nil
 }

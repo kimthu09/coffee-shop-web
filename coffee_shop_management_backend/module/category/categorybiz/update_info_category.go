@@ -1,7 +1,6 @@
 package categorybiz
 
 import (
-	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"context"
 )
@@ -29,13 +28,13 @@ func (biz *updateInfoCategoryBiz) UpdateInfoCategory(
 	id string,
 	data *categorymodel.CategoryUpdateInfo) error {
 
+	if err := data.Validate(); err != nil {
+		return err
+	}
+
 	_, err := biz.store.FindCategory(ctx, map[string]interface{}{"id": id})
 
 	if err != nil {
-		return common.ErrCannotGetEntity(common.TableCategory, err)
-	}
-
-	if err := data.Validate(); err != nil {
 		return err
 	}
 

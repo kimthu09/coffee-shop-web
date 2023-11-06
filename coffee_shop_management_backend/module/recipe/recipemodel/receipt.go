@@ -16,14 +16,14 @@ func (*Recipe) TableName() string {
 }
 
 var (
-	ErrDuplicateIngredient = common.NewCustomError(
+	ErrRecipeIngredientDuplicate = common.NewCustomError(
 		errors.New("ingredient for recipe is duplicate"),
 		"ingredient for recipe is duplicate",
-		"ErrDuplicateIngredient",
+		"ErrRecipeIngredientDuplicate",
 	)
-	ErrDetailsEmpty = common.NewCustomError(
+	ErrRecipeDetailsEmpty = common.NewCustomError(
 		errors.New("ingredient for recipe is empty"),
 		"ingredient for recipe is empty",
-		"ErrDetailsEmpty",
+		"ErrRecipeDetailsEmpty",
 	)
 )

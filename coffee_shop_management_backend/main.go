@@ -5,10 +5,12 @@ import (
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotetransport/gincancelnote"
 	"coffee_shop_management_backend/module/category/categorytransport/gincategory"
+	"coffee_shop_management_backend/module/customer/customertransport/gincustomer"
 	"coffee_shop_management_backend/module/exportnote/exportnotetransport/ginexportnote"
 	"coffee_shop_management_backend/module/importnote/importnotetransport/ginimportnote"
 	"coffee_shop_management_backend/module/ingredient/ingredienttransport/giningredient"
 	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailtransport/giningredientdetail"
+	"coffee_shop_management_backend/module/invoice/invoicetransport/gininvoice"
 	"coffee_shop_management_backend/module/product/producttransport/ginproduct"
 	"coffee_shop_management_backend/module/supplier/suppliertransport/ginsupplier"
 	"coffee_shop_management_backend/module/user/usertransport/gin_user"
@@ -51,16 +53,29 @@ func main() {
 	toppings := v1.Group("/toppings", middleware.RequireAuth(appCtx))
 	{
 		toppings.POST("", ginproduct.CreateTopping(appCtx))
-		//categories.GET("", gincategory.ListCategory(appCtx))
-		//categories.GET("/:id", gincategory.FindCategory(appCtx))
-		//categories.PATCH("/:id", gincategory.UpdateInfoCategory(appCtx))
+		toppings.PATCH("/:id", ginproduct.UpdateTopping(appCtx))
+		toppings.PATCH("/:id/status", ginproduct.ChangeStatusTopping(appCtx))
+	}
+
+	foods := v1.Group("/foods", middleware.RequireAuth(appCtx))
+	{
+		foods.POST("", ginproduct.CreateFood(appCtx))
+		foods.PATCH("/:id", ginproduct.UpdateFood(appCtx))
+		foods.PATCH("/:id/status", ginproduct.ChangeStatusFood(appCtx))
 	}
 
 	suppliers := v1.Group("/suppliers", middleware.RequireAuth(appCtx))
 	{
 		suppliers.POST("", ginsupplier.CreateSupplier(appCtx))
-		suppliers.POST("/:id", ginsupplier.UpdateInfoSupplier(appCtx))
+		suppliers.PATCH("/:id", ginsupplier.UpdateInfoSupplier(appCtx))
 		suppliers.POST("/:id/pay", ginsupplier.PaySupplier(appCtx))
+	}
+
+	customers := v1.Group("/customers", middleware.RequireAuth(appCtx))
+	{
+		customers.POST("", gincustomer.CreateCustomer(appCtx))
+		customers.PATCH("/:id", gincustomer.UpdateInfoCustomer(appCtx))
+		customers.POST("/:id/pay", gincustomer.PayCustomer(appCtx))
 	}
 
 	ingredients := v1.Group("/ingredients", middleware.RequireAuth(appCtx))
@@ -72,7 +87,7 @@ func main() {
 	importNotes := v1.Group("/importNotes", middleware.RequireAuth(appCtx))
 	{
 		importNotes.POST("", ginimportnote.CreateImportNote(appCtx))
-		importNotes.POST("/:id", ginimportnote.ChangeStatusImportNote(appCtx))
+		importNotes.PATCH("/:id", ginimportnote.ChangeStatusImportNote(appCtx))
 	}
 
 	exportNotes := v1.Group("/exportNotes", middleware.RequireAuth(appCtx))
@@ -83,6 +98,11 @@ func main() {
 	cancelNotes := v1.Group("/cancelNotes", middleware.RequireAuth(appCtx))
 	{
 		cancelNotes.POST("", gincancelnote.CreateCancelNote(appCtx))
+	}
+
+	invoices := v1.Group("/invoices", middleware.RequireAuth(appCtx))
+	{
+		invoices.POST("", gininvoice.CreateInvoice(appCtx))
 	}
 
 	err = r.Run(":8080")

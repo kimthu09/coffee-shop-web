@@ -18,29 +18,40 @@ func (*Supplier) TableName() string {
 }
 
 var (
-	ErrIdInvalid = common.NewCustomError(
+	ErrSupplierIdInvalid = common.NewCustomError(
 		errors.New("id of supplier is invalid"),
 		"id of supplier is invalid",
-		"ErrIdInvalid",
+		"ErrSupplierIdInvalid",
 	)
-	ErrNameEmpty = common.NewCustomError(
+	ErrSupplierNameEmpty = common.NewCustomError(
 		errors.New("name of supplier is empty"),
 		"name of supplier is empty",
-		"ErrNameEmpty",
+		"ErrSupplierNameEmpty",
 	)
-	ErrPhoneInvalid = common.NewCustomError(
+	ErrSupplierPhoneInvalid = common.NewCustomError(
 		errors.New("phone of supplier is invalid"),
 		"phone of supplier is invalid",
-		"ErrPhoneInvalid",
+		"ErrSupplierPhoneInvalid",
 	)
-	ErrEmailInvalid = common.NewCustomError(
+	ErrSupplierEmailInvalid = common.NewCustomError(
 		errors.New("email of supplier is invalid"),
 		"email of supplier is invalid",
-		"ErrEmailInvalid",
+		"ErrSupplierEmailInvalid",
 	)
 	ErrDebtPayNotExist = common.NewCustomError(
 		errors.New("debt pay is not exist"),
 		"debt pay is not exist",
 		"ErrDebtPayNotExist",
+	)
+	ErrDebtPayIsInvalid = common.NewCustomError(
+		errors.New("debt pay is invalid"),
+		"debt pay is invalid",
+		"ErrDebtPayIsInvalid",
+	)
+	ErrSupplierIdDuplicate = common.ErrDuplicateKey(
+		errors.New("id of supplier is duplicate"),
+	)
+	ErrSupplierPhoneDuplicate = common.ErrDuplicateKey(
+		errors.New("phone of supplier is duplicate"),
 	)
 )

@@ -12,15 +12,15 @@ func (s *sqlStore) UpdateTopping(
 	data *productmodel.ToppingUpdate,
 ) error {
 
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Where("id = ?", id).Updates(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
+		if gormErr := common.GetGormErr(err); gormErr != nil {
+			switch key := gormErr.GetDuplicateErrorKey("name"); key {
+			case "name":
+				return productmodel.ErrToppingNameDuplicate
+			}
+		}
 		return common.ErrDB(err)
 	}
 

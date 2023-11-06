@@ -3,46 +3,159 @@ package productbiz
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/product/productmodel"
+	"coffee_shop_management_backend/module/recipedetail/recipedetailmodel"
 	"context"
 )
 
-type UpdateToppingStore interface {
-	FindTopping(ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string) (*productmodel.Topping, error)
+type UpdateToppingRepo interface {
+	CheckIngredient(
+		ctx context.Context,
+		data []recipedetailmodel.RecipeDetailUpdate,
+	) error
+	FindTopping(
+		ctx context.Context,
+		id string,
+	) (*productmodel.Topping, error)
 	UpdateTopping(
 		ctx context.Context,
 		id string,
-		data *productmodel.ToppingUpdate) error
+		data *productmodel.ToppingUpdate,
+	) error
+	UpdateRecipeDetailsOfRecipe(
+		ctx context.Context,
+		recipeId string,
+		deletedRecipeDetails []recipedetailmodel.RecipeDetail,
+		updatedRecipeDetails []recipedetailmodel.RecipeDetailUpdate,
+		createdRecipeDetails []recipedetailmodel.RecipeDetailCreate,
+	) error
+	FindRecipeDetails(
+		ctx context.Context,
+		recipeId string,
+	) ([]recipedetailmodel.RecipeDetail, error)
 }
 
 type updateToppingBiz struct {
-	store UpdateToppingStore
+	repo UpdateToppingRepo
 }
 
-func NewUpdateToppingBiz(store UpdateToppingStore) *updateToppingBiz {
-	return &updateToppingBiz{store: store}
+func NewUpdateToppingBiz(
+	repo UpdateToppingRepo) *updateToppingBiz {
+	return &updateToppingBiz{
+		repo: repo,
+	}
 }
 
 func (biz *updateToppingBiz) UpdateTopping(
 	ctx context.Context,
 	id string,
 	data *productmodel.ToppingUpdate) error {
-
+	//validate data
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	result, err := biz.store.FindTopping(ctx, map[string]interface{}{"id": id})
+	//Check status
+	currentTopping, err := biz.repo.FindTopping(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	if !result.IsActive {
+	if !currentTopping.IsActive {
 		return common.ErrNoPermission(productmodel.ErrProductInactive)
 	}
 
-	errStorage := biz.store.UpdateTopping(ctx, id, data)
+	//Store data
+	if err := biz.repo.UpdateTopping(ctx, id, data); err != nil {
+		return err
+	}
 
-	return errStorage
+	if data.Recipe != nil {
+		if err := biz.updateRecipe(ctx, currentTopping.RecipeId, data); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (biz *updateToppingBiz) updateRecipe(
+	ctx context.Context,
+	recipeId string,
+	data *productmodel.ToppingUpdate) error {
+	if err := biz.repo.CheckIngredient(ctx, data.Recipe.Details); err != nil {
+		return err
+	}
+
+	currentRecipeDetails, err := biz.repo.FindRecipeDetails(ctx, recipeId)
+	if err != nil {
+		return err
+	}
+
+	deletedRecipeDetails, updatedRecipeDetails, createdRecipeDetails := classifyDetails(
+		recipeId,
+		currentRecipeDetails,
+		data.Recipe.Details,
+	)
+
+	if err := biz.repo.UpdateRecipeDetailsOfRecipe(
+		ctx,
+		recipeId,
+		deletedRecipeDetails,
+		updatedRecipeDetails,
+		createdRecipeDetails,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func classifyDetails(
+	recipeId string,
+	currents []recipedetailmodel.RecipeDetail,
+	updates []recipedetailmodel.RecipeDetailUpdate) (
+	[]recipedetailmodel.RecipeDetail,
+	[]recipedetailmodel.RecipeDetailUpdate,
+	[]recipedetailmodel.RecipeDetailCreate) {
+	var deletedRecipeDetails []recipedetailmodel.RecipeDetail
+	var updatedRecipeDetails []recipedetailmodel.RecipeDetailUpdate
+	var createdRecipeDetails []recipedetailmodel.RecipeDetailCreate
+
+	mapExistRecipeDetail := make(map[string]int)
+	mapRecipeDetailUpdate := make(map[string]recipedetailmodel.RecipeDetailUpdate)
+	mapRecipeDetail := make(map[string]recipedetailmodel.RecipeDetail)
+	for _, v := range updates {
+		mapExistRecipeDetail[v.IngredientId]++
+		mapRecipeDetailUpdate[v.IngredientId] = v
+	}
+	for _, v := range currents {
+		mapExistRecipeDetail[v.IngredientId]--
+		mapRecipeDetail[v.IngredientId] = v
+	}
+	for key, value := range mapExistRecipeDetail {
+		if value == -1 {
+			deletedRecipeDetails = append(
+				deletedRecipeDetails,
+				mapRecipeDetail[key],
+			)
+		}
+		if value == 0 {
+			updatedRecipeDetails = append(
+				updatedRecipeDetails,
+				mapRecipeDetailUpdate[key],
+			)
+		}
+		if value == 1 {
+			recipeDetailNeedCreate := mapRecipeDetailUpdate[key]
+			recipeDetailCreate := recipedetailmodel.RecipeDetailCreate{
+				RecipeId:     recipeId,
+				IngredientId: recipeDetailNeedCreate.IngredientId,
+				AmountNeed:   recipeDetailNeedCreate.AmountNeed,
+			}
+			createdRecipeDetails = append(
+				createdRecipeDetails,
+				recipeDetailCreate,
+			)
+		}
+	}
+
+	return deletedRecipeDetails, updatedRecipeDetails, createdRecipeDetails
 }

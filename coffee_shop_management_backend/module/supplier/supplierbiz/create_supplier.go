@@ -6,15 +6,15 @@ import (
 	"context"
 )
 
-type CreateSupplierStorage interface {
+type CreateSupplierStore interface {
 	CreateSupplier(ctx context.Context, data *suppliermodel.SupplierCreate) error
 }
 
 type createSupplierBiz struct {
-	store CreateSupplierStorage
+	store CreateSupplierStore
 }
 
-func NewCreateSupplierBiz(store CreateSupplierStorage) *createSupplierBiz {
+func NewCreateSupplierBiz(store CreateSupplierStore) *createSupplierBiz {
 	return &createSupplierBiz{store: store}
 }
 

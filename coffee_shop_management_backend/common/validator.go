@@ -43,17 +43,17 @@ func ValidateUrl(s string) bool {
 }
 
 func ValidateNotNilId(id *string) bool {
-	if id == nil || len(*id) == 0 || len(*id) > 9 {
+	if id == nil || len(*id) == 0 || len(*id) > MaxLengthIdCanGenerate {
 		return false
 	}
 	return true
 }
 
 func ValidateId(id *string) bool {
-	if id == nil {
+	if id == nil || len(*id) == 0 {
 		return true
 	}
-	if len(*id) == 0 || len(*id) > 9 {
+	if len(*id) > MaxLengthIdCanGenerate {
 		return false
 	}
 	return true

@@ -9,15 +9,17 @@ import (
 func (s *sqlStore) CreateCategory(
 	ctx context.Context,
 	data *categorymodel.CategoryCreate) error {
-	db := s.db.Begin()
+	db := s.db
 
 	if err := db.Create(data).Error; err != nil {
-		db.Rollback()
-		return common.ErrDB(err)
-	}
-
-	if err := db.Commit().Error; err != nil {
-		db.Rollback()
+		if gormErr := common.GetGormErr(err); gormErr != nil {
+			switch key := gormErr.GetDuplicateErrorKey("PRIMARY", "name"); key {
+			case `PRIMARY`:
+				return categorymodel.ErrCategoryIdDuplicate
+			case "name":
+				return categorymodel.ErrCategoryNameDuplicate
+			}
+		}
 		return common.ErrDB(err)
 	}
 

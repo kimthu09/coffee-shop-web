@@ -2,18 +2,19 @@ package supplierdebtmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/common/enum"
 	"errors"
 	"time"
 )
 
 type SupplierDebt struct {
-	Id               string            `json:"id" gorm:"column:id;"`
-	IdSupplier       string            `json:"idSupplier" gorm:"column:idSupplier;"`
-	Amount           float32           `json:"amount" gorm:"column:amount;"`
-	AmountLeft       float32           `json:"amountLeft" gorm:"column:amountLeft;"`
-	SupplierDebtType *SupplierDebtType `json:"type" gorm:"column:type;"`
-	CreateBy         string            `json:"createBy" gorm:"column:createBy;"`
-	CreateAt         *time.Time        `json:"createAt" gorm:"column:createAt;"`
+	Id         string         `json:"id" gorm:"column:id;"`
+	IdSupplier string         `json:"idSupplier" gorm:"column:idSupplier;"`
+	Amount     float32        `json:"amount" gorm:"column:amount;"`
+	AmountLeft float32        `json:"amountLeft" gorm:"column:amountLeft;"`
+	DebtType   *enum.DebtType `json:"type" gorm:"column:type;"`
+	CreateBy   string         `json:"createBy" gorm:"column:createBy;"`
+	CreateAt   *time.Time     `json:"createAt" gorm:"column:createAt;"`
 }
 
 func (*SupplierDebt) TableName() string {
@@ -31,9 +32,9 @@ var (
 		"amount is not negative number",
 		"ErrAmountIsNotNegativeNumber",
 	)
-	ErrSupplierDebtTypeEmpty = common.NewCustomError(
-		errors.New("supplier debt type is empty"),
-		"supplier debt type is empty",
-		"ErrSupplierDebtTypeEmpty",
+	ErrDebtTypeEmpty = common.NewCustomError(
+		errors.New("debt type is empty"),
+		"debt type is empty",
+		"ErrDebtTypeEmpty",
 	)
 )

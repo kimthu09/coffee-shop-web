@@ -9,8 +9,8 @@ type SizeFood struct {
 	FoodId   string  `json:"foodId" gorm:"column:foodId;"`
 	SizeId   string  `json:"sizeId" gorm:"column:sizeId;"`
 	Name     string  `json:"name" gorm:"column:name;"`
-	Cost     float64 `json:"cost" gorm:"column:cost;"`
-	Price    float64 `json:"price" gorm:"column:price;"`
+	Cost     float32 `json:"cost" gorm:"column:cost;"`
+	Price    float32 `json:"price" gorm:"column:price;"`
 	RecipeId string  `json:"recipeId" gorm:"column:recipeId;"`
 }
 
@@ -19,24 +19,24 @@ func (*SizeFood) TableName() string {
 }
 
 var (
-	ErrNameEmpty = common.NewCustomError(
+	ErrSizeFoodNameEmpty = common.NewCustomError(
 		errors.New("name of size is empty"),
 		"name of size is empty",
-		"ErrNameEmpty",
+		"ErrSizeFoodNameEmpty",
 	)
-	ErrCostIsNegativeNumber = common.NewCustomError(
+	ErrSizeFoodCostIsNegativeNumber = common.NewCustomError(
 		errors.New("cost is negative number"),
 		"cost is negative number",
-		"ErrCostIsNegativeNumber",
+		"ErrSizeFoodCostIsNegativeNumber",
 	)
-	ErrPriceIsNegativeNumber = common.NewCustomError(
+	ErrSizeFoodPriceIsNegativeNumber = common.NewCustomError(
 		errors.New("price is negative number"),
 		"price is negative number",
-		"ErrPriceIsNegativeNumber",
+		"ErrSizeFoodPriceIsNegativeNumber",
 	)
-	ErrRecipeEmpty = common.NewCustomError(
+	ErrSizeFoodRecipeEmpty = common.NewCustomError(
 		errors.New("recipe is empty"),
 		"recipe is empty",
-		"ErrRecipeEmpty",
+		"ErrSizeFoodRecipeEmpty",
 	)
 )

@@ -10,7 +10,7 @@ import (
 
 func (s *sqlStore) FindListSizeFood(
 	ctx context.Context,
-	foodId string) (*[]sizefoodmodel.SizeFood, error) {
+	foodId string) ([]sizefoodmodel.SizeFood, error) {
 	var data []sizefoodmodel.SizeFood
 	db := s.db
 
@@ -24,5 +24,5 @@ func (s *sqlStore) FindListSizeFood(
 		return nil, common.ErrDB(err)
 	}
 
-	return &data, nil
+	return data, nil
 }

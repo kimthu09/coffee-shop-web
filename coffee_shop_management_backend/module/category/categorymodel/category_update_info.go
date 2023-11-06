@@ -5,7 +5,7 @@ import (
 )
 
 type CategoryUpdateInfo struct {
-	Name        string  `json:"name" gorm:"column:name;"`
+	Name        *string `json:"name" gorm:"column:name;"`
 	Description *string `json:"description" gorm:"column:description;"`
 }
 
@@ -14,8 +14,8 @@ func (*CategoryUpdateInfo) TableName() string {
 }
 
 func (c *CategoryUpdateInfo) Validate() error {
-	if common.ValidateEmptyString(c.Name) {
-		return ErrNameEmpty
+	if c.Name != nil && common.ValidateEmptyString(*c.Name) {
+		return ErrCategoryNameEmpty
 	}
 
 	return nil

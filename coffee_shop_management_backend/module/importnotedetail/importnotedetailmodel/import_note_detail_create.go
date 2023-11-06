@@ -5,10 +5,12 @@ import (
 )
 
 type ImportNoteDetailCreate struct {
-	ImportNoteId string  `json:"-" gorm:"column:importNoteId;"`
-	IngredientId string  `json:"ingredientId" gorm:"column:ingredientId;"`
-	ExpiryDate   string  `json:"expiryDate" gorm:"column:expiryDate;"`
-	AmountImport float32 `json:"amountImport" json:"amountImport" gorm:"column:amountImport"`
+	ImportNoteId   string  `json:"-" gorm:"column:importNoteId;"`
+	IngredientId   string  `json:"ingredientId" gorm:"column:ingredientId;"`
+	ExpiryDate     string  `json:"expiryDate" gorm:"column:expiryDate;"`
+	Price          float32 `json:"price" gorm:"column:price"`
+	IsReplacePrice bool    `json:"isReplacePrice" gorm:"-"`
+	AmountImport   float32 `json:"amountImport" json:"amountImport" gorm:"column:amountImport"`
 }
 
 func (*ImportNoteDetailCreate) TableName() string {
@@ -17,13 +19,16 @@ func (*ImportNoteDetailCreate) TableName() string {
 
 func (data *ImportNoteDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
-		return ErrIngredientIdInvalid
+		return ErrImportDetailIngredientIdInvalid
 	}
 	if !common.ValidateDateString(data.ExpiryDate) {
-		return ErrExpiryDateInvalid
+		return ErrImportDetailExpiryDateInvalid
+	}
+	if common.ValidateNegativeNumber(data.Price) {
+		return ErrImportDetailPriceIsNegativeNumber
 	}
 	if common.ValidateNotPositiveNumber(data.AmountImport) {
-		return ErrAmountImportIsNotPositiveNumber
+		return ErrImportDetailAmountImportIsNotPositiveNumber
 	}
 	return nil
 }

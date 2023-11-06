@@ -9,8 +9,8 @@ type SizeFoodCreate struct {
 	FoodId   string                    `json:"-" gorm:"column:foodId;"`
 	SizeId   string                    `json:"-" gorm:"column:sizeId;"`
 	Name     string                    `json:"name" gorm:"column:name"`
-	Cost     float64                   `json:"cost" gorm:"column:cost"`
-	Price    float64                   `json:"price" gorm:"column:price"`
+	Cost     float32                   `json:"cost" gorm:"column:cost"`
+	Price    float32                   `json:"price" gorm:"column:price"`
 	RecipeId string                    `json:"-" gorm:"column:recipeId;"`
 	Recipe   *recipemodel.RecipeCreate `json:"recipe" gorm:"-"`
 }
@@ -21,16 +21,16 @@ func (*SizeFoodCreate) TableName() string {
 
 func (data *SizeFoodCreate) Validate() *common.AppError {
 	if common.ValidateEmptyString(data.Name) {
-		return ErrNameEmpty
+		return ErrSizeFoodNameEmpty
 	}
 	if common.ValidateNegativeNumber(data.Cost) {
-		return ErrCostIsNegativeNumber
+		return ErrSizeFoodCostIsNegativeNumber
 	}
 	if common.ValidateNegativeNumber(data.Price) {
-		return ErrPriceIsNegativeNumber
+		return ErrSizeFoodPriceIsNegativeNumber
 	}
 	if data.Recipe == nil {
-		return ErrRecipeEmpty
+		return ErrSizeFoodRecipeEmpty
 	}
 	if err := data.Recipe.Validate(); err != nil {
 		return err
