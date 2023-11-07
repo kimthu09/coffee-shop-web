@@ -3,6 +3,8 @@ package ginimportnote
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/importnote/importnotebiz"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
 	"coffee_shop_management_backend/module/importnote/importnoterepo"
@@ -30,7 +32,7 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 		data.CloseBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
@@ -51,7 +53,9 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			supplierDebtStore,
 		)
 
-		business := importnotebiz.NewChangeStatusImportNoteBiz(repo)
+		gen := generator.NewShortIdGenerator()
+
+		business := importnotebiz.NewChangeStatusImportNoteBiz(gen, repo, requester)
 
 		if err := business.ChangeStatusImportNote(
 			c.Request.Context(),

@@ -1,0 +1,115 @@
+package rolerepo
+
+import (
+	"coffee_shop_management_backend/module/role/rolemodel"
+	"coffee_shop_management_backend/module/rolefeature/rolefeaturemodel"
+	"context"
+)
+
+type UpdateRoleStore interface {
+	UpdateRole(
+		ctx context.Context,
+		id string,
+		data *rolemodel.RoleUpdate) error
+}
+
+type UpdateRoleFeature interface {
+	CreateListImportNoteDetail(
+		ctx context.Context,
+		data []rolefeaturemodel.RoleFeature,
+	) error
+	DeleteRoleFeature(
+		ctx context.Context,
+		conditions map[string]interface{},
+	) error
+	FindListFeatures(
+		ctx context.Context,
+		roleId string,
+	) ([]rolefeaturemodel.RoleFeature, error)
+}
+
+type updateRoleRepo struct {
+	roleStore        UpdateRoleStore
+	roleFeatureStore UpdateRoleFeature
+	featureStore     CheckFeatureStore
+}
+
+func NewUpdateRoleRepo(
+	roleStore UpdateRoleStore,
+	roleFeatureStore UpdateRoleFeature,
+	featureStore CheckFeatureStore) *updateRoleRepo {
+	return &updateRoleRepo{
+		roleStore:        roleStore,
+		roleFeatureStore: roleFeatureStore,
+		featureStore:     featureStore,
+	}
+}
+
+func (repo *updateRoleRepo) CheckFeatureExist(
+	ctx context.Context,
+	data *rolemodel.RoleUpdate) error {
+	for _, v := range *data.Features {
+		if _, err := repo.featureStore.FindFeature(ctx, v); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (repo *updateRoleRepo) GetListRoleFeatures(
+	ctx context.Context,
+	roleId string) ([]string, error) {
+	features, err := repo.roleFeatureStore.FindListFeatures(ctx, roleId)
+	if err != nil {
+		return nil, err
+	}
+
+	var featureListStr []string
+	for _, feature := range features {
+		featureListStr = append(featureListStr, feature.FeatureId)
+	}
+	return featureListStr, nil
+}
+
+func (repo *updateRoleRepo) UpdateRole(
+	ctx context.Context,
+	roleId string,
+	data *rolemodel.RoleUpdate) error {
+	if err := repo.roleStore.UpdateRole(ctx, roleId, data); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *updateRoleRepo) UpdateRoleFeatures(
+	ctx context.Context,
+	deletedRoleFeatures []rolefeaturemodel.RoleFeature,
+	createdRoleFeatures []rolefeaturemodel.RoleFeature) error {
+	if err := repo.deleteRoleFeatures(ctx, deletedRoleFeatures); err != nil {
+		return err
+	}
+	if err := repo.roleFeatureStore.CreateListImportNoteDetail(
+		ctx, createdRoleFeatures,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *updateRoleRepo) deleteRoleFeatures(
+	ctx context.Context,
+	deletedRoleFeatures []rolefeaturemodel.RoleFeature) error {
+	for _, v := range deletedRoleFeatures {
+		if err := repo.roleFeatureStore.DeleteRoleFeature(
+			ctx,
+			map[string]interface{}{
+				"roleId":    v.RoleId,
+				"featureId": v.FeatureId,
+			},
+		); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

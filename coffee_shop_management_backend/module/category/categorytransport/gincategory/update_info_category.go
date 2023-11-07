@@ -3,6 +3,7 @@ package gincategory
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorybiz"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"coffee_shop_management_backend/module/category/categorystore"
@@ -21,7 +22,9 @@ func UpdateInfoCategory(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		store := categorystore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := categorybiz.NewUpdateInfoCategoryBiz(store)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
+		biz := categorybiz.NewUpdateInfoCategoryBiz(store, requester)
 
 		if err := biz.UpdateInfoCategory(c.Request.Context(), id, &data); err != nil {
 			panic(err)

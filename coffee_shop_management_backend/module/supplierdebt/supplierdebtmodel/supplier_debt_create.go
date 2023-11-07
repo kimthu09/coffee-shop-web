@@ -7,7 +7,7 @@ import (
 
 type SupplierDebtCreate struct {
 	Id         string         `json:"-" gorm:"column:id;"`
-	IdSupplier string         `json:"idSupplier" gorm:"column:idSupplier;"`
+	SupplierId string         `json:"supplierId" gorm:"column:supplierId;"`
 	Amount     float32        `json:"amount" gorm:"column:amount;"`
 	AmountLeft float32        `json:"-" gorm:"column:amountLeft;"`
 	DebtType   *enum.DebtType `json:"type" gorm:"column:type;"`
@@ -19,14 +19,14 @@ func (*SupplierDebtCreate) TableName() string {
 }
 
 func (data *SupplierDebtCreate) Validate() *common.AppError {
-	if !common.ValidateNotNilId(&data.IdSupplier) {
-		return ErrIdSupplierInvalid
+	if !common.ValidateNotNilId(&data.SupplierId) {
+		return ErrSupplierDebtIdSupplierInvalid
 	}
 	if common.ValidateNotNegativeNumber(data.Amount) {
-		return ErrAmountIsNotNegativeNumber
+		return ErrSupplierDebtAmountIsNotNegativeNumber
 	}
 	if data.DebtType == nil {
-		return ErrDebtTypeEmpty
+		return ErrSupplierDebtTypeEmpty
 	}
 	return nil
 }

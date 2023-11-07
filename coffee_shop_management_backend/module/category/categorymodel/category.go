@@ -37,4 +37,13 @@ var (
 	ErrCategoryNameDuplicate = common.ErrDuplicateKey(
 		errors.New("name of category is duplicate"),
 	)
+	ErrCategoryCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create category"),
+	)
+	ErrCategoryUpdateInfoNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to update info category"),
+	)
+	ErrCategoryViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view category"),
+	)
 )

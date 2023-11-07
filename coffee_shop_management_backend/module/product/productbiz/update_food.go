@@ -2,6 +2,8 @@ package productbiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/recipe/recipemodel"
@@ -58,12 +60,19 @@ type UpdateFoodRepo interface {
 }
 
 type updateFoodBiz struct {
-	repo UpdateFoodRepo
+	gen       generator.IdGenerator
+	repo      UpdateFoodRepo
+	requester middleware.Requester
 }
 
-func NewUpdateFoodBiz(repo UpdateFoodRepo) *updateFoodBiz {
+func NewUpdateFoodBiz(
+	gen generator.IdGenerator,
+	repo UpdateFoodRepo,
+	requester middleware.Requester) *updateFoodBiz {
 	return &updateFoodBiz{
-		repo: repo,
+		gen:       gen,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
@@ -71,7 +80,10 @@ func (biz *updateFoodBiz) UpdateFood(
 	ctx context.Context,
 	id string,
 	data *productmodel.FoodUpdate) error {
-	//validate data
+	if !biz.requester.IsHasFeature(common.FoodUpdateInfoFeatureCode) {
+		return productmodel.ErrFoodUpdateInfoNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
@@ -163,7 +175,7 @@ func (biz *updateFoodBiz) UpdateFood(
 		}
 		for _, v := range *data.Sizes {
 			if v.SizeId == nil {
-				sizeCreate, errCreate := getSizeFoodCreateFromSizeFoodUpdate(id, v)
+				sizeCreate, errCreate := getSizeFoodCreateFromSizeFoodUpdate(biz.gen, id, v)
 				if errCreate != nil {
 					return errCreate
 				}
@@ -237,9 +249,10 @@ func (biz *updateFoodBiz) UpdateFood(
 }
 
 func getSizeFoodCreateFromSizeFoodUpdate(
+	gen generator.IdGenerator,
 	foodId string,
 	size sizefoodmodel.SizeFoodUpdate) (*sizefoodmodel.SizeFoodCreate, error) {
-	sizeId, err := common.GenerateId()
+	sizeId, err := gen.GenerateId()
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +274,7 @@ func getSizeFoodCreateFromSizeFoodUpdate(
 
 	var recipe *recipemodel.RecipeCreate
 	if size.Recipe != nil && size.Recipe.Details != nil {
-		recipeId, err := common.GenerateId()
+		recipeId, err := gen.GenerateId()
 		if err != nil {
 			return nil, err
 		}

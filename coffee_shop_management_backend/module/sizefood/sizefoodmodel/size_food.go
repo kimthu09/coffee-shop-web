@@ -2,16 +2,18 @@ package sizefoodmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/recipe/recipemodel"
 	"errors"
 )
 
 type SizeFood struct {
-	FoodId   string  `json:"foodId" gorm:"column:foodId;"`
-	SizeId   string  `json:"sizeId" gorm:"column:sizeId;"`
-	Name     string  `json:"name" gorm:"column:name;"`
-	Cost     float32 `json:"cost" gorm:"column:cost;"`
-	Price    float32 `json:"price" gorm:"column:price;"`
-	RecipeId string  `json:"recipeId" gorm:"column:recipeId;"`
+	FoodId   string             `json:"foodId" gorm:"column:foodId;"`
+	SizeId   string             `json:"sizeId" gorm:"column:sizeId;"`
+	Name     string             `json:"name" gorm:"column:name;"`
+	Cost     float32            `json:"cost" gorm:"column:cost;"`
+	Price    float32            `json:"price" gorm:"column:price;"`
+	RecipeId string             `json:"-" gorm:"column:recipeId;"`
+	Recipe   recipemodel.Recipe `json:"recipe" gorm:"foreignkey:recipeId"`
 }
 
 func (*SizeFood) TableName() string {

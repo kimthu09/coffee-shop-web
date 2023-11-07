@@ -2,12 +2,14 @@ package categoryfoodmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/category/categorymodel"
 	"errors"
 )
 
 type CategoryFood struct {
-	FoodId     string `json:"foodId" gorm:"column:foodId;"`
-	CategoryId string `json:"categoryId" gorm:"column:categoryId;"`
+	FoodId     string                 `json:"foodId" gorm:"column:foodId;"`
+	CategoryId string                 `json:"-" gorm:"column:categoryId;"`
+	Category   categorymodel.Category `json:"category" gorm:"foreignkey:CategoryId"`
 }
 
 func (*CategoryFood) TableName() string {

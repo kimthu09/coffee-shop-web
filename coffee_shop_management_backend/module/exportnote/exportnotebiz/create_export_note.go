@@ -2,6 +2,8 @@ package exportnotebiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
 	"context"
 )
@@ -26,24 +28,34 @@ type CreateExportNoteRepo interface {
 }
 
 type createExportNoteBiz struct {
-	repo CreateExportNoteRepo
+	gen       generator.IdGenerator
+	repo      CreateExportNoteRepo
+	requester middleware.Requester
 }
 
 func NewCreateExportNoteBiz(
-	repo CreateExportNoteRepo) *createExportNoteBiz {
+	gen generator.IdGenerator,
+	repo CreateExportNoteRepo,
+	requester middleware.Requester) *createExportNoteBiz {
 	return &createExportNoteBiz{
-		repo: repo,
+		gen:       gen,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
 func (biz *createExportNoteBiz) CreateExportNote(
 	ctx context.Context,
 	data *exportnotemodel.ExportNoteCreate) error {
+	if !biz.requester.IsHasFeature(common.ExportNoteCreateFeatureCode) {
+		return exportnotemodel.ErrExportNoteCreateNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	if err := handleExportNoteId(data); err != nil {
+	if err := handleExportNoteId(biz.gen, data); err != nil {
 		return err
 	}
 
@@ -76,8 +88,10 @@ func (biz *createExportNoteBiz) CreateExportNote(
 	return nil
 }
 
-func handleExportNoteId(data *exportnotemodel.ExportNoteCreate) error {
-	idCancelNote, errGenerateIdCancelNote := common.IdProcess(data.Id)
+func handleExportNoteId(
+	gen generator.IdGenerator,
+	data *exportnotemodel.ExportNoteCreate) error {
+	idCancelNote, errGenerateIdCancelNote := gen.IdProcess(data.Id)
 	if errGenerateIdCancelNote != nil {
 		return errGenerateIdCancelNote
 	}

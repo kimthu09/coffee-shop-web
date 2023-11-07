@@ -6,6 +6,15 @@ import (
 	"errors"
 )
 
+type SimpleIngredient struct {
+	Id   string `json:"id" gorm:"column:id;"`
+	Name string `json:"name" gorm:"column:name;"`
+}
+
+func (*SimpleIngredient) TableName() string {
+	return common.TableIngredient
+}
+
 type Ingredient struct {
 	Id          string            `json:"id" gorm:"column:id;"`
 	Name        string            `json:"name" gorm:"column:name;"`
@@ -49,5 +58,11 @@ var (
 	)
 	ErrIngredientNameDuplicate = common.ErrDuplicateKey(
 		errors.New("name of ingredient is duplicate"),
+	)
+	ErrIngredientCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create ingredient"),
+	)
+	ErrIngredientViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view ingredient"),
 	)
 )

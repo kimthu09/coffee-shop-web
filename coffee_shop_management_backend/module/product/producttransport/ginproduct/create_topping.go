@@ -3,6 +3,8 @@ package ginproduct
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
@@ -22,6 +24,8 @@ func CreateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
 		db := appCtx.GetMainDBConnection().Begin()
 
 		toppingStore := productstore.NewSQLStore(db)
@@ -29,14 +33,16 @@ func CreateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 		ingredientStore := ingredientstore.NewSQLStore(db)
 		recipeDetailStore := recipedetailstore.NewSQLStore(db)
 
-		createToppingRepo := productrepo.NewCreateToppingRepo(
+		repo := productrepo.NewCreateToppingRepo(
 			toppingStore,
 			recipeStore,
 			ingredientStore,
 			recipeDetailStore,
 		)
 
-		business := productbiz.NewCreateToppingBiz(createToppingRepo)
+		gen := generator.NewShortIdGenerator()
+
+		business := productbiz.NewCreateToppingBiz(gen, repo, requester)
 
 		if err := business.CreateTopping(c.Request.Context(), &data); err != nil {
 			db.Rollback()

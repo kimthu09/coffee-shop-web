@@ -1,7 +1,6 @@
 package invoicerepo
 
 import (
-	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/common/enum"
 	"coffee_shop_management_backend/module/customer/customermodel"
 	"coffee_shop_management_backend/module/customerdebt/customerdebtmodel"
@@ -219,35 +218,9 @@ func (repo *createInvoiceRepo) getPriceFromTopping(
 	return &topping.Price, nil
 }
 
-func (repo *createInvoiceRepo) HandleCustomer(
+func (repo *createInvoiceRepo) CreateCustomerDebt(
 	ctx context.Context,
-	data *invoicemodel.InvoiceCreate) error {
-	if err := repo.createCustomerDebt(ctx, data); err != nil {
-		return err
-	}
-
-	if err := repo.updateDebtCustomer(ctx, data); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *createInvoiceRepo) updateDebtCustomer(
-	ctx context.Context,
-	data *invoicemodel.InvoiceCreate) error {
-	customerUpdateDebt := customermodel.CustomerUpdateDebt{
-		Amount: &data.AmountDebt,
-	}
-	if err := repo.customerStore.UpdateCustomerDebt(
-		ctx, *data.CustomerId, &customerUpdateDebt,
-	); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *createInvoiceRepo) createCustomerDebt(
-	ctx context.Context,
+	supplierDebtId string,
 	data *invoicemodel.InvoiceCreate) error {
 	debtCurrent, err := repo.customerStore.GetDebtCustomer(
 		ctx,
@@ -259,15 +232,10 @@ func (repo *createInvoiceRepo) createCustomerDebt(
 	amountBorrow := data.AmountDebt
 	amountLeft := *debtCurrent + amountBorrow
 
-	idSupplierDebtCreate, errGenerateIdSupplierDebtCreate := common.GenerateId()
-	if errGenerateIdSupplierDebtCreate != nil {
-		return errGenerateIdSupplierDebtCreate
-	}
-
 	debtType := enum.Debt
 	customerDebtCreate := customerdebtmodel.CustomerDebtCreate{
-		Id:         idSupplierDebtCreate,
-		IdCustomer: *data.CustomerId,
+		Id:         supplierDebtId,
+		CustomerId: *data.CustomerId,
 		Amount:     amountBorrow,
 		AmountLeft: amountLeft,
 		DebtType:   &debtType,
@@ -276,6 +244,20 @@ func (repo *createInvoiceRepo) createCustomerDebt(
 
 	if err := repo.customerDebtStore.CreateCustomerDebt(
 		ctx, &customerDebtCreate,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *createInvoiceRepo) UpdateDebtCustomer(
+	ctx context.Context,
+	data *invoicemodel.InvoiceCreate) error {
+	customerUpdateDebt := customermodel.CustomerUpdateDebt{
+		Amount: &data.AmountDebt,
+	}
+	if err := repo.customerStore.UpdateCustomerDebt(
+		ctx, *data.CustomerId, &customerUpdateDebt,
 	); err != nil {
 		return err
 	}

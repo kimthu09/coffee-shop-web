@@ -2,6 +2,8 @@ package categorybiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"context"
 )
@@ -14,22 +16,30 @@ type CreateCategoryStorage interface {
 }
 
 type createCategoryBiz struct {
-	store CreateCategoryStorage
+	gen       generator.IdGenerator
+	store     CreateCategoryStorage
+	requester middleware.Requester
 }
 
-func NewCreateCategoryBiz(store CreateCategoryStorage) *createCategoryBiz {
-	return &createCategoryBiz{store: store}
+func NewCreateCategoryBiz(
+	generator generator.IdGenerator,
+	store CreateCategoryStorage,
+	requester middleware.Requester) *createCategoryBiz {
+	return &createCategoryBiz{gen: generator, store: store, requester: requester}
 }
 
 func (biz *createCategoryBiz) CreateCategory(
 	ctx context.Context,
 	data *categorymodel.CategoryCreate) error {
+	if !biz.requester.IsHasFeature(common.CategoryCreateFeatureCode) {
+		return categorymodel.ErrCategoryCreateNoPermission
+	}
 
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	idAddress, err := common.GenerateId()
+	idAddress, err := biz.gen.GenerateId()
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,8 @@ package invoicebiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/invoice/invoicemodel"
 	"context"
 )
@@ -15,10 +17,13 @@ type CreateInvoiceRepo interface {
 		ctx context.Context,
 		data *invoicemodel.InvoiceCreate,
 	) error
-	HandleCustomer(
+	CreateCustomerDebt(
 		ctx context.Context,
-		data *invoicemodel.InvoiceCreate,
-	) error
+		supplierDebtId string,
+		data *invoicemodel.InvoiceCreate) error
+	UpdateDebtCustomer(
+		ctx context.Context,
+		data *invoicemodel.InvoiceCreate) error
 	HandleInvoice(
 		ctx context.Context,
 		data *invoicemodel.InvoiceCreate,
@@ -26,24 +31,34 @@ type CreateInvoiceRepo interface {
 }
 
 type createInvoiceBiz struct {
-	repo CreateInvoiceRepo
+	gen       generator.IdGenerator
+	repo      CreateInvoiceRepo
+	requester middleware.Requester
 }
 
 func NewCreateInvoiceBiz(
-	repo CreateInvoiceRepo) *createInvoiceBiz {
+	gen generator.IdGenerator,
+	repo CreateInvoiceRepo,
+	requester middleware.Requester) *createInvoiceBiz {
 	return &createInvoiceBiz{
-		repo: repo,
+		gen:       gen,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
 func (biz *createInvoiceBiz) CreateInvoice(
 	ctx context.Context,
 	data *invoicemodel.InvoiceCreate) error {
+	if !biz.requester.IsHasFeature(common.InvoiceCreateFeatureCode) {
+		return invoicemodel.ErrInvoiceCreateNoPermission
+	}
+
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	if err := handleInvoiceId(data); err != nil {
+	if err := handleInvoiceId(biz.gen, data); err != nil {
 		return err
 	}
 
@@ -60,7 +75,16 @@ func (biz *createInvoiceBiz) CreateInvoice(
 	}
 
 	if data.CustomerId != nil {
-		if err := biz.repo.HandleCustomer(ctx, data); err != nil {
+		customerDebtId, errGenerateId := biz.gen.GenerateId()
+		if errGenerateId != nil {
+			return errGenerateId
+		}
+
+		if err := biz.repo.CreateCustomerDebt(ctx, customerDebtId, data); err != nil {
+			return err
+		}
+
+		if err := biz.repo.UpdateDebtCustomer(ctx, data); err != nil {
 			return err
 		}
 	}
@@ -71,8 +95,8 @@ func (biz *createInvoiceBiz) CreateInvoice(
 	return nil
 }
 
-func handleInvoiceId(data *invoicemodel.InvoiceCreate) error {
-	idInvoice, err := common.GenerateId()
+func handleInvoiceId(gen generator.IdGenerator, data *invoicemodel.InvoiceCreate) error {
+	idInvoice, err := gen.GenerateId()
 	if err != nil {
 		return err
 	}

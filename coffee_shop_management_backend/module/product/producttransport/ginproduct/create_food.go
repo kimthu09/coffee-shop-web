@@ -3,6 +3,8 @@ package ginproduct
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorystore"
 	"coffee_shop_management_backend/module/categoryfood/categoryfoodstore"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
@@ -25,6 +27,8 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
 		db := appCtx.GetMainDBConnection().Begin()
 
 		foodStore := productstore.NewSQLStore(db)
@@ -45,7 +49,9 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			recipeDetailStore,
 		)
 
-		business := productbiz.NewCreateFoodBiz(repo)
+		gen := generator.NewShortIdGenerator()
+
+		business := productbiz.NewCreateFoodBiz(gen, repo, requester)
 
 		if err := business.CreateFood(c.Request.Context(), &data); err != nil {
 			db.Rollback()

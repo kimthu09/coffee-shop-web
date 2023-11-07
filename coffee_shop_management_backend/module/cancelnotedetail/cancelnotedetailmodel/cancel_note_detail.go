@@ -2,15 +2,17 @@ package cancelnotedetailmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
 	"errors"
 )
 
 type CancelNoteDetail struct {
-	CancelNoteId string       `json:"cancelNoteId" gorm:"column:cancelNoteId;"`
-	IngredientId string       `json:"ingredientId" gorm:"column:ingredientId;"`
-	ExpiryDate   string       `json:"expiryDate" gorm:"column:expiryDate;"`
-	Reason       CancelReason `json:"reason" gorm:"column:reason;"`
-	AmountCancel float32      `json:"amountCancel" gorm:"column:amountCancel;"`
+	CancelNoteId string                           `json:"cancelNoteId" gorm:"column:cancelNoteId;"`
+	IngredientId string                           `json:"-" gorm:"column:ingredientId;"`
+	Ingredient   ingredientmodel.SimpleIngredient `json:"ingredient" gorm:"foreignKey:IngredientId;references:Id"`
+	ExpiryDate   string                           `json:"expiryDate" gorm:"column:expiryDate;"`
+	Reason       CancelReason                     `json:"reason" gorm:"column:reason;"`
+	AmountCancel float32                          `json:"amountCancel" gorm:"column:amountCancel;"`
 }
 
 func (*CancelNoteDetail) TableName() string {
@@ -37,5 +39,8 @@ var (
 		errors.New("amount cancel is not positive number"),
 		"amount cancel is not positive number",
 		"ErrCancelDetailAmountCancelIsNotPositiveNumber",
+	)
+	ErrCancelDetailViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view cancel note"),
 	)
 )

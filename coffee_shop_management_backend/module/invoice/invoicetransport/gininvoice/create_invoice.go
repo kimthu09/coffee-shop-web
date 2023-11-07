@@ -3,6 +3,8 @@ package gininvoice
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/customer/customerstore"
 	"coffee_shop_management_backend/module/customerdebt/customerdebtstore"
 	"coffee_shop_management_backend/module/invoice/invoicebiz"
@@ -24,7 +26,7 @@ func CreateInvoice(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(common.ErrInvalidRequest(err))
 		}
 
-		requester := c.MustGet(common.CurrentUserStr).(common.Requester)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 		data.CreateBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
@@ -47,7 +49,9 @@ func CreateInvoice(appCtx appctx.AppContext) gin.HandlerFunc {
 			toppingStore,
 		)
 
-		business := invoicebiz.NewCreateInvoiceBiz(repo)
+		gen := generator.NewShortIdGenerator()
+
+		business := invoicebiz.NewCreateInvoiceBiz(gen, repo, requester)
 
 		if err := business.CreateInvoice(c.Request.Context(), &data); err != nil {
 			db.Rollback()

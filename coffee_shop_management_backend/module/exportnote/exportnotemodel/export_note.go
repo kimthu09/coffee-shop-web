@@ -33,4 +33,10 @@ var (
 		"amount export is over stock",
 		"ErrExportNoteAmountCancelIsOverTheStock",
 	)
+	ErrExportNoteCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create export note"),
+	)
+	ErrExportNoteViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view export note"),
+	)
 )

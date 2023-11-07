@@ -5,13 +5,23 @@ import (
 	"errors"
 )
 
+type SimplerFood struct {
+	Id   string `json:"id" gorm:"column:id;"`
+	Name string `json:"name" gorm:"column:name;"`
+}
+
+func (*SimplerFood) TableName() string {
+	return common.TableFood
+}
+
 type InvoiceDetail struct {
-	InvoiceId   string  `json:"invoiceId" gorm:"column:invoiceId;"`
-	FoodId      string  `json:"foodId" gorm:"column:foodId;"`
-	SizeName    string  `json:"sizeName" gorm:"column:sizeName"`
-	Amount      float32 `json:"amount" gorm:"column:amount;"`
-	UnitPrice   float32 `json:"unitPrice" gorm:"column:unitPrice"`
-	Description string  `json:"description" gorm:"column:description;"`
+	InvoiceId   string      `json:"invoiceId" gorm:"column:invoiceId;"`
+	FoodId      string      `json:"-" gorm:"column:foodId;"`
+	Food        SimplerFood `json:"food" gorm:"foreignKey:FoodId;references:Id"`
+	SizeName    string      `json:"sizeName" gorm:"column:sizeName"`
+	Amount      float32     `json:"amount" gorm:"column:amount;"`
+	UnitPrice   float32     `json:"unitPrice" gorm:"column:unitPrice"`
+	Description string      `json:"description" gorm:"column:description;"`
 }
 
 func (*InvoiceDetail) TableName() string {
@@ -48,5 +58,8 @@ var (
 		errors.New("topping is inactive"),
 		"topping is inactive",
 		"ErrInvoiceDetailExistToppingIsInactive",
+	)
+	ErrInvoiceDetailViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view invoice"),
 	)
 )

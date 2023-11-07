@@ -124,35 +124,9 @@ func (repo *changeStatusImportNoteRepo) UpdateImportNote(
 	return nil
 }
 
-func (repo *changeStatusImportNoteRepo) HandleSupplier(
+func (repo *changeStatusImportNoteRepo) CreateSupplierDebt(
 	ctx context.Context,
-	data *importnotemodel.ImportNoteUpdate) error {
-	if err := repo.updateDebtSupplier(ctx, data); err != nil {
-		return err
-	}
-
-	if err := repo.createSupplierDebt(ctx, data); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *changeStatusImportNoteRepo) updateDebtSupplier(
-	ctx context.Context,
-	importNote *importnotemodel.ImportNoteUpdate) error {
-	supplierUpdateDebt := suppliermodel.SupplierUpdateDebt{
-		Amount: &importNote.TotalPrice,
-	}
-	if err := repo.supplierStore.UpdateSupplierDebt(
-		ctx, importNote.SupplierId, &supplierUpdateDebt,
-	); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *changeStatusImportNoteRepo) createSupplierDebt(
-	ctx context.Context,
+	supplierDebtId string,
 	importNote *importnotemodel.ImportNoteUpdate) error {
 	debtCurrent, err := repo.supplierStore.GetDebtSupplier(
 		ctx,
@@ -164,15 +138,10 @@ func (repo *changeStatusImportNoteRepo) createSupplierDebt(
 	amountBorrow := importNote.TotalPrice
 	amountLeft := *debtCurrent + amountBorrow
 
-	idSupplierDebtCreate, errGenerateIdSupplierDebtCreate := common.GenerateId()
-	if errGenerateIdSupplierDebtCreate != nil {
-		return errGenerateIdSupplierDebtCreate
-	}
-
 	debtType := enum.Debt
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
-		Id:         idSupplierDebtCreate,
-		IdSupplier: importNote.SupplierId,
+		Id:         supplierDebtId,
+		SupplierId: importNote.SupplierId,
 		Amount:     amountBorrow,
 		AmountLeft: amountLeft,
 		DebtType:   &debtType,
@@ -181,6 +150,20 @@ func (repo *changeStatusImportNoteRepo) createSupplierDebt(
 
 	if err := repo.supplierDebtStore.CreateSupplierDebt(
 		ctx, &supplierDebtCreate,
+	); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (repo *changeStatusImportNoteRepo) UpdateDebtSupplier(
+	ctx context.Context,
+	importNote *importnotemodel.ImportNoteUpdate) error {
+	supplierUpdateDebt := suppliermodel.SupplierUpdateDebt{
+		Amount: &importNote.TotalPrice,
+	}
+	if err := repo.supplierStore.UpdateSupplierDebt(
+		ctx, importNote.SupplierId, &supplierUpdateDebt,
 	); err != nil {
 		return err
 	}

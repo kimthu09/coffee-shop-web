@@ -2,6 +2,7 @@ package productbiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/recipedetail/recipedetailmodel"
 	"context"
@@ -35,13 +36,16 @@ type UpdateToppingRepo interface {
 }
 
 type updateToppingBiz struct {
-	repo UpdateToppingRepo
+	repo      UpdateToppingRepo
+	requester middleware.Requester
 }
 
 func NewUpdateToppingBiz(
-	repo UpdateToppingRepo) *updateToppingBiz {
+	repo UpdateToppingRepo,
+	requester middleware.Requester) *updateToppingBiz {
 	return &updateToppingBiz{
-		repo: repo,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
@@ -49,6 +53,10 @@ func (biz *updateToppingBiz) UpdateTopping(
 	ctx context.Context,
 	id string,
 	data *productmodel.ToppingUpdate) error {
+	if !biz.requester.IsHasFeature(common.ToppingUpdateInfoFeatureCode) {
+		return productmodel.ErrToppingUpdateInfoNoPermission
+	}
+
 	//validate data
 	if err := data.Validate(); err != nil {
 		return err

@@ -2,15 +2,31 @@ package productmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/categoryfood/categoryfoodmodel"
+	"coffee_shop_management_backend/module/sizefood/sizefoodmodel"
 	"errors"
 )
 
 type Food struct {
-	*Product `json:",inline"`
+	*Product       `json:",inline"`
+	FoodCategories Categories `json:"categories" gorm:"foreignkey:foodId;association_foreignkey:id"`
+	FoodSizes      Sizes      `json:"sizes" gorm:"foreignkey:foodId;association_foreignkey:id"`
 }
 
 func (*Food) TableName() string {
 	return common.TableFood
+}
+
+type Categories []categoryfoodmodel.CategoryFood
+
+func (*Categories) TableName() string {
+	return common.TableCategoryFood
+}
+
+type Sizes []sizefoodmodel.SizeFood
+
+func (*Sizes) TableName() string {
+	return common.TableSizeFood
 }
 
 var (
@@ -44,5 +60,17 @@ var (
 		errors.New("size id is invalid"),
 		"size id is invalid",
 		"ErrFoodSizeIdInvalid",
+	)
+	ErrFoodCreateNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to create food"),
+	)
+	ErrFoodUpdateInfoNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to update info food"),
+	)
+	ErrFoodChangeStatusNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to change status food"),
+	)
+	ErrFoodViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view food"),
 	)
 )

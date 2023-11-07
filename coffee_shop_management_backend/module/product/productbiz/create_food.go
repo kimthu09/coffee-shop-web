@@ -2,6 +2,8 @@ package productbiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"context"
 )
@@ -31,24 +33,34 @@ type CreateFoodRepo interface {
 }
 
 type createFoodBiz struct {
-	repo CreateFoodRepo
+	gen       generator.IdGenerator
+	repo      CreateFoodRepo
+	requester middleware.Requester
 }
 
-func NewCreateFoodBiz(repo CreateFoodRepo) *createFoodBiz {
+func NewCreateFoodBiz(
+	gen generator.IdGenerator,
+	repo CreateFoodRepo,
+	requester middleware.Requester) *createFoodBiz {
 	return &createFoodBiz{
-		repo: repo,
+		gen:       gen,
+		repo:      repo,
+		requester: requester,
 	}
 }
 
 func (biz *createFoodBiz) CreateFood(
 	ctx context.Context,
 	data *productmodel.FoodCreate) error {
+	if !biz.requester.IsHasFeature(common.FoodCreateFeatureCode) {
+		return productmodel.ErrFoodCreateNoPermission
+	}
 
 	if err := data.Validate(); err != nil {
 		return err
 	}
 
-	if err := handleFoodId(data); err != nil {
+	if err := handleFoodId(biz.gen, data); err != nil {
 		return err
 	}
 
@@ -75,9 +87,9 @@ func (biz *createFoodBiz) CreateFood(
 	return nil
 }
 
-func handleFoodId(data *productmodel.FoodCreate) error {
+func handleFoodId(gen generator.IdGenerator, data *productmodel.FoodCreate) error {
 	//handle id for food
-	id, err := common.IdProcess(data.Id)
+	id, err := gen.IdProcess(data.Id)
 	if err != nil {
 		return err
 	}
@@ -87,13 +99,13 @@ func handleFoodId(data *productmodel.FoodCreate) error {
 	for i, _ := range data.Sizes {
 		data.Sizes[i].FoodId = *id
 
-		sizeId, err := common.GenerateId()
+		sizeId, err := gen.GenerateId()
 		if err != nil {
 			return err
 		}
 		data.Sizes[i].SizeId = sizeId
 
-		recipeId, err := common.GenerateId()
+		recipeId, err := gen.GenerateId()
 		if err != nil {
 			return err
 		}
