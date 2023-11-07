@@ -9,7 +9,7 @@ import (
 
 type CustomerDebt struct {
 	Id         string         `json:"id" gorm:"column:id;"`
-	IdCustomer string         `json:"idCustomer" gorm:"column:idCustomer;"`
+	CustomerId string         `json:"customerId" gorm:"column:customerId;"`
 	Amount     float32        `json:"amount" gorm:"column:amount;"`
 	AmountLeft float32        `json:"amountLeft" gorm:"column:amountLeft;"`
 	DebtType   *enum.DebtType `json:"type" gorm:"column:type;"`
@@ -36,5 +36,8 @@ var (
 		errors.New("debt type is empty"),
 		"debt type is empty",
 		"ErrDebtTypeEmpty",
+	)
+	ErrCustomerDebtViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view customer"),
 	)
 )

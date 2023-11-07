@@ -63,4 +63,7 @@ var (
 	ErrCustomerPayNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to pay customer"),
 	)
+	ErrCustomerViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view customer"),
+	)
 )

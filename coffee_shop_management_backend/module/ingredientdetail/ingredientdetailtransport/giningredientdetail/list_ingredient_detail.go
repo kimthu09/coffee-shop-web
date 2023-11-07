@@ -3,6 +3,7 @@ package giningredientdetail
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailbiz"
 	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailmodel"
 	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailstore"
@@ -10,9 +11,9 @@ import (
 	"net/http"
 )
 
-func ListIngredientDetailById(appCtx appctx.AppContext) gin.HandlerFunc {
+func ListIngredientDetail(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		ingredientId := c.Param("id")
+		id := c.Param("id")
 
 		var filter ingredientdetailmodel.Filter
 		if err := c.ShouldBind(&filter); err != nil {
@@ -27,9 +28,12 @@ func ListIngredientDetailById(appCtx appctx.AppContext) gin.HandlerFunc {
 		paging.Fulfill()
 
 		store := ingredientdetailstore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := ingredientdetailbiz.NewListIngredientDetailByIdBiz(store)
 
-		result, err := biz.ListIngredientDetailById(c.Request.Context(), ingredientId, &filter, &paging)
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
+		biz := ingredientdetailbiz.NewListIngredientDetailByIdBiz(store, requester)
+
+		result, err := biz.ListIngredientDetail(c.Request.Context(), id, &filter, &paging)
 
 		if err != nil {
 			panic(err)

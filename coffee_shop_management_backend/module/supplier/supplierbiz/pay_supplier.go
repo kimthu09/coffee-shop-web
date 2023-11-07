@@ -107,7 +107,7 @@ func getSupplierDebtCreate(
 	debtType := enum.Pay
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
 		Id:         id,
-		IdSupplier: supplierId,
+		SupplierId: supplierId,
 		Amount:     amountPay,
 		AmountLeft: amountLeft,
 		DebtType:   &debtType,

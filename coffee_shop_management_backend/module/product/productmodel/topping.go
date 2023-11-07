@@ -11,7 +11,7 @@ type Topping struct {
 	Cost     float32            `json:"cost" gorm:"column:cost;"`
 	Price    float32            `json:"price" gorm:"column:price;"`
 	RecipeId string             `json:"-" gorm:"column:recipeId;"`
-	Recipe   recipemodel.Recipe `json:"recipe" gorm:"-"`
+	Recipe   recipemodel.Recipe `json:"recipe" gorm:"foreignkey:recipeId"`
 }
 
 func (*Topping) TableName() string {
@@ -48,5 +48,8 @@ var (
 	)
 	ErrToppingChangeStatusNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to change status topping"),
+	)
+	ErrToppingViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view topping"),
 	)
 )

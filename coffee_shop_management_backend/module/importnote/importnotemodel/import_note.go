@@ -6,9 +6,19 @@ import (
 	"time"
 )
 
+type SimpleSupplier struct {
+	Id   string `json:"id" gorm:"column:id;"`
+	Name string `json:"name" gorm:"column:name;"`
+}
+
+func (*SimpleSupplier) TableName() string {
+	return common.TableSupplier
+}
+
 type ImportNote struct {
 	Id         string            `json:"id" gorm:"column:id;"`
-	SupplierId string            `json:"supplierId" gorm:"column:supplierId;"`
+	SupplierId string            `json:"-" gorm:"column:supplierId;"`
+	Supplier   SimpleSupplier    `json:"supplier" gorm:"foreignKey:SupplierId;references:Id"`
 	TotalPrice float32           `json:"totalPrice" gorm:"column:totalPrice;"`
 	Status     *ImportNoteStatus `json:"status" gorm:"column:status;"`
 	CreateBy   string            `json:"createBy" gorm:"column:createBy;"`
@@ -62,5 +72,8 @@ var (
 	)
 	ErrImportNoteChangeStatusNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to change status import note"),
+	)
+	ErrImportNoteViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view import note"),
 	)
 )

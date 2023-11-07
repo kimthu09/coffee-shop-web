@@ -141,7 +141,7 @@ func (repo *changeStatusImportNoteRepo) CreateSupplierDebt(
 	debtType := enum.Debt
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
 		Id:         supplierDebtId,
-		IdSupplier: importNote.SupplierId,
+		SupplierId: importNote.SupplierId,
 		Amount:     amountBorrow,
 		AmountLeft: amountLeft,
 		DebtType:   &debtType,

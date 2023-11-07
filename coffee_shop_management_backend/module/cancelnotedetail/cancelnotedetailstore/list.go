@@ -4,42 +4,45 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/cancelnotedetail/cancelnotedetailmodel"
 	"context"
+	"gorm.io/gorm"
 )
 
-func (s *sqlStore) ListCancelNote(
+func (s *sqlStore) ListCancelNoteDetail(
 	ctx context.Context,
-	condition map[string]interface{},
-	filter *cancelnotedetailmodel.Filter,
-	paging *common.Paging,
-	moreKeys ...string,
-) ([]cancelnotedetailmodel.CancelNoteDetail, error) {
+	cancelNoteId string,
+	paging *common.Paging) ([]cancelnotedetailmodel.CancelNoteDetail, error) {
 	var result []cancelnotedetailmodel.CancelNoteDetail
+	db := s.db
 
-	db := s.db.Table(common.TableCancelNoteDetail).Where(condition)
+	db = db.Table(common.TableCancelNoteDetail)
 
-	//if filterValue := filter; filterValue != nil {
-	//	if filterValue.IsGetEmptyIngredientDetails {
-	//		db = db.Where("amount > 0")
-	//	}
-	//}
+	db = db.Where("cancelNoteId = ?", cancelNoteId)
 
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
+	dbTemp, errPaging := handlePaging(db, paging)
+	if errPaging != nil {
+		return nil, errPaging
 	}
-
-	for i := range moreKeys {
-		db = db.Preload(moreKeys[i])
-	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
+	db = dbTemp
 
 	if err := db.
 		Limit(int(paging.Limit)).
-		Order("ingredientId desc").
+		Preload("Ingredient", func(db *gorm.DB) *gorm.DB {
+			return db.Order("Ingredient.name")
+		}).
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
 
 	return result, nil
+}
+
+func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
+	if err := db.Count(&paging.Total).Error; err != nil {
+		return nil, common.ErrDB(err)
+	}
+
+	offset := (paging.Page - 1) * paging.Limit
+	db = db.Offset(int(offset))
+
+	return db, nil
 }

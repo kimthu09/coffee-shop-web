@@ -44,4 +44,7 @@ var (
 	ErrRoleUpdateNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to update role"),
 	)
+	ErrRoleViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view role"),
+	)
 )

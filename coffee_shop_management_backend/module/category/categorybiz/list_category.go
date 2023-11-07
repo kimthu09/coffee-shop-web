@@ -2,35 +2,45 @@ package categorybiz
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"context"
 )
 
 type ListCategoryStorage interface {
-	ListCategory(ctx context.Context,
-		searchKey string,
+	ListCategory(
+		ctx context.Context,
+		filter *categorymodel.Filter,
 		propertiesContainSearchKey []string,
 		paging *common.Paging,
-		moreKeys ...string,
 	) ([]categorymodel.Category, error)
 }
 
 type listCategoryBiz struct {
-	store ListCategoryStorage
+	store     ListCategoryStorage
+	requester middleware.Requester
 }
 
-func NewListCategoryBiz(store ListCategoryStorage) *listCategoryBiz {
+func NewListCategoryBiz(
+	store ListCategoryStorage,
+	requester middleware.Requester) *listCategoryBiz {
 	return &listCategoryBiz{
-		store: store,
+		store:     store,
+		requester: requester,
 	}
 }
 
-func (biz *listCategoryBiz) ListCategory(ctx context.Context,
+func (biz *listCategoryBiz) ListCategory(
+	ctx context.Context,
 	filter *categorymodel.Filter,
 	paging *common.Paging) ([]categorymodel.Category, error) {
+	if !biz.requester.IsHasFeature(common.CategoryViewFeatureCode) {
+		return nil, categorymodel.ErrCategoryViewNoPermission
+	}
+
 	result, err := biz.store.ListCategory(
 		ctx,
-		filter.SearchKey,
+		filter,
 		[]string{"id", "name"},
 		paging)
 

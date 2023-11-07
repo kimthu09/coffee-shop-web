@@ -36,4 +36,7 @@ var (
 	ErrCancelNoteCreateNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to create cancel note"),
 	)
+	ErrCancelNoteViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view cancel note"),
+	)
 )

@@ -4,21 +4,44 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"context"
+	"gorm.io/gorm"
 	"strings"
 )
 
-func (s *sqlStore) ListCategory(ctx context.Context,
-	searchKey string,
+func (s *sqlStore) ListCategory(
+	ctx context.Context,
+	filter *categorymodel.Filter,
 	propertiesContainSearchKey []string,
-	paging *common.Paging,
-	moreKeys ...string) ([]categorymodel.Category, error) {
+	paging *common.Paging) ([]categorymodel.Category, error) {
 	var result []categorymodel.Category
 	db := s.db
 
 	db = db.Table(common.TableCategory)
 
+	handleFilter(db, filter, propertiesContainSearchKey)
+
+	dbTemp, errPaging := handlePaging(db, paging)
+	if errPaging != nil {
+		return nil, errPaging
+	}
+	db = dbTemp
+
+	if err := db.
+		Limit(int(paging.Limit)).
+		Order("name").
+		Find(&result).Error; err != nil {
+		return nil, common.ErrDB(err)
+	}
+
+	return result, nil
+}
+
+func getWhereClause(
+	db *gorm.DB,
+	searchKey string,
+	propertiesContainSearchKey []string) *gorm.DB {
 	conditions := make([]string, len(propertiesContainSearchKey))
-	args := make([]string, len(propertiesContainSearchKey))
+	args := make([]interface{}, len(propertiesContainSearchKey))
 
 	for i, prop := range propertiesContainSearchKey {
 		conditions[i] = prop + " LIKE ?"
@@ -27,25 +50,27 @@ func (s *sqlStore) ListCategory(ctx context.Context,
 
 	whereClause := strings.Join(conditions, " OR ")
 
-	db.Where(whereClause, args)
+	return db.Where(whereClause, args...)
+}
 
+func handleFilter(
+	db *gorm.DB,
+	filter *categorymodel.Filter,
+	propertiesContainSearchKey []string) {
+	if filter != nil {
+		if filter.SearchKey != "" {
+			db = getWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
+		}
+	}
+}
+
+func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
 	if err := db.Count(&paging.Total).Error; err != nil {
 		return nil, common.ErrDB(err)
-	}
-
-	for i := range moreKeys {
-		db = db.Preload(moreKeys[i])
 	}
 
 	offset := (paging.Page - 1) * paging.Limit
 	db = db.Offset(int(offset))
 
-	if err := db.
-		Limit(int(paging.Limit)).
-		Order("create_at desc").
-		Find(&result).Error; err != nil {
-		return nil, common.ErrDB(err)
-	}
-
-	return result, nil
+	return db, nil
 }

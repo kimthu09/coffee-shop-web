@@ -63,4 +63,7 @@ var (
 	ErrSupplierUpdateInfoNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to update info supplier"),
 	)
+	ErrSupplierViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view supplier"),
+	)
 )

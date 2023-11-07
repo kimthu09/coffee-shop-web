@@ -7,12 +7,18 @@ import (
 )
 
 type Recipe struct {
-	Id      string                            `json:"id" gorm:"column:id;"`
-	Details *[]recipedetailmodel.RecipeDetail `json:"details" gorm:"-"`
+	Id      string        `json:"id" gorm:"column:id;"`
+	Details RecipeDetails `json:"details"`
 }
 
 func (*Recipe) TableName() string {
 	return common.TableRecipe
+}
+
+type RecipeDetails []recipedetailmodel.RecipeDetail
+
+func (*RecipeDetails) TableName() string {
+	return common.TableRecipeDetail
 }
 
 var (

@@ -2,6 +2,7 @@ package ingredientdetailmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"errors"
 )
 
 type IngredientDetail struct {
@@ -13,3 +14,9 @@ type IngredientDetail struct {
 func (*IngredientDetail) TableName() string {
 	return common.TableIngredientDetail
 }
+
+var (
+	ErrIngredientDetailViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view ingredient"),
+	)
+)

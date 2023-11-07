@@ -108,6 +108,9 @@ var (
 	ErrUserResetPasswordNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to reset password user"),
 	)
+	ErrUserViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view user"),
+	)
 	ErrUserSenderPasswordWrong = common.NewCustomError(
 		errors.New("password of user sender is wrong"),
 		"your password is not right",

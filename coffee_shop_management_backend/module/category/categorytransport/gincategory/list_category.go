@@ -3,6 +3,7 @@ package gincategory
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
+	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorybiz"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"coffee_shop_management_backend/module/category/categorystore"
@@ -25,7 +26,10 @@ func ListCategory(appCtx appctx.AppContext) gin.HandlerFunc {
 		paging.Fulfill()
 
 		store := categorystore.NewSQLStore(appCtx.GetMainDBConnection())
-		biz := categorybiz.NewListCategoryBiz(store)
+
+		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
+
+		biz := categorybiz.NewListCategoryBiz(store, requester)
 
 		result, err := biz.ListCategory(c.Request.Context(), &filter, &paging)
 

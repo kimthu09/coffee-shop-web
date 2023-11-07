@@ -2,14 +2,16 @@ package exportnotedetailmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
 	"errors"
 )
 
 type ExportNoteDetail struct {
-	ExportNoteId string  `json:"exportNoteId" gorm:"column:exportNoteId;"`
-	IngredientId string  `json:"ingredientId" gorm:"column:ingredientId;"`
-	ExpiryDate   string  `json:"expiryDate" gorm:"column:expiryDate;"`
-	AmountExport float32 `json:"amountExport" gorm:"column:amountExport"`
+	ExportNoteId string                           `json:"exportNoteId" gorm:"column:exportNoteId;"`
+	IngredientId string                           `json:"-" gorm:"column:ingredientId;"`
+	Ingredient   ingredientmodel.SimpleIngredient `json:"ingredient" gorm:"foreignKey:IngredientId;references:Id"`
+	ExpiryDate   string                           `json:"expiryDate" gorm:"column:expiryDate;"`
+	AmountExport float32                          `json:"amountExport" gorm:"column:amountExport"`
 }
 
 func (*ExportNoteDetail) TableName() string {
@@ -31,5 +33,8 @@ var (
 		errors.New("amount export is not positive number"),
 		"amount export is not positive number",
 		"ErrExportDetailAmountExportIsNotPositiveNumber",
+	)
+	ErrExportDetailViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view export note"),
 	)
 )

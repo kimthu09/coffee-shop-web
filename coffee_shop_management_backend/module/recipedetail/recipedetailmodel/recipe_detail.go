@@ -2,13 +2,15 @@ package recipedetailmodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
 	"errors"
 )
 
 type RecipeDetail struct {
-	RecipeId     string  `json:"recipeId" gorm:"column:recipeId;"`
-	IngredientId string  `json:"ingredientId" gorm:"column:ingredientId;"`
-	AmountNeed   float32 `json:"amountNeed" gorm:"column:amountNeed;"`
+	RecipeId     string                           `json:"recipeId" gorm:"column:recipeId;"`
+	IngredientId string                           `json:"-" gorm:"column:ingredientId;"`
+	Ingredient   ingredientmodel.SimpleIngredient `json:"ingredient" gorm:"foreignKey:IngredientId;references:Id"`
+	AmountNeed   float32                          `json:"amountNeed" gorm:"column:amountNeed;"`
 }
 
 func (*RecipeDetail) TableName() string {

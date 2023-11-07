@@ -43,4 +43,7 @@ var (
 	ErrCategoryUpdateInfoNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to update info category"),
 	)
+	ErrCategoryViewNoPermission = common.ErrNoPermission(
+		errors.New("you have no permission to view category"),
+	)
 )

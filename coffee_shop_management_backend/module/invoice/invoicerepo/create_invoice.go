@@ -235,7 +235,7 @@ func (repo *createInvoiceRepo) CreateCustomerDebt(
 	debtType := enum.Debt
 	customerDebtCreate := customerdebtmodel.CustomerDebtCreate{
 		Id:         supplierDebtId,
-		IdCustomer: *data.CustomerId,
+		CustomerId: *data.CustomerId,
 		Amount:     amountBorrow,
 		AmountLeft: amountLeft,
 		DebtType:   &debtType,
