@@ -28,10 +28,10 @@ var (
 		"list export note details are empty",
 		"ErrExportNoteDetailsEmpty",
 	)
-	ErrExportNoteAmountCancelIsOverTheStock = common.NewCustomError(
+	ErrExportNoteAmountExportIsOverTheStock = common.NewCustomError(
 		errors.New("amount export is over stock"),
 		"amount export is over stock",
-		"ErrExportNoteAmountCancelIsOverTheStock",
+		"ErrExportNoteAmountExportIsOverTheStock",
 	)
 	ErrExportNoteCreateNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to create export note"),

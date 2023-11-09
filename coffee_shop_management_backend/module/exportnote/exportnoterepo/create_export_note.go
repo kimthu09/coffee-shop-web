@@ -48,19 +48,19 @@ type UpdateIngredientDetailStore interface {
 	) error
 }
 
-type createCancelNoteRepo struct {
+type createExportNoteRepo struct {
 	exportNoteStore       CreateExportNoteStore
 	exportNoteDetailStore CreateExportNoteDetailStore
 	ingredientStore       UpdateIngredientStore
 	ingredientDetailStore UpdateIngredientDetailStore
 }
 
-func NewCreateCancelNoteRepo(
+func NewCreateExportNoteRepo(
 	exportNoteStore CreateExportNoteStore,
 	exportNoteDetailStore CreateExportNoteDetailStore,
 	ingredientStore UpdateIngredientStore,
-	ingredientDetailStore UpdateIngredientDetailStore) *createCancelNoteRepo {
-	return &createCancelNoteRepo{
+	ingredientDetailStore UpdateIngredientDetailStore) *createExportNoteRepo {
+	return &createExportNoteRepo{
 		exportNoteStore:       exportNoteStore,
 		exportNoteDetailStore: exportNoteDetailStore,
 		ingredientStore:       ingredientStore,
@@ -68,7 +68,7 @@ func NewCreateCancelNoteRepo(
 	}
 }
 
-func (repo *createCancelNoteRepo) GetPriceIngredient(
+func (repo *createExportNoteRepo) GetPriceIngredient(
 	ctx context.Context,
 	ingredientId string) (*float32, error) {
 	price, err := repo.ingredientStore.GetPriceIngredient(
@@ -81,7 +81,7 @@ func (repo *createCancelNoteRepo) GetPriceIngredient(
 	return price, nil
 }
 
-func (repo *createCancelNoteRepo) HandleExportNote(
+func (repo *createExportNoteRepo) HandleExportNote(
 	ctx context.Context,
 	data *exportnotemodel.ExportNoteCreate) error {
 	if err := repo.exportNoteStore.CreateExportNote(ctx, data); err != nil {
@@ -96,7 +96,7 @@ func (repo *createCancelNoteRepo) HandleExportNote(
 	return nil
 }
 
-func (repo *createCancelNoteRepo) HandleIngredientDetail(
+func (repo *createExportNoteRepo) HandleIngredientDetail(
 	ctx context.Context,
 	data *exportnotemodel.ExportNoteCreate) error {
 	for _, exportNoteDetailCreate := range data.ExportNoteDetails {
@@ -111,7 +111,7 @@ func (repo *createCancelNoteRepo) HandleIngredientDetail(
 	return nil
 }
 
-func (repo *createCancelNoteRepo) checkIngredientDetail(
+func (repo *createExportNoteRepo) checkIngredientDetail(
 	ctx context.Context,
 	data *exportnotedetailmodel.ExportNoteDetailCreate) error {
 	currentData, err := repo.ingredientDetailStore.FindIngredientDetail(
@@ -126,13 +126,13 @@ func (repo *createCancelNoteRepo) checkIngredientDetail(
 	}
 
 	if currentData.Amount < data.AmountExport {
-		return exportnotemodel.ErrExportNoteAmountCancelIsOverTheStock
+		return exportnotemodel.ErrExportNoteAmountExportIsOverTheStock
 	}
 
 	return nil
 }
 
-func (repo *createCancelNoteRepo) updateIngredientDetail(
+func (repo *createExportNoteRepo) updateIngredientDetail(
 	ctx context.Context,
 	data *exportnotedetailmodel.ExportNoteDetailCreate) error {
 	dataUpdate := ingredientdetailmodel.IngredientDetailUpdate{
@@ -151,7 +151,7 @@ func (repo *createCancelNoteRepo) updateIngredientDetail(
 	return nil
 }
 
-func (repo *createCancelNoteRepo) HandleIngredientTotalAmount(
+func (repo *createExportNoteRepo) HandleIngredientTotalAmount(
 	ctx context.Context,
 	ingredientTotalAmountNeedUpdate map[string]float32) error {
 	for key, value := range ingredientTotalAmountNeedUpdate {
