@@ -5,7 +5,6 @@ import (
 	"coffee_shop_management_backend/module/cancelnote/cancelnotemodel"
 	"context"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func (s *sqlStore) ListCancelNote(
@@ -36,30 +35,13 @@ func (s *sqlStore) ListCancelNote(
 	return result, nil
 }
 
-func getWhereClause(
-	db *gorm.DB,
-	searchKey string,
-	propertiesContainSearchKey []string) *gorm.DB {
-	conditions := make([]string, len(propertiesContainSearchKey))
-	args := make([]interface{}, len(propertiesContainSearchKey))
-
-	for i, prop := range propertiesContainSearchKey {
-		conditions[i] = prop + " LIKE ?"
-		args[i] = "%" + searchKey + "%"
-	}
-
-	whereClause := strings.Join(conditions, " OR ")
-
-	return db.Where(whereClause, args...)
-}
-
 func handleFilter(
 	db *gorm.DB,
 	filter *cancelnotemodel.Filter,
 	propertiesContainSearchKey []string) {
 	if filter != nil {
 		if filter.SearchKey != "" {
-			db = getWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
+			db = common.GetWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
 		}
 		if filter.MinPrice != nil {
 			db = db.Where("totalPrice >= ?", filter.MinPrice)
