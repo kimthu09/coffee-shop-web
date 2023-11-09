@@ -214,13 +214,15 @@ func (repo *changeStatusImportNoteRepo) HandleIngredientDetails(
 			} else {
 				return err
 			}
+		} else {
+			dataUpdate := ingredientdetailmodel.IngredientDetailUpdate{
+				IngredientId: v.IngredientId,
+				ExpiryDate:   v.ExpiryDate,
+				Amount:       v.AmountImport,
+			}
+			updatedIngredientDetails = append(updatedIngredientDetails, dataUpdate)
 		}
-		dataUpdate := ingredientdetailmodel.IngredientDetailUpdate{
-			IngredientId: v.IngredientId,
-			ExpiryDate:   v.ExpiryDate,
-			Amount:       v.AmountImport,
-		}
-		updatedIngredientDetails = append(updatedIngredientDetails, dataUpdate)
+
 	}
 
 	if err := repo.updateIngredientDetails(ctx, updatedIngredientDetails); err != nil {
