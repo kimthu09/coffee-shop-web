@@ -26,12 +26,14 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"os"
 )
 
 func main() {
-	dsn := os.Getenv("DBConnectionStr")
-	secretKey := os.Getenv("SYSTEM_SECRET")
+	//dsn := os.Getenv("DBConnectionStr")
+	//secretKey := os.Getenv("SYSTEM_SECRET")
+
+	dsn := "root:123456@tcp(127.0.0.1:33062)/coffeemanagement?charset=utf8mb4&parseTime=True&loc=Local"
+	secretKey := "123456789"
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
