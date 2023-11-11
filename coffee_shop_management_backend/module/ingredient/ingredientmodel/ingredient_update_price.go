@@ -11,7 +11,7 @@ func (*IngredientUpdatePrice) TableName() string {
 }
 
 func (data *IngredientUpdatePrice) Validate() *common.AppError {
-	if common.ValidateNegativeNumber(data.Price) {
+	if data.Price != nil && common.ValidateNegativeNumber(*data.Price) {
 		return ErrIngredientPriceIsNegativeNumber
 	}
 	return nil
