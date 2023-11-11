@@ -24,7 +24,7 @@ type updateInfoCustomerBiz struct {
 	requester middleware.Requester
 }
 
-func NewUpdateInfoSupplierBiz(
+func NewUpdateInfoCustomerBiz(
 	repo UpdateInfoCustomerRepo,
 	requester middleware.Requester) *updateInfoCustomerBiz {
 	return &updateInfoCustomerBiz{repo: repo, requester: requester}

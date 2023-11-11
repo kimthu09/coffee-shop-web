@@ -28,7 +28,7 @@ func UpdateInfoCustomer(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		store := customerstore.NewSQLStore(db)
 		repo := customerrepo.NewUpdateInfoSupplierRepo(store)
-		biz := customerbiz.NewUpdateInfoSupplierBiz(repo, requester)
+		biz := customerbiz.NewUpdateInfoCustomerBiz(repo, requester)
 
 		if err := biz.UpdateInfoCustomer(c.Request.Context(), id, &data); err != nil {
 			db.Rollback()
