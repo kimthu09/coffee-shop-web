@@ -51,7 +51,12 @@ func (biz *updatePasswordBiz) UpdatePassword(
 		return usermodel.ErrUserInactive
 	}
 
-	newPasswordHashed := biz.hasher.Hash(data.Password + user.Salt)
+	hashedPassword := biz.hasher.Hash(data.OldPassword + user.Salt)
+	if hashedPassword != user.Password {
+		return usermodel.ErrUserSenderPasswordWrong
+	}
+
+	newPasswordHashed := biz.hasher.Hash(data.NewPassword + user.Salt)
 	if err := biz.repo.UpdateUserPassword(ctx, id, newPasswordHashed); err != nil {
 		return err
 	}

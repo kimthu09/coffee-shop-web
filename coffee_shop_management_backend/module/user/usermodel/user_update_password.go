@@ -3,7 +3,8 @@ package usermodel
 import "coffee_shop_management_backend/common"
 
 type UserUpdatePassword struct {
-	Password string `json:"password" gorm:"-"`
+	OldPassword string `json:"oldPassword" gorm:"-"`
+	NewPassword string `json:"newPassword" gorm:"-"`
 }
 
 func (*UserUpdatePassword) TableName() string {
@@ -11,7 +12,10 @@ func (*UserUpdatePassword) TableName() string {
 }
 
 func (data *UserUpdatePassword) Validate() error {
-	if !common.ValidatePassword(&data.Password) {
+	if !common.ValidatePassword(&data.OldPassword) {
+		return ErrUserUpdatedPassInvalid
+	}
+	if !common.ValidatePassword(&data.NewPassword) {
 		return ErrUserUpdatedPassInvalid
 	}
 	return nil
