@@ -179,7 +179,7 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 					t,
 					tt.want,
 					got,
-					"ListImportNote() got = %v, want %v",
+					"ListIngredient() got = %v, want %v",
 					got,
 					tt.want,
 				)
