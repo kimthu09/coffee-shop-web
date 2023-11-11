@@ -2,7 +2,7 @@ package rolefeaturestore
 
 import (
 	"coffee_shop_management_backend/common"
-	"coffee_shop_management_backend/module/category/categorymodel"
+	"coffee_shop_management_backend/module/role/rolemodel"
 	"context"
 )
 
@@ -14,7 +14,7 @@ func (s *sqlStore) DeleteRoleFeature(
 	if err := db.
 		Table(common.TableRoleFeature).
 		Where(conditions).
-		Delete(&categorymodel.Category{}).Error; err != nil {
+		Delete(&rolemodel.Role{}).Error; err != nil {
 		return common.ErrDB(err)
 	}
 
