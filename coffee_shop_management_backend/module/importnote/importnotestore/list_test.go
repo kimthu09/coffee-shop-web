@@ -251,10 +251,10 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 			got, err := s.ListImportNote(tt.args.ctx, tt.args.filter, tt.args.propertiesContainSearchKey, tt.args.paging)
 
 			if tt.wantErr {
-				assert.NotNil(t, err, "ListImportNote() err = %v, wantErr = %v", err, tt.wantErr)
+				assert.NotNil(t, err, "ListIngredient() err = %v, wantErr = %v", err, tt.wantErr)
 			} else {
-				assert.Nil(t, err, "ListImportNote() err = %v, wantErr = %v", err, tt.wantErr)
-				assert.Equal(t, tt.want, got, "ListImportNote() = %v, want %v", got, tt.want)
+				assert.Nil(t, err, "ListIngredient() err = %v, wantErr = %v", err, tt.wantErr)
+				assert.Equal(t, tt.want, got, "ListIngredient() = %v, want %v", got, tt.want)
 			}
 		})
 	}

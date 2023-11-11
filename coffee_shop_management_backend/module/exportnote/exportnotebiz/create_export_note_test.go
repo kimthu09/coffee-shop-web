@@ -1,6 +1,7 @@
 package exportnotebiz
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
@@ -167,7 +168,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(false).
 					Once()
 			},
@@ -186,7 +187,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 			},
@@ -205,7 +206,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -229,7 +230,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -258,7 +259,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -292,7 +293,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -331,7 +332,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -375,7 +376,7 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
 					Return(true).
 					Once()
 

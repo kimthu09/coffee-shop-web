@@ -172,7 +172,7 @@ func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "List export note successfully",
+			name: "List import note successfully",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
