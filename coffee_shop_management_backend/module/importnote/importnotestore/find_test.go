@@ -133,7 +133,7 @@ func Test_sqlStore_FindImportNote(t *testing.T) {
 				assert.NotNil(t, err, "FindImportNote() err = %v, wantErr = %v", err, tt.wantErr)
 			} else {
 				assert.Nil(t, err, "FindImportNote() err = %v, wantErr = %v", err, tt.wantErr)
-				assert.Equal(t, tt.want, got, "ListImportNote() = %v, want %v", got, tt.want)
+				assert.Equal(t, tt.want, got, "ListIngredient() = %v, want %v", got, tt.want)
 			}
 		})
 	}

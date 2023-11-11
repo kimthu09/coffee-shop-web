@@ -27,7 +27,7 @@ func NewListIngredientBiz(
 	return &listIngredientBiz{store: store, requester: requester}
 }
 
-func (biz *listIngredientBiz) ListImportNote(
+func (biz *listIngredientBiz) ListIngredient(
 	ctx context.Context,
 	filter *ingredientmodel.Filter,
 	paging *common.Paging) ([]ingredientmodel.Ingredient, error) {

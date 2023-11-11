@@ -232,7 +232,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
