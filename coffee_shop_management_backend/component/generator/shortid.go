@@ -15,7 +15,7 @@ func NewShortIdGenerator() *shortIdGenerator {
 func (*shortIdGenerator) GenerateId() (string, error) {
 	return shortid.Generate()
 }
-func (g *shortIdGenerator) IdProcess(id *string) (*string, *common.AppError) {
+func (g *shortIdGenerator) IdProcess(id *string) (*string, error) {
 	if id != nil && len(*id) != 0 {
 		if len(*id) > common.MaxLengthIdCanGenerate {
 			return nil, common.ErrIdIsTooLong()

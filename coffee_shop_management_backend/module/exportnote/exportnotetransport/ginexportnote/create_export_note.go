@@ -34,7 +34,7 @@ func CreateExportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 		ingredientStore := ingredientstore.NewSQLStore(db)
 		ingredientDetailStore := ingredientdetailstore.NewSQLStore(db)
 
-		repo := exportnoterepo.NewCreateCancelNoteRepo(
+		repo := exportnoterepo.NewCreateExportNoteRepo(
 			exportNoteStore,
 			exportNoteDetailStore,
 			ingredientStore,
