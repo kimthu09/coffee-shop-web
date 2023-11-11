@@ -41,7 +41,7 @@ func (m *mockRequester) GetRole() rolemodel.Role {
 	return args.Get(0).(rolemodel.Role)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
-	args := m.Called()
+	args := m.Called(featureCode)
 	return args.Bool(0)
 }
 
@@ -134,7 +134,7 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteViewFeatureCode).
 					Return(false).
 					Once()
 			},
@@ -154,7 +154,7 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteViewFeatureCode).
 					Return(true).
 					Once()
 
@@ -184,7 +184,7 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.ExportNoteViewFeatureCode).
 					Return(true).
 					Once()
 

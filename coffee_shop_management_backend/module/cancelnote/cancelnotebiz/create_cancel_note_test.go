@@ -1,6 +1,7 @@
 package cancelnotebiz
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/cancelnote/cancelnotemodel"
@@ -85,7 +86,7 @@ func (m *mockRequester) GetRole() rolemodel.Role {
 	return args.Get(0).(rolemodel.Role)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
-	args := m.Called()
+	args := m.Called(featureCode)
 	return args.Bool(0)
 }
 
@@ -193,7 +194,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(false).
 					Once()
 			},
@@ -212,7 +213,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 			},
@@ -255,7 +256,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -284,7 +285,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -318,7 +319,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -357,7 +358,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
@@ -401,7 +402,7 @@ func Test_createCancelNoteBiz_CreateCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteCreateFeatureCode).
 					Return(true).
 					Once()
 
