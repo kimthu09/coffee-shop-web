@@ -28,7 +28,7 @@ func NewListImportNoteDetailBiz(
 
 func (biz *listImportNoteDetailBiz) ListImportNoteDetail(
 	ctx context.Context,
-	exportNoteId string,
+	importNoteId string,
 	paging *common.Paging) ([]importnotedetailmodel.ImportNoteDetail, error) {
 	if !biz.requester.IsHasFeature(common.ImportNoteViewFeatureCode) {
 		return nil, importnotedetailmodel.ErrImportDetailViewNoPermission
@@ -36,7 +36,7 @@ func (biz *listImportNoteDetailBiz) ListImportNoteDetail(
 
 	result, err := biz.store.ListImportNoteDetail(
 		ctx,
-		exportNoteId,
+		importNoteId,
 		paging,
 	)
 	if err != nil {

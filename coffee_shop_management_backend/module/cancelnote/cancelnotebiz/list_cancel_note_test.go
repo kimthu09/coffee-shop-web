@@ -113,7 +113,7 @@ func Test_listCancelNoteBiz_ListCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteViewFeatureCode).
 					Return(false).
 					Once()
 			},
@@ -133,7 +133,7 @@ func Test_listCancelNoteBiz_ListCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteViewFeatureCode).
 					Return(true).
 					Once()
 
@@ -163,7 +163,7 @@ func Test_listCancelNoteBiz_ListCancelNote(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", mock.Anything).
+					On("IsHasFeature", common.CancelNoteViewFeatureCode).
 					Return(true).
 					Once()
 

@@ -1,7 +1,6 @@
 package supplierrepo
 
 import (
-	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebtmodel"
 	"context"
@@ -27,7 +26,6 @@ type CreateSupplierDebtStore interface {
 type paySupplierRepo struct {
 	supplierStore     PaySupplierStore
 	supplierDebtStore CreateSupplierDebtStore
-	requester         middleware.Requester
 }
 
 func NewUpdatePayRepo(

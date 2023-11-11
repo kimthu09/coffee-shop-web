@@ -17,16 +17,3 @@ type SupplierDebtCreate struct {
 func (*SupplierDebtCreate) TableName() string {
 	return common.TableSupplierDebt
 }
-
-func (data *SupplierDebtCreate) Validate() *common.AppError {
-	if !common.ValidateNotNilId(&data.SupplierId) {
-		return ErrSupplierDebtIdSupplierInvalid
-	}
-	if common.ValidateNotNegativeNumber(data.Amount) {
-		return ErrSupplierDebtAmountIsNotNegativeNumber
-	}
-	if data.DebtType == nil {
-		return ErrSupplierDebtTypeEmpty
-	}
-	return nil
-}

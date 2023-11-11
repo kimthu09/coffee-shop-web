@@ -31,7 +31,7 @@ func ListIngredient(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		biz := ingredientbiz.NewListIngredientBiz(store, requester)
 
-		result, err := biz.ListImportNote(c.Request.Context(), &filter, &paging)
+		result, err := biz.ListIngredient(c.Request.Context(), &filter, &paging)
 
 		if err != nil {
 			panic(err)
