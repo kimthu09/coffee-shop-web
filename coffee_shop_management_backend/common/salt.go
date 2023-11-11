@@ -20,7 +20,7 @@ func randSequence(n int) string {
 }
 
 func GenSalt(length int) string {
-	if length < 0 {
+	if length <= 0 {
 		length = 50
 	}
 	return randSequence(length)
