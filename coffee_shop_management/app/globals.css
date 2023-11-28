@@ -28,6 +28,7 @@
     /* custom color */
     --brown: 22, 38%, 34%;
     --light-brown: 15, 9%, 74%;
+    --light-orange: 23, 100%, 94%;
   }
 
   .dark {
@@ -70,6 +71,66 @@
   }
 }
 
+* {
+  @apply p-0 m-0 box-border;
+}
 .col {
   @apply flex flex-col flex-wrap gap-5;
+}
+
+h1 {
+  @apply text-3xl font-bold tracking-tight lg:text-4xl;
+}
+
+.sidebar__logo {
+  @apply w-12 h-12 object-contain rounded-md;
+}
+
+.sidebar__list {
+  @apply list-none;
+}
+
+.sidebar__icon {
+  @apply w-6 h-6 inline-block;
+}
+
+/* Price Range */
+input[type="range"]::-webkit-slider-thumb {
+  pointer-events: auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  -webkit-appearance: none;
+  @apply bg-orange-500;
+}
+
+.DropdownMenuContent {
+  width: var(--radix-dropdown-menu-trigger-width);
+  max-height: var(--radix-dropdown-menu-content-available-height);
+}
+
+.DropdownMenuContentMaxHeight {
+  width: var(--radix-dropdown-menu-trigger-width);
+  max-height: 44rem;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 5px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

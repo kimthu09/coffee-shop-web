@@ -1,10 +1,8 @@
-import ProductManage from "@/components/ProductManage/ProductManage";
-import Image from "next/image";
-
+import OrderScreen from "./order/page";
 export default function Home() {
   return (
     <main>
-      <ProductManage></ProductManage>
+      <OrderScreen />
     </main>
   );
 }
