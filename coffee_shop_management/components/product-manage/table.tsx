@@ -30,7 +30,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -39,19 +38,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Product, products } from "@/types";
+import { Product } from "@/types";
 import Image from "next/image";
-import { FiFilter } from "react-icons/fi";
+import { products } from "@/constants";
+import FilterSheet from "./filter-sheet";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "../ui/command";
-
-import { Check, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogOverlay,
+  DialogTitle,
+  DialogTrigger,
+} from "../ui/dialog";
+import { useState } from "react";
+import CategoryList from "../category-list";
 
 const data: Product[] = products;
 
@@ -93,9 +93,9 @@ export const columns: ColumnDef<Product>[] = [
             "https://img.freepik.com/premium-vector/modern-flat-icon-landscape_203633-11062.jpg?w=826"
           }
           alt="image"
-          className="object-contain max-h-14"
-          width={50}
-          height={50}
+          className="object-contain max-h-10"
+          width={40}
+          height={40}
         ></Image>
       </div>
     ),
@@ -210,16 +210,15 @@ const filters = [
   },
 ];
 export function ProductTable() {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  );
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = React.useState({});
-  const [filterSelection, setFilterSelection] = React.useState("name");
-  const [openFilter, setOpenFilter] = React.useState(false);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [rowSelection, setRowSelection] = useState({});
+  const [filterSelection, setFilterSelection] = useState("name");
+  const [openFilter, setOpenFilter] = useState(false);
 
+  const [openCategory, setOpenCategory] = useState(false);
+  const [category, setCategory] = useState("");
   const table = useReactTable({
     data,
     columns,
@@ -242,66 +241,63 @@ export function ProductTable() {
   return (
     <div className="w-full">
       <div className="flex items-center py-4 gap-2">
-        <DropdownMenu open={openFilter} onOpenChange={setOpenFilter}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={openFilter}
-              className="w-[200px] justify-between"
-            >
-              {filterSelection
-                ? filters.find((filter) => filter.value === filterSelection)
-                    ?.label
-                : "Select language"}
-              <FiFilter className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-[200px] p-0">
-            <Command>
-              <CommandInput placeholder="Tìm điều kiện lọc" />
-              <CommandEmpty>Không tìm thấy điều kiện lọc</CommandEmpty>
-              <CommandGroup>
-                {filters.map((filter) => (
-                  <CommandItem
-                    value={filter.label}
-                    key={filter.value}
-                    onSelect={() => {
-                      setFilterSelection(filter.value);
-                      setOpenFilter(false);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        filter.value === filterSelection
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    {filter.label}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </Command>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-40 justify-between">
+                Chọn thao tác <ChevronDownIcon className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="max-h-44 w-40">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Chuyển danh mục
+                  </DropdownMenuItem>
+                </DialogTrigger>
+                <DialogOverlay>
+                  <DialogContent className="p-0">
+                    <DialogTitle className="p-6 pb-0">
+                      Chuyển mặt hàng tới danh mục khác
+                    </DialogTitle>
+                    <div className="flex flex-col border-y-[1px] p-6">
+                      <p>Chọn 1 danh mục muốn chuyển tới</p>
+                      <div className="mt-4 flex-1 ">
+                        <CategoryList
+                          category={category}
+                          setCategory={setCategory}
+                        />
+                      </div>
+                    </div>
 
-        <Input
-          placeholder="Tìm kiếm sản phẩm"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
-          className="max-w-sm"
-        />
+                    <DialogClose className="ml-auto p-6 pt-0">
+                      <Button type="submit">Hoàn tất</Button>
+                    </DialogClose>
+                  </DialogContent>
+                </DialogOverlay>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger asChild>
+                  <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                    Xoá khỏi danh mục
+                  </DropdownMenuItem>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogTitle>Xoá mặt hàng khỏi danh mục</DialogTitle>
+                </DialogContent>
+              </Dialog>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
+            <Button variant="outline">
               Cột hiển thị <ChevronDownIcon className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent>
             {table
               .getAllColumns()
               .filter((column) => column.getCanHide())
@@ -321,6 +317,10 @@ export function ProductTable() {
               })}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <div className="ml-auto">
+          <FilterSheet />
+        </div>
       </div>
       <div className="rounded-md border">
         <Table>
