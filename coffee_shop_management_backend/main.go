@@ -22,16 +22,23 @@ import (
 	"coffee_shop_management_backend/module/supplier/suppliertransport/ginsupplier"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebttransport/ginsupplierdebt"
 	"coffee_shop_management_backend/module/user/usertransport/ginuser"
-	"github.com/gin-gonic/gin"
-	"gorm.io/driver/mysql"
-	"gorm.io/gorm"
 	"log"
 	"os"
+
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func main() {
-	dsn := os.Getenv("DBConnectionStr")
-	secretKey := os.Getenv("SYSTEM_SECRET")
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	dsn := os.Getenv("DB_CONNECTION_STR")
+	secretKey := os.Getenv("SECRET_KEY")
 
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
