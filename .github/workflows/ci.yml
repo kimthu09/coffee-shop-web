@@ -6,6 +6,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        go-version: ["1.19", "1.20", "1.21"]
+        node-version: ["18.18.0", "20.10.0"] # Specify the latest LTS versions of Node.js
+        include:
+          - node-version: "18.18.0"
+            next-env: "production"
+          - node-version: "20.10.0"
+            next-env: "production"
+
     services:
       mysql:
         image: mysql:5.7
@@ -27,12 +37,12 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
-          go-version: "1.21"
+          go-version: ${{ matrix.go-version }}
 
       - name: Set up Node.js for Next.js frontend
         uses: actions/setup-node@v2
         with:
-          node-version: "18.18.0"
+          node-version: ${{ matrix.node-version }}
 
       - name: Wait for MySQL to start
         run: |
@@ -44,7 +54,7 @@ jobs:
       - name: Replace DSN in .env
         run: |
           cd coffee_shop_management_backend
-          sed -i "s|(cfsm-mysql:3306)|(127.0.0.1:3306)|" .env
+          sed -i "s|root:123456@tcp(cfsm-mysql:3306)/cfshopmanagement|root:123456@tcp(127.0.0.1:3306)/cfshopmanagement|" .env
 
       - name: Build Go backend
         run: |
@@ -64,4 +74,4 @@ jobs:
       - name: Build Next.js frontend
         run: |
           cd coffee_shop_management
-          npm run build
+          NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
