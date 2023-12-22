@@ -1,0 +1,46 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: "1.21"
+
+      - name: Build Go backend
+        run: |
+          cd coffee_shop_management_backend
+          go build -v ./...
+
+      - name: Test Go backend
+        run: |
+          cd coffee_shop_management_backend
+          go test -v ./...
+
+      - name: Set up Node.js for Next.js frontend
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18.18.0"
+
+      - name: Install dependencies for Next.js frontend
+        run: |
+          cd coffee_shop_management
+          npm install
+
+      - name: Build Next.js frontend
+        run: |
+          cd coffee_shop_management
+          npm run build
+
+      # - name: Test Next.js frontend
+      #   run: |
+      #     cd coffee_shop_management
+      #     npm test
