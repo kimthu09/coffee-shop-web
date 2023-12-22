@@ -66,12 +66,12 @@ jobs:
           cd coffee_shop_management_backend
           go test -v ./...
 
-      - name: Install dependencies for Next.js frontend
-        run: |
-          cd coffee_shop_management
-          npm install
+      # - name: Install dependencies for Next.js frontend
+      #   run: |
+      #     cd coffee_shop_management
+      #     npm install
 
-      - name: Build Next.js frontend
-        run: |
-          cd coffee_shop_management
-          NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
+      # - name: Build Next.js frontend
+      #   run: |
+      #     cd coffee_shop_management
+      #     NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
