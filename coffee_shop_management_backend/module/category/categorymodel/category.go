@@ -23,27 +23,22 @@ func (*Category) TableName() string {
 var (
 	ErrCategoryNameEmpty = common.NewCustomError(
 		errors.New("name of category is empty"),
-		"name of category is empty",
+		"Tên của danh mục đang trống",
 		"ErrCategoryNameEmpty",
 	)
-	ErrCategoryAmountProductCategoryNotExist = common.NewCustomError(
-		errors.New("amount product of category is empty"),
-		"amount product of category is empty",
-		"ErrCategoryAmountProductCategoryNotExist",
-	)
 	ErrCategoryIdDuplicate = common.ErrDuplicateKey(
-		errors.New("id of category is duplicate"),
+		errors.New("Đã tồn tại danh mục trong hệ thống"),
 	)
 	ErrCategoryNameDuplicate = common.ErrDuplicateKey(
-		errors.New("name of category is duplicate"),
+		errors.New("Đã tồn tại danh mục có tên này trong hệ thống"),
 	)
 	ErrCategoryCreateNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to create category"),
+		errors.New("Bạn không có quyền tạo danh mục mới"),
 	)
 	ErrCategoryUpdateInfoNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to update info category"),
+		errors.New("Bạn không có quyền chỉnh sửa thông tin danh mục"),
 	)
 	ErrCategoryViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view category"),
+		errors.New("Bạn không có quyền xem danh mục"),
 	)
 )

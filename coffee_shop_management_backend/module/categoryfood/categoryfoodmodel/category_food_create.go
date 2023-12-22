@@ -12,13 +12,3 @@ type CategoryFoodCreate struct {
 func (*CategoryFoodCreate) TableName() string {
 	return common.TableCategoryFood
 }
-
-func (data *CategoryFoodCreate) Validate() *common.AppError {
-	if !common.ValidateNotNilId(&data.FoodId) {
-		return ErrIdFoodInvalid
-	}
-	if !common.ValidateNotNilId(&data.CategoryId) {
-		return ErrIdCategoryInvalid
-	}
-	return nil
-}

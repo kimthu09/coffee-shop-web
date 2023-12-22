@@ -10,8 +10,8 @@ import (
 
 func (s *sqlStore) FindListCategories(
 	ctx context.Context,
-	foodId string) ([]categorymodel.SimpleCategory, error) {
-	var data []categorymodel.SimpleCategory
+	foodId string) ([]categorymodel.SimpleCategoryWithId, error) {
+	var data []categorymodel.SimpleCategoryWithId
 	db := s.db
 
 	if err := db.

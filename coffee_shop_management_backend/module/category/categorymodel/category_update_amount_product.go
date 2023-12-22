@@ -9,10 +9,3 @@ type CategoryUpdateAmountProduct struct {
 func (*CategoryUpdateAmountProduct) TableName() string {
 	return common.TableCategory
 }
-
-func (data *CategoryUpdateAmountProduct) Validate() error {
-	if data == nil {
-		return ErrCategoryAmountProductCategoryNotExist
-	}
-	return nil
-}

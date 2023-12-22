@@ -7,7 +7,7 @@ import (
 	"context"
 )
 
-type ListCategoryStorage interface {
+type ListCategoryStore interface {
 	ListCategory(
 		ctx context.Context,
 		filter *categorymodel.Filter,
@@ -17,12 +17,12 @@ type ListCategoryStorage interface {
 }
 
 type listCategoryBiz struct {
-	store     ListCategoryStorage
+	store     ListCategoryStore
 	requester middleware.Requester
 }
 
 func NewListCategoryBiz(
-	store ListCategoryStorage,
+	store ListCategoryStore,
 	requester middleware.Requester) *listCategoryBiz {
 	return &listCategoryBiz{
 		store:     store,
