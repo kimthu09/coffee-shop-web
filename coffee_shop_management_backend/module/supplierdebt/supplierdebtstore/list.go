@@ -2,15 +2,19 @@ package supplierdebtstore
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebtmodel"
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 func (s *sqlStore) ListSupplierDebt(
 	ctx context.Context,
 	supplierId string,
-	paging *common.Paging) ([]supplierdebtmodel.SupplierDebt, error) {
+	filterSupplierDebt *filter.SupplierDebtFilter,
+	paging *common.Paging,
+	moreKeys ...string) ([]supplierdebtmodel.SupplierDebt, error) {
 	var result []supplierdebtmodel.SupplierDebt
 	db := s.db
 
@@ -18,15 +22,20 @@ func (s *sqlStore) ListSupplierDebt(
 
 	db = db.Where("supplierId = ?", supplierId)
 
-	dbTemp, errPaging := handlePaging(db, paging)
+	handleFilter(db, filterSupplierDebt)
+
+	dbTemp, errPaging := common.HandlePaging(db, paging)
 	if errPaging != nil {
 		return nil, errPaging
 	}
 	db = dbTemp
 
+	for i := range moreKeys {
+		db = db.Preload(moreKeys[i])
+	}
+
 	if err := db.
-		Limit(int(paging.Limit)).
-		Order("createAt desc").
+		Order("createdAt desc").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
@@ -34,13 +43,17 @@ func (s *sqlStore) ListSupplierDebt(
 	return result, nil
 }
 
-func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
+func handleFilter(
+	db *gorm.DB,
+	filterSupplierDebt *filter.SupplierDebtFilter) {
+	if filterSupplierDebt != nil {
+		if filterSupplierDebt.DateFrom != nil {
+			timeFrom := time.Unix(*filterSupplierDebt.DateFrom, 0)
+			db = db.Where("createdAt >= ?", timeFrom)
+		}
+		if filterSupplierDebt.DateTo != nil {
+			timeTo := time.Unix(*filterSupplierDebt.DateTo, 0)
+			db = db.Where("createdAt <= ?", timeTo)
+		}
 	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
-
-	return db, nil
 }

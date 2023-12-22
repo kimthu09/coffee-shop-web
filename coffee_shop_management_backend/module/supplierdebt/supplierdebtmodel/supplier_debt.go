@@ -3,7 +3,6 @@ package supplierdebtmodel
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/common/enum"
-	"errors"
 	"time"
 )
 
@@ -13,31 +12,10 @@ type SupplierDebt struct {
 	Amount     float32        `json:"amount" gorm:"column:amount;"`
 	AmountLeft float32        `json:"amountLeft" gorm:"column:amountLeft;"`
 	DebtType   *enum.DebtType `json:"type" gorm:"column:type;"`
-	CreateBy   string         `json:"createBy" gorm:"column:createBy;"`
-	CreateAt   *time.Time     `json:"createAt" gorm:"column:createAt;"`
+	CreatedBy  string         `json:"createdBy" gorm:"column:createdBy;"`
+	CreatedAt  *time.Time     `json:"createdAt" gorm:"column:createdAt;"`
 }
 
 func (*SupplierDebt) TableName() string {
 	return common.TableSupplierDebt
 }
-
-var (
-	ErrSupplierDebtIdSupplierInvalid = common.NewCustomError(
-		errors.New("id of supplier is invalid"),
-		"id of supplier is invalid",
-		"ErrSupplierDebtIdSupplierInvalid",
-	)
-	ErrSupplierDebtAmountIsNotNegativeNumber = common.NewCustomError(
-		errors.New("amount is not negative number"),
-		"amount is not negative number",
-		"ErrSupplierDebtAmountIsNotNegativeNumber",
-	)
-	ErrSupplierDebtTypeEmpty = common.NewCustomError(
-		errors.New("debt type is empty"),
-		"debt type is empty",
-		"ErrSupplierDebtTypeEmpty",
-	)
-	ErrSupplierDebtViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view supplier"),
-	)
-)

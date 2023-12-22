@@ -4,7 +4,6 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
-	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
@@ -12,39 +11,41 @@ import (
 	"testing"
 )
 
-type mockListSupplierRepo struct {
+type mockSeeSupplierDetailRepo struct {
 	mock.Mock
 }
 
-func (m *mockListSupplierRepo) ListSupplier(
+func (m *mockSeeSupplierDetailRepo) SeeSupplierDetail(
 	ctx context.Context,
-	filter *filter.Filter,
-	paging *common.Paging) ([]suppliermodel.Supplier, error) {
-	args := m.Called(ctx, filter, paging)
-	return args.Get(0).([]suppliermodel.Supplier), args.Error(1)
+	supplierId string) (*suppliermodel.Supplier, error) {
+	args := m.Called(ctx, supplierId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*suppliermodel.Supplier), args.Error(1)
 }
 
-func TestNewListSupplierRepo(t *testing.T) {
+func TestNewSeeSupplierDetailBiz(t *testing.T) {
 	type args struct {
-		repo      ListSupplierRepo
+		repo      SeeSupplierDetailRepo
 		requester middleware.Requester
 	}
 
 	mockRequest := new(mockRequester)
-	mockRepo := new(mockListSupplierRepo)
+	mockRepo := new(mockSeeSupplierDetailRepo)
 
 	tests := []struct {
 		name string
 		args args
-		want *listSupplierBiz
+		want *seeSupplierDetailBiz
 	}{
 		{
-			name: "Create object has type ListSupplierBiz",
+			name: "Create object has type SeeSupplierDetailBiz",
 			args: args{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
-			want: &listSupplierBiz{
+			want: &seeSupplierDetailBiz{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
@@ -52,43 +53,40 @@ func TestNewListSupplierRepo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewListSupplierRepo(tt.args.repo, tt.args.requester)
+			got := NewSeeSupplierDetailBiz(tt.args.repo, tt.args.requester)
 
 			assert.Equal(
 				t,
 				tt.want,
 				got,
-				"NewListSupplierRepo() = %v, want %v",
+				"NewSeeSupplierDetailBiz() = %v, want %v",
 				got,
 				tt.want)
 		})
 	}
 }
 
-func Test_listSupplierBiz_ListSupplier(t *testing.T) {
+func Test_seeSupplierDetailBiz_SeeSupplierDetail(t *testing.T) {
 	type fields struct {
-		repo      ListSupplierRepo
+		repo      SeeSupplierDetailRepo
 		requester middleware.Requester
 	}
 	type args struct {
-		ctx    context.Context
-		filter *filter.Filter
-		paging *common.Paging
+		ctx        context.Context
+		supplierId string
 	}
 
-	mockRepo := new(mockListSupplierRepo)
 	mockRequest := new(mockRequester)
+	mockRepo := new(mockSeeSupplierDetailRepo)
 
-	paging := common.Paging{
-		Page: 1,
+	supplierId := mock.Anything
+	supplier := suppliermodel.Supplier{
+		Id:    supplierId,
+		Name:  mock.Anything,
+		Email: mock.Anything,
+		Phone: mock.Anything,
+		Debt:  0,
 	}
-	filterSupplier := filter.Filter{
-		SearchKey: "",
-		MinDebt:   nil,
-		MaxDebt:   nil,
-	}
-	listSuppliers := make([]suppliermodel.Supplier, 0)
-	var emptyListSuppliers []suppliermodel.Supplier
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -96,19 +94,18 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
-		want    []suppliermodel.Supplier
+		want    *suppliermodel.Supplier
 		wantErr bool
 	}{
 		{
-			name: "List supplier failed because user is not allowed",
+			name: "See supplier detail failed because user is not allowed",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filterSupplier,
-				paging: &paging,
+				ctx:        context.Background(),
+				supplierId: supplierId,
 			},
 			mock: func() {
 				mockRequest.
@@ -116,19 +113,18 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listSuppliers,
+			want:    &supplier,
 			wantErr: true,
 		},
 		{
-			name: "List supplier failed because can not get list from database",
+			name: "See supplier detail failed because can not get supplier from database",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filterSupplier,
-				paging: &paging,
+				ctx:        context.Background(),
+				supplierId: supplierId,
 			},
 			mock: func() {
 				mockRequest.
@@ -138,26 +134,24 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 
 				mockRepo.
 					On(
-						"ListSupplier",
+						"SeeSupplierDetail",
 						context.Background(),
-						&filterSupplier,
-						&paging).
-					Return(emptyListSuppliers, mockErr).
+						supplierId).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    listSuppliers,
+			want:    &supplier,
 			wantErr: true,
 		},
 		{
-			name: "List supplier successfully",
+			name: "See supplier detail successfully",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filterSupplier,
-				paging: &paging,
+				ctx:        context.Background(),
+				supplierId: supplierId,
 			},
 			mock: func() {
 				mockRequest.
@@ -167,50 +161,46 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 
 				mockRepo.
 					On(
-						"ListSupplier",
+						"SeeSupplierDetail",
 						context.Background(),
-						&filterSupplier,
-						&paging).
-					Return(listSuppliers, nil).
+						supplierId).
+					Return(&supplier, nil).
 					Once()
 			},
-			want:    listSuppliers,
+			want:    &supplier,
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			biz := &listSupplierBiz{
+			biz := &seeSupplierDetailBiz{
 				repo:      tt.fields.repo,
 				requester: tt.fields.requester,
 			}
 
 			tt.mock()
 
-			got, err := biz.ListSupplier(
-				tt.args.ctx,
-				tt.args.filter,
-				tt.args.paging)
+			got, err := biz.SeeSupplierDetail(tt.args.ctx, tt.args.supplierId)
 
 			if tt.wantErr {
 				assert.NotNil(
 					t,
 					err,
-					"ListSupplier() error = %v, wantErr %v",
+					"SeeSupplierDetail() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 			} else {
 				assert.Nil(
 					t,
 					err,
-					"ListSupplier() error = %v, wantErr %v",
+					"SeeSupplierDetail() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 				assert.Equal(
 					t,
 					tt.want,
 					got,
-					"ListIngredientDetail() = %v, want %v",
+					"SeeSupplierDetail() = %v, want %v",
 					got,
 					tt.want)
 			}

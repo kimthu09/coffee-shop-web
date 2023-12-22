@@ -7,9 +7,10 @@ import (
 )
 
 type PaySupplierStore interface {
-	GetDebtSupplier(
+	FindSupplier(
 		ctx context.Context,
-		supplierId string) (*float32, error)
+		conditions map[string]interface{},
+		moreKeys ...string) (*suppliermodel.Supplier, error)
 	UpdateSupplierDebt(
 		ctx context.Context,
 		id string,
@@ -28,7 +29,7 @@ type paySupplierRepo struct {
 	supplierDebtStore CreateSupplierDebtStore
 }
 
-func NewUpdatePayRepo(
+func NewPaySupplierRepo(
 	supplierStore PaySupplierStore,
 	supplierDebtStore CreateSupplierDebtStore) *paySupplierRepo {
 	return &paySupplierRepo{
@@ -39,15 +40,15 @@ func NewUpdatePayRepo(
 
 func (repo *paySupplierRepo) GetDebtSupplier(
 	ctx context.Context,
-	supplierId string) (*float32, error) {
-	debtCurrent, err := repo.supplierStore.GetDebtSupplier(
-		ctx,
-		supplierId)
+	supplierId string) (*int, error) {
+	supplier, err := repo.supplierStore.FindSupplier(
+		ctx, map[string]interface{}{"id": supplierId},
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return debtCurrent, nil
+	return &supplier.Debt, nil
 }
 
 func (repo *paySupplierRepo) CreateSupplierDebt(

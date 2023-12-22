@@ -20,12 +20,12 @@ type mockPaySupplierRepo struct {
 
 func (m *mockPaySupplierRepo) GetDebtSupplier(
 	ctx context.Context,
-	supplierId string) (*float32, error) {
+	supplierId string) (*int, error) {
 	args := m.Called(ctx, supplierId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*float32), args.Error(1)
+	return args.Get(0).(*int), args.Error(1)
 }
 func (m *mockPaySupplierRepo) CreateSupplierDebt(
 	ctx context.Context,
@@ -102,25 +102,27 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 	mockRepo := new(mockPaySupplierRepo)
 	supplierId := mock.Anything
 
-	validAmount := float32(100)
-	amount0 := float32(0)
-	negativeAmount := float32(-1)
-	createBy := mock.Anything
+	validAmount := 100
+	amount0 := 0
+	negativeAmount := -1
+	overDebtAmount := 400
+	createdBy := mock.Anything
+	supplierDebtId := "1234"
 	supplierUpdateDebt := suppliermodel.SupplierUpdateDebt{
-		Amount:   &validAmount,
-		CreateBy: createBy,
+		Id:        &supplierDebtId,
+		Amount:    &validAmount,
+		CreatedBy: createdBy,
 	}
-	supplierDebtId := mock.Anything
-	currentDebtSupplier := float32(100)
+	currentDebtSupplier := -300
 	mockErr := errors.New(mock.Anything)
 	debtType := enum.Pay
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
 		Id:         supplierDebtId,
 		SupplierId: supplierId,
-		Amount:     float32(100),
-		AmountLeft: float32(200),
+		Amount:     validAmount,
+		AmountLeft: currentDebtSupplier + validAmount,
 		DebtType:   &debtType,
-		CreateBy:   createBy,
+		CreatedBy:  createdBy,
 	}
 	tests := []struct {
 		name    string
@@ -162,13 +164,19 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 				ctx:        context.Background(),
 				supplierId: supplierId,
 				data: &suppliermodel.SupplierUpdateDebt{
-					Amount: &amount0,
+					Amount:    &amount0,
+					CreatedBy: createdBy,
 				},
 			},
 			mock: func() {
 				mockRequest.
 					On("IsHasFeature", common.SupplierPayFeatureCode).
 					Return(true).
+					Once()
+
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
 					Once()
 			},
 			want:    &supplierDebtId,
@@ -185,7 +193,8 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 				ctx:        context.Background(),
 				supplierId: supplierId,
 				data: &suppliermodel.SupplierUpdateDebt{
-					Amount: &negativeAmount,
+					Amount:    &negativeAmount,
+					CreatedBy: createdBy,
 				},
 			},
 			mock: func() {
@@ -193,34 +202,10 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					On("IsHasFeature", common.SupplierPayFeatureCode).
 					Return(true).
 					Once()
-			},
-			want:    &supplierDebtId,
-			wantErr: true,
-		},
-		{
-			name: "Pay supplier failed because can not get debt supplier",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:        context.Background(),
-				supplierId: supplierId,
-				data:       &supplierUpdateDebt,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.SupplierPayFeatureCode).
-					Return(true).
-					Once()
 
-				mockRepo.
-					On(
-						"GetDebtSupplier",
-						context.Background(),
-						supplierId).
-					Return(nil, mockErr).
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
 					Once()
 			},
 			want:    &supplierDebtId,
@@ -244,12 +229,54 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
+					Once()
+
 				mockRepo.
 					On(
 						"GetDebtSupplier",
 						context.Background(),
 						supplierId).
 					Return(nil, mockErr).
+					Once()
+			},
+			want:    &supplierDebtId,
+			wantErr: true,
+		},
+		{
+			name: "Pay supplier failed because can not debt pay is over current debt",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:        context.Background(),
+				supplierId: supplierId,
+				data: &suppliermodel.SupplierUpdateDebt{
+					Amount:    &overDebtAmount,
+					CreatedBy: createdBy,
+				},
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.SupplierPayFeatureCode).
+					Return(true).
+					Once()
+
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
+					Once()
+
+				mockRepo.
+					On(
+						"GetDebtSupplier",
+						context.Background(),
+						supplierId).
+					Return(&currentDebtSupplier, nil).
 					Once()
 			},
 			want:    &supplierDebtId,
@@ -273,6 +300,11 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
+					Once()
+
 				mockRepo.
 					On(
 						"GetDebtSupplier",
@@ -283,8 +315,8 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 
 				mockGenerator.
 					On(
-						"GenerateId").
-					Return("", mockErr).
+						"IdProcess", supplierUpdateDebt.Id).
+					Return(nil, mockErr).
 					Once()
 			},
 			want:    &supplierDebtId,
@@ -308,6 +340,11 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
+					Once()
+
 				mockRepo.
 					On(
 						"GetDebtSupplier",
@@ -318,8 +355,8 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 
 				mockGenerator.
 					On(
-						"GenerateId").
-					Return(supplierDebtId, nil).
+						"IdProcess", supplierUpdateDebt.Id).
+					Return(supplierUpdateDebt.Id, nil).
 					Once()
 
 				mockRepo.
@@ -352,6 +389,11 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
+					Once()
+
 				mockRepo.
 					On(
 						"GetDebtSupplier",
@@ -362,8 +404,8 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 
 				mockGenerator.
 					On(
-						"GenerateId").
-					Return(supplierDebtId, nil).
+						"IdProcess", supplierUpdateDebt.Id).
+					Return(supplierUpdateDebt.Id, nil).
 					Once()
 
 				mockRepo.
@@ -404,6 +446,11 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(createdBy).
+					Once()
+
 				mockRepo.
 					On(
 						"GetDebtSupplier",
@@ -414,8 +461,8 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 
 				mockGenerator.
 					On(
-						"GenerateId").
-					Return(supplierDebtId, nil).
+						"IdProcess", supplierUpdateDebt.Id).
+					Return(supplierUpdateDebt.Id, nil).
 					Once()
 
 				mockRepo.

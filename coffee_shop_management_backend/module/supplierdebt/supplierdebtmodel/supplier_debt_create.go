@@ -8,10 +8,10 @@ import (
 type SupplierDebtCreate struct {
 	Id         string         `json:"-" gorm:"column:id;"`
 	SupplierId string         `json:"supplierId" gorm:"column:supplierId;"`
-	Amount     float32        `json:"amount" gorm:"column:amount;"`
-	AmountLeft float32        `json:"-" gorm:"column:amountLeft;"`
+	Amount     int            `json:"amount" gorm:"column:amount;"`
+	AmountLeft int            `json:"-" gorm:"column:amountLeft;"`
 	DebtType   *enum.DebtType `json:"type" gorm:"column:type;"`
-	CreateBy   string         `json:"-" gorm:"column:createBy;"`
+	CreatedBy  string         `json:"-" gorm:"column:createdBy;"`
 }
 
 func (*SupplierDebtCreate) TableName() string {

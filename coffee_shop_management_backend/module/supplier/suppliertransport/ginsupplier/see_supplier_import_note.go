@@ -4,18 +4,20 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/middleware"
+	"coffee_shop_management_backend/module/importnote/importnotestore"
 	"coffee_shop_management_backend/module/supplier/supplierbiz"
 	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"coffee_shop_management_backend/module/supplier/supplierrepo"
-	"coffee_shop_management_backend/module/supplier/supplierstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func ListSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
+func SeeSupplierImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var filterSupplier filter.Filter
-		if err := c.ShouldBind(&filterSupplier); err != nil {
+		id := c.Param("id")
+
+		var importSupplierFilter filter.SupplierImportFilter
+		if err := c.ShouldBind(&importSupplierFilter); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
 
@@ -26,19 +28,20 @@ func ListSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		paging.Fulfill()
 
-		store := supplierstore.NewSQLStore(appCtx.GetMainDBConnection())
-		repo := supplierrepo.NewListSupplierRepo(store)
+		importNoteStore := importnotestore.NewSQLStore(appCtx.GetMainDBConnection())
 
+		repo := supplierrepo.NewSeeSupplierImportNoteRepo(importNoteStore)
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
-		biz := supplierbiz.NewListSupplierRepo(repo, requester)
+		biz := supplierbiz.NewSeeSupplierImportNoteBiz(repo, requester)
 
-		result, err := biz.ListSupplier(c.Request.Context(), &filterSupplier, &paging)
+		result, err := biz.SeeSupplierImportNote(
+			c.Request.Context(), id, &importSupplierFilter, &paging)
 
 		if err != nil {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filterSupplier))
+		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
 	}
 }

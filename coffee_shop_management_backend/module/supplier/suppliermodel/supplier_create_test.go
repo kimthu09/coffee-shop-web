@@ -13,6 +13,7 @@ func TestSupplierCreate_TableName(t *testing.T) {
 		Name  string
 		Email string
 		Phone string
+		Debt  int
 	}
 	tests := []struct {
 		name   string
@@ -26,6 +27,7 @@ func TestSupplierCreate_TableName(t *testing.T) {
 				Name:  "",
 				Email: "",
 				Phone: "",
+				Debt:  0,
 			},
 			want: common.TableSupplier,
 		},
@@ -37,6 +39,7 @@ func TestSupplierCreate_TableName(t *testing.T) {
 				Name:  tt.fields.Name,
 				Email: tt.fields.Email,
 				Phone: tt.fields.Phone,
+				Debt:  tt.fields.Debt,
 			}
 			got := supplier.TableName()
 			assert.Equal(t, tt.want, got, "TableName() = %v, want %v", got, tt.want)
@@ -50,6 +53,7 @@ func TestSupplierCreate_Validate(t *testing.T) {
 		Name  string
 		Email string
 		Phone string
+		Debt  int
 	}
 
 	inValidId := "012345678901234567890"
@@ -94,12 +98,24 @@ func TestSupplierCreate_Validate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "SupplierCreate is invalid with invalid debt",
+			fields: fields{
+				Id:    nil,
+				Name:  mock.Anything,
+				Email: "a@gmail.com",
+				Phone: "1234567890",
+				Debt:  100,
+			},
+			wantErr: true,
+		},
+		{
 			name: "SupplierCreate is valid",
 			fields: fields{
 				Id:    nil,
 				Name:  mock.Anything,
 				Email: "a@gmail.com",
 				Phone: "0123456789",
+				Debt:  0,
 			},
 			wantErr: false,
 		},
@@ -111,6 +127,7 @@ func TestSupplierCreate_Validate(t *testing.T) {
 				Name:  tt.fields.Name,
 				Email: tt.fields.Email,
 				Phone: tt.fields.Phone,
+				Debt:  tt.fields.Debt,
 			}
 
 			err := data.Validate()

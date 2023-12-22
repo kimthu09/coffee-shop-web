@@ -7,15 +7,17 @@ import (
 	"coffee_shop_management_backend/module/supplier/supplierbiz"
 	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"coffee_shop_management_backend/module/supplier/supplierrepo"
-	"coffee_shop_management_backend/module/supplier/supplierstore"
+	"coffee_shop_management_backend/module/supplierdebt/supplierdebtstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func ListSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
+func SeeSupplierDebt(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var filterSupplier filter.Filter
-		if err := c.ShouldBind(&filterSupplier); err != nil {
+		id := c.Param("id")
+
+		var debtSupplierFilter filter.SupplierDebtFilter
+		if err := c.ShouldBind(&debtSupplierFilter); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
 
@@ -26,19 +28,20 @@ func ListSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		paging.Fulfill()
 
-		store := supplierstore.NewSQLStore(appCtx.GetMainDBConnection())
-		repo := supplierrepo.NewListSupplierRepo(store)
+		supplierDebtStore := supplierdebtstore.NewSQLStore(appCtx.GetMainDBConnection())
 
+		repo := supplierrepo.NewSeeSupplierDebtRepo(supplierDebtStore)
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
-		biz := supplierbiz.NewListSupplierRepo(repo, requester)
+		biz := supplierbiz.NewSeeSupplierDebtBiz(repo, requester)
 
-		result, err := biz.ListSupplier(c.Request.Context(), &filterSupplier, &paging)
+		result, err := biz.SeeSupplierDebt(
+			c.Request.Context(), id, &debtSupplierFilter, &paging)
 
 		if err != nil {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filterSupplier))
+		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, nil))
 	}
 }

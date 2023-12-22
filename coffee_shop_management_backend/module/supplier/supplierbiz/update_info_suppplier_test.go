@@ -15,12 +15,6 @@ type mockUpdateInfoSupplier struct {
 	mock.Mock
 }
 
-func (m *mockUpdateInfoSupplier) CheckExist(
-	ctx context.Context,
-	supplierId string) error {
-	args := m.Called(ctx, supplierId)
-	return args.Error(0)
-}
 func (m *mockUpdateInfoSupplier) UpdateSupplierInfo(
 	ctx context.Context,
 	supplierId string,
@@ -139,33 +133,6 @@ func Test_updateInfoSupplierBiz_UpdateInfoSupplier(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Update supplier info failed because supplier is not exist",
-			fields: fields{
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				id:   supplierId,
-				data: &supplierUpdateInfo,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.SupplierUpdateInfoFeatureCode).
-					Return(true).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckExist",
-						context.Background(),
-						supplierId).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
 			name: "Update supplier info failed because can not save to database",
 			fields: fields{
 				repo:      mockRepo,
@@ -180,14 +147,6 @@ func Test_updateInfoSupplierBiz_UpdateInfoSupplier(t *testing.T) {
 				mockRequest.
 					On("IsHasFeature", common.SupplierUpdateInfoFeatureCode).
 					Return(true).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckExist",
-						context.Background(),
-						supplierId).
-					Return(nil).
 					Once()
 
 				mockRepo.
@@ -216,14 +175,6 @@ func Test_updateInfoSupplierBiz_UpdateInfoSupplier(t *testing.T) {
 				mockRequest.
 					On("IsHasFeature", common.SupplierUpdateInfoFeatureCode).
 					Return(true).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckExist",
-						context.Background(),
-						supplierId).
-					Return(nil).
 					Once()
 
 				mockRepo.
