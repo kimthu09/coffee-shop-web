@@ -30,7 +30,7 @@ func (repo *listToppingRepo) ListTopping(
 	result, err := repo.store.ListTopping(
 		ctx,
 		filter,
-		[]string{"id", "name", "description"},
+		[]string{"id", "name"},
 		paging)
 
 	if err != nil {

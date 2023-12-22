@@ -8,7 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) FindFood(ctx context.Context,
+func (s *sqlStore) FindFood(
+	ctx context.Context,
 	conditions map[string]interface{},
 	moreKeys ...string) (*productmodel.Food, error) {
 	var data productmodel.Food

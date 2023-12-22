@@ -4,7 +4,6 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/middleware"
-	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/product/productrepo"
@@ -18,25 +17,21 @@ func UpdateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 
-		var data productmodel.ToppingUpdate
+		var data productmodel.ToppingUpdateInfo
 
 		if err := c.ShouldBind(&data); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
-
-		data.IsActive = nil
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
 		db := appCtx.GetMainDBConnection().Begin()
 
 		toppingStore := productstore.NewSQLStore(db)
-		ingredientStore := ingredientstore.NewSQLStore(db)
 		recipeDetailStore := recipedetailstore.NewSQLStore(db)
 
 		repo := productrepo.NewUpdateToppingRepo(
 			toppingStore,
-			ingredientStore,
 			recipeDetailStore,
 		)
 
@@ -52,6 +47,6 @@ func UpdateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

@@ -30,7 +30,7 @@ func (repo *listFoodRepo) ListFood(
 	result, err := repo.store.ListFood(
 		ctx,
 		filter,
-		[]string{"id", "name", "description"},
+		[]string{"id", "name"},
 		paging)
 
 	if err != nil {

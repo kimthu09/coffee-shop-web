@@ -9,10 +9,6 @@ import (
 )
 
 type CreateToppingRepo interface {
-	CheckIngredient(
-		ctx context.Context,
-		data *productmodel.ToppingCreate,
-	) error
 	StoreTopping(
 		ctx context.Context,
 		data *productmodel.ToppingCreate,
@@ -30,6 +26,7 @@ func NewCreateToppingBiz(
 	repo CreateToppingRepo,
 	requester middleware.Requester) *createToppingBiz {
 	return &createToppingBiz{
+		gen:       gen,
 		repo:      repo,
 		requester: requester,
 	}
@@ -43,10 +40,6 @@ func (biz *createToppingBiz) CreateTopping(
 	}
 
 	if err := data.Validate(); err != nil {
-		return err
-	}
-
-	if err := biz.repo.CheckIngredient(ctx, data); err != nil {
 		return err
 	}
 
@@ -82,15 +75,15 @@ func handleToppingId(gen generator.IdGenerator, data *productmodel.ToppingCreate
 }
 
 func handleRecipeId(gen generator.IdGenerator, data *productmodel.ToppingCreate) error {
-	idRecipe, err := gen.IdProcess(&data.RecipeId)
+	idRecipe, err := gen.GenerateId()
 	if err != nil {
 		return err
 	}
 
-	data.RecipeId = *idRecipe
-	data.Recipe.Id = *idRecipe
+	data.RecipeId = idRecipe
+	data.Recipe.Id = idRecipe
 	for i := range data.Recipe.Details {
-		data.Recipe.Details[i].RecipeId = *idRecipe
+		data.Recipe.Details[i].RecipeId = idRecipe
 	}
 	return nil
 }

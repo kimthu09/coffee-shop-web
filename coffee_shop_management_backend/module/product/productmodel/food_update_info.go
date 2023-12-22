@@ -5,19 +5,21 @@ import (
 	"coffee_shop_management_backend/module/sizefood/sizefoodmodel"
 )
 
-type FoodUpdate struct {
-	*ProductUpdate `json:",inline"`
-	Categories     *[]string                       `json:"categories" gorm:"-"`
-	Sizes          *[]sizefoodmodel.SizeFoodUpdate `json:"sizes" gorm:"-"`
+type FoodUpdateInfo struct {
+	*ProductUpdateInfo `json:",inline"`
+	Categories         *[]string                       `json:"categories" gorm:"-"`
+	Sizes              *[]sizefoodmodel.SizeFoodUpdate `json:"sizes" gorm:"-"`
 }
 
-func (*FoodUpdate) TableName() string {
+func (*FoodUpdateInfo) TableName() string {
 	return common.TableFood
 }
 
-func (data *FoodUpdate) Validate() error {
-	if err := (*data.ProductUpdate).Validate(); err != nil {
-		return err
+func (data *FoodUpdateInfo) Validate() error {
+	if data.ProductUpdateInfo != nil {
+		if err := (*data.ProductUpdateInfo).Validate(); err != nil {
+			return err
+		}
 	}
 	if data.Categories != nil {
 		if len(*data.Categories) == 0 {

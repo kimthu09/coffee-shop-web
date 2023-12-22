@@ -7,7 +7,6 @@ import (
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/category/categorystore"
 	"coffee_shop_management_backend/module/categoryfood/categoryfoodstore"
-	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/product/productrepo"
@@ -36,7 +35,6 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 		categoryStore := categorystore.NewSQLStore(db)
 		sizeFoodStore := sizefoodstore.NewSQLStore(db)
 		recipeStore := recipestore.NewSQLStore(db)
-		ingredientStore := ingredientstore.NewSQLStore(db)
 		recipeDetailStore := recipedetailstore.NewSQLStore(db)
 
 		repo := productrepo.NewCreateFoodRepo(
@@ -45,7 +43,6 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			categoryStore,
 			sizeFoodStore,
 			recipeStore,
-			ingredientStore,
 			recipeDetailStore,
 		)
 
@@ -63,6 +60,6 @@ func CreateFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.Id))
 	}
 }

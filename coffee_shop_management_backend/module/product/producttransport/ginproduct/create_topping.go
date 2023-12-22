@@ -5,7 +5,6 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
-	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/product/productbiz"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"coffee_shop_management_backend/module/product/productrepo"
@@ -30,13 +29,11 @@ func CreateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		toppingStore := productstore.NewSQLStore(db)
 		recipeStore := recipestore.NewSQLStore(db)
-		ingredientStore := ingredientstore.NewSQLStore(db)
 		recipeDetailStore := recipedetailstore.NewSQLStore(db)
 
 		repo := productrepo.NewCreateToppingRepo(
 			toppingStore,
 			recipeStore,
-			ingredientStore,
 			recipeDetailStore,
 		)
 
@@ -54,6 +51,6 @@ func CreateTopping(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.Id))
 	}
 }

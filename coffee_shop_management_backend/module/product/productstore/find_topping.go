@@ -8,7 +8,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) FindTopping(ctx context.Context,
+func (s *sqlStore) FindTopping(
+	ctx context.Context,
 	conditions map[string]interface{},
 	moreKeys ...string) (*productmodel.Topping, error) {
 	var data productmodel.Topping

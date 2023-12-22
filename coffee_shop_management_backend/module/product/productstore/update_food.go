@@ -9,7 +9,7 @@ import (
 func (s *sqlStore) UpdateFood(
 	ctx context.Context,
 	id string,
-	data *productmodel.FoodUpdate) error {
+	data *productmodel.FoodUpdateInfo) error {
 
 	db := s.db
 

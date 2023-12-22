@@ -12,35 +12,23 @@ import (
 	"net/http"
 )
 
-func ChangeStatusFood(appCtx appctx.AppContext) gin.HandlerFunc {
+func ChangeStatusFoods(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
-
-		var data productmodel.FoodUpdate
+		var data []productmodel.FoodUpdateStatus
 
 		if err := c.ShouldBind(&data); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
-
-		if data.IsActive == nil {
-			panic(common.ErrInvalidRequest(productmodel.ErrProductIsActiveEmpty))
-		}
-
-		data.Name = nil
-		data.Description = nil
-		data.CookingGuide = nil
-		data.Categories = nil
-		data.Sizes = nil
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
 		db := appCtx.GetMainDBConnection().Begin()
 
 		store := productstore.NewSQLStore(db)
-		repo := productrepo.NewChangeStatusFoodRepo(store)
-		business := productbiz.NewChangeStatusFoodBiz(repo, requester)
+		repo := productrepo.NewChangeStatusFoodsRepo(store)
+		business := productbiz.NewChangeStatusFoodsBiz(repo, requester)
 
-		if err := business.ChangeStatusFood(c.Request.Context(), id, &data); err != nil {
+		if err := business.ChangeStatusFoods(c.Request.Context(), data); err != nil {
 			db.Rollback()
 			panic(err)
 		}
@@ -50,6 +38,6 @@ func ChangeStatusFood(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

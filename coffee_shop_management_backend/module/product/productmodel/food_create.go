@@ -16,6 +16,9 @@ func (*FoodCreate) TableName() string {
 }
 
 func (data *FoodCreate) Validate() error {
+	if data.ProductCreate == nil {
+		return ErrFoodProductInfoEmpty
+	}
 	if err := (*data.ProductCreate).Validate(); err != nil {
 		return err
 	}
