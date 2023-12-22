@@ -45,7 +45,7 @@ func (biz *resetPasswordBiz) ResetPassword(
 	ctx context.Context,
 	id string,
 	data *usermodel.UserResetPassword) error {
-	if biz.requester.GetRole().Id != common.RoleAdminId {
+	if biz.requester.GetRoleId() != common.RoleAdminId {
 		return usermodel.ErrUserResetPasswordNoPermission
 	}
 

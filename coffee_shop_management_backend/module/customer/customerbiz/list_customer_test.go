@@ -83,8 +83,8 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 	}
 	filter := customermodel.Filter{
 		SearchKey: "",
-		MinDebt:   nil,
-		MaxDebt:   nil,
+		MinPoint:  nil,
+		MaxPoint:  nil,
 	}
 	listCustomers := make([]customermodel.Customer, 0)
 	var emptyListCustomers []customermodel.Customer

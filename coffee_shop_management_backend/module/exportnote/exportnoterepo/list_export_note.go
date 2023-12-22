@@ -12,6 +12,7 @@ type ListExportNoteStore interface {
 		filter *exportnotemodel.Filter,
 		propertiesContainSearchKey []string,
 		paging *common.Paging,
+		moreKeys ...string,
 	) ([]exportnotemodel.ExportNote, error)
 }
 
@@ -30,8 +31,9 @@ func (repo *listExportNoteRepo) ListExportNote(
 	result, err := repo.store.ListExportNote(
 		ctx,
 		filter,
-		[]string{"id", "createBy"},
-		paging)
+		[]string{"id"},
+		paging,
+		"CreatedByUser")
 
 	if err != nil {
 		return nil, err

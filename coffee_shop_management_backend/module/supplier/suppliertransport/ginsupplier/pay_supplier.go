@@ -25,13 +25,13 @@ func PaySupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
-		data.CreateBy = requester.GetUserId()
+		data.CreatedBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
 
 		supplierStore := supplierstore.NewSQLStore(db)
 		supplierDebtStore := supplierdebtstore.NewSQLStore(db)
-		repo := supplierrepo.NewUpdatePayRepo(supplierStore, supplierDebtStore)
+		repo := supplierrepo.NewPaySupplierRepo(supplierStore, supplierDebtStore)
 
 		gen := generator.NewShortIdGenerator()
 
@@ -49,6 +49,6 @@ func PaySupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(idSupplierDebt))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(idSupplierDebt))
 	}
 }

@@ -5,7 +5,6 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
-	"coffee_shop_management_backend/module/feature/featurestore"
 	"coffee_shop_management_backend/module/role/rolebiz"
 	"coffee_shop_management_backend/module/role/rolemodel"
 	"coffee_shop_management_backend/module/role/rolerepo"
@@ -29,12 +28,10 @@ func CreateRole(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		roleStore := rolestore.NewSQLStore(db)
 		roleFeatureStore := rolefeaturestore.NewSQLStore(db)
-		featureStore := featurestore.NewSQLStore(db)
 
 		repo := rolerepo.NewCreateRoleRepo(
 			roleStore,
 			roleFeatureStore,
-			featureStore,
 		)
 
 		gen := generator.NewShortIdGenerator()
@@ -51,6 +48,6 @@ func CreateRole(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.Id))
 	}
 }

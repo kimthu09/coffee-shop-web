@@ -11,7 +11,8 @@ type ListImportNoteStore interface {
 		ctx context.Context,
 		filter *importnotemodel.Filter,
 		propertiesContainSearchKey []string,
-		paging *common.Paging) ([]importnotemodel.ImportNote, error)
+		paging *common.Paging,
+		moreKeys ...string) ([]importnotemodel.ImportNote, error)
 }
 
 type listImportNoteRepo struct {
@@ -29,8 +30,9 @@ func (repo *listImportNoteRepo) ListImportNote(
 	result, err := repo.store.ListImportNote(
 		ctx,
 		filter,
-		[]string{"id", "supplierId", "createBy", "closeBy"},
-		paging)
+		[]string{"id", "supplierId", "createdBy", "closedBy"},
+		paging,
+		"Supplier", "CreatedByUser", "ClosedByUser")
 
 	if err != nil {
 		return nil, err

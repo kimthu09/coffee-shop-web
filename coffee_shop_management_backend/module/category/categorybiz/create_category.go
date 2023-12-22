@@ -8,7 +8,7 @@ import (
 	"context"
 )
 
-type CreateCategoryStorage interface {
+type CreateCategoryStore interface {
 	CreateCategory(
 		ctx context.Context,
 		data *categorymodel.CategoryCreate,
@@ -17,13 +17,13 @@ type CreateCategoryStorage interface {
 
 type createCategoryBiz struct {
 	gen       generator.IdGenerator
-	store     CreateCategoryStorage
+	store     CreateCategoryStore
 	requester middleware.Requester
 }
 
 func NewCreateCategoryBiz(
 	generator generator.IdGenerator,
-	store CreateCategoryStorage,
+	store CreateCategoryStore,
 	requester middleware.Requester) *createCategoryBiz {
 	return &createCategoryBiz{gen: generator, store: store, requester: requester}
 }

@@ -63,28 +63,6 @@ func NewCreateImportNoteRepo(
 	}
 }
 
-func (repo *createImportNoteRepo) CheckIngredient(
-	ctx context.Context,
-	ingredientId string) error {
-	if _, err := repo.ingredientStore.FindIngredient(
-		ctx, map[string]interface{}{"id": ingredientId},
-	); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *createImportNoteRepo) CheckSupplier(
-	ctx context.Context,
-	supplierId string) error {
-	if _, err := repo.supplierStore.FindSupplier(
-		ctx, map[string]interface{}{"id": supplierId},
-	); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (repo *createImportNoteRepo) HandleCreateImportNote(
 	ctx context.Context,
 	data *importnotemodel.ImportNoteCreate) error {

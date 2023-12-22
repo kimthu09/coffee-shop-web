@@ -18,8 +18,9 @@ func (m *mockListImportNoteStore) ListImportNote(
 	ctx context.Context,
 	filter *importnotemodel.Filter,
 	propertiesContainSearchKey []string,
-	paging *common.Paging) ([]importnotemodel.ImportNote, error) {
-	args := m.Called(ctx, filter, propertiesContainSearchKey, paging)
+	paging *common.Paging,
+	moreKeys ...string) ([]importnotemodel.ImportNote, error) {
+	args := m.Called(ctx, filter, propertiesContainSearchKey, paging, moreKeys)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -61,9 +62,10 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 		store ListImportNoteStore
 	}
 	type args struct {
-		ctx    context.Context
-		filter *importnotemodel.Filter
-		paging *common.Paging
+		ctx      context.Context
+		filter   *importnotemodel.Filter
+		paging   *common.Paging
+		moreKeys []string
 	}
 
 	mockStore := new(mockListImportNoteStore)
@@ -80,18 +82,18 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 		{
 			Id:         mock.Anything,
 			TotalPrice: 0,
-			CreateAt:   nil,
-			CreateBy:   mock.Anything,
+			CreatedAt:  nil,
+			CreatedBy:  mock.Anything,
 		},
 		{
 			Id:         mock.Anything,
 			TotalPrice: 0,
-			CreateAt:   nil,
-			CreateBy:   mock.Anything,
+			CreatedAt:  nil,
+			CreatedBy:  mock.Anything,
 		},
 	}
 	mockErr := errors.New(mock.Anything)
-
+	moreKeys := []string{"Supplier", "CreatedByUser", "ClosedByUser"}
 	tests := []struct {
 		name    string
 		fields  fields
@@ -106,9 +108,10 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 				store: mockStore,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:      context.Background(),
+				filter:   &filter,
+				paging:   &paging,
+				moreKeys: moreKeys,
 			},
 			mock: func() {
 				mockStore.
@@ -117,7 +120,8 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 						context.Background(),
 						&filter,
 						mock.Anything,
-						&paging).
+						&paging,
+						moreKeys).
 					Return(importNotes, nil).
 					Once()
 			},
@@ -130,9 +134,10 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 				store: mockStore,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:      context.Background(),
+				filter:   &filter,
+				paging:   &paging,
+				moreKeys: moreKeys,
 			},
 			mock: func() {
 				mockStore.
@@ -141,7 +146,8 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 						context.Background(),
 						&filter,
 						mock.Anything,
-						&paging).
+						&paging,
+						moreKeys).
 					Return(nil, mockErr).
 					Once()
 			},

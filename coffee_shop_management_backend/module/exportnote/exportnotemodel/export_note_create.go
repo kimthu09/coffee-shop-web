@@ -7,8 +7,8 @@ import (
 
 type ExportNoteCreate struct {
 	Id                *string                                        `json:"id" gorm:"column:id;"`
-	TotalPrice        float32                                        `json:"-" gorm:"column:totalPrice;"`
-	CreateBy          string                                         `json:"-" gorm:"column:createBy;"`
+	CreatedBy         string                                         `json:"-" gorm:"column:createdBy;"`
+	Reason            *ExportReason                                  `json:"reason" gorm:"column:reason;"`
 	ExportNoteDetails []exportnotedetailmodel.ExportNoteDetailCreate `json:"details" gorm:"-"`
 }
 
@@ -23,10 +23,17 @@ func (data *ExportNoteCreate) Validate() *common.AppError {
 	if data.ExportNoteDetails == nil || len(data.ExportNoteDetails) == 0 {
 		return ErrExportNoteDetailsEmpty
 	}
-
+	if data.Reason == nil {
+		return ErrExportNoteReasonEmpty
+	}
+	mapExist := make(map[string]int)
 	for _, v := range data.ExportNoteDetails {
 		if err := v.Validate(); err != nil {
 			return err
+		}
+		mapExist[v.IngredientId]++
+		if mapExist[v.IngredientId] >= 2 {
+			return ErrExportNoteExistDuplicateIngredient
 		}
 	}
 	return nil

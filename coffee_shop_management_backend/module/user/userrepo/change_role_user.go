@@ -19,29 +19,13 @@ type ChangeRoleUserStore interface {
 
 type changeRoleUserRepo struct {
 	userStore ChangeRoleUserStore
-	roleStore CheckRoleStore
 }
 
 func NewChangeRoleUserRepo(
-	userStore ChangeRoleUserStore,
-	roleStore CheckRoleStore) *changeRoleUserRepo {
+	userStore ChangeRoleUserStore) *changeRoleUserRepo {
 	return &changeRoleUserRepo{
 		userStore: userStore,
-		roleStore: roleStore,
 	}
-}
-
-func (repo *changeRoleUserRepo) CheckRoleExist(ctx context.Context, roleId string) error {
-	if _, err := repo.roleStore.FindRole(
-		ctx,
-		map[string]interface{}{
-			"id": roleId,
-		},
-	); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (repo *changeRoleUserRepo) CheckUserStatusPermission(

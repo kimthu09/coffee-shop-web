@@ -1,15 +1,15 @@
 package usermodel
 
 import (
-	"coffee_shop_management_backend/component/token_provider"
+	"coffee_shop_management_backend/component/tokenprovider"
 )
 
 type Account struct {
-	AccessToken  *token_provider.Token `json:"access_token"`
-	RefreshToken *token_provider.Token `json:"refresh_token"`
+	AccessToken  *tokenprovider.Token `json:"access_token"`
+	RefreshToken *tokenprovider.Token `json:"refresh_token"`
 }
 
-func NewAccount(at, rt *token_provider.Token) *Account {
+func NewAccount(at, rt *tokenprovider.Token) *Account {
 	return &Account{
 		AccessToken:  at,
 		RefreshToken: rt,

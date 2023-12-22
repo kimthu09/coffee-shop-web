@@ -25,10 +25,6 @@ type CreateCategoryFoodStore interface {
 }
 
 type UpdateCategoryStore interface {
-	FindCategory(ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*categorymodel.Category, error)
 	UpdateAmountProductCategory(
 		ctx context.Context,
 		id string,
@@ -49,7 +45,6 @@ type createFoodRepo struct {
 	categoryStore     UpdateCategoryStore
 	sizeFoodStore     CreateSizeFoodStore
 	recipeStore       CreateRecipeStore
-	ingredientStore   CheckIngredientStore
 	recipeDetailStore CreateListRecipeDetailStore
 }
 
@@ -59,7 +54,6 @@ func NewCreateFoodRepo(
 	categoryStore UpdateCategoryStore,
 	sizeFoodStore CreateSizeFoodStore,
 	recipeStore CreateRecipeStore,
-	ingredientStore CheckIngredientStore,
 	recipeDetailStore CreateListRecipeDetailStore) *createFoodRepo {
 	return &createFoodRepo{
 		foodStore:         foodStore,
@@ -67,38 +61,8 @@ func NewCreateFoodRepo(
 		categoryStore:     categoryStore,
 		sizeFoodStore:     sizeFoodStore,
 		recipeStore:       recipeStore,
-		ingredientStore:   ingredientStore,
 		recipeDetailStore: recipeDetailStore,
 	}
-}
-
-func (repo *createFoodRepo) CheckCategoryExist(
-	ctx context.Context,
-	data *productmodel.FoodCreate) error {
-	for _, v := range data.Categories {
-		if _, err := repo.categoryStore.FindCategory(
-			ctx,
-			map[string]interface{}{"id": v}); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (repo *createFoodRepo) CheckIngredientExist(
-	ctx context.Context,
-	data *productmodel.FoodCreate) error {
-	for _, size := range data.Sizes {
-		for _, recipeDetail := range size.Recipe.Details {
-			if _, err := repo.ingredientStore.FindIngredient(
-				ctx,
-				map[string]interface{}{"id": recipeDetail.IngredientId},
-			); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
 }
 
 func (repo *createFoodRepo) CreateFood(
@@ -161,11 +125,11 @@ func (repo *createFoodRepo) HandleSizeFood(
 	ctx context.Context,
 	data *productmodel.FoodCreate) error {
 	for _, value := range data.Sizes {
-		if err := repo.createSizeFood(ctx, value); err != nil {
+		if err := repo.createRecipe(ctx, *value.Recipe); err != nil {
 			return err
 		}
 
-		if err := repo.createRecipe(ctx, *value.Recipe); err != nil {
+		if err := repo.createSizeFood(ctx, value); err != nil {
 			return err
 		}
 

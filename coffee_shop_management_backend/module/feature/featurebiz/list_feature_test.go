@@ -38,9 +38,9 @@ func (m *mockRequester) GetEmail() string {
 	args := m.Called()
 	return args.String(0)
 }
-func (m *mockRequester) GetRole() rolemodel.Role {
+func (m *mockRequester) GetRoleId() string {
 	args := m.Called()
-	return args.Get(0).(rolemodel.Role)
+	return args.Get(0).(string)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
 	args := m.Called(featureCode)
@@ -128,8 +128,8 @@ func Test_listFeatureBiz_ListFeature(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(roleNoAdmin).
+					On("GetRoleId").
+					Return(roleNoAdmin.Id).
 					Once()
 			},
 			want:    listFeature,
@@ -146,8 +146,8 @@ func Test_listFeatureBiz_ListFeature(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(roleAdmin).
+					On("GetRoleId").
+					Return(roleAdmin.Id).
 					Once()
 
 				mockStore.
@@ -172,8 +172,8 @@ func Test_listFeatureBiz_ListFeature(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(roleAdmin).
+					On("GetRoleId").
+					Return(roleAdmin.Id).
 					Once()
 
 				mockStore.

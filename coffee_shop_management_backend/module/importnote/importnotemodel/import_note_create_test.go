@@ -10,9 +10,9 @@ import (
 func TestImportNoteCreate_TableName(t *testing.T) {
 	type fields struct {
 		Id                *string
-		TotalPrice        float32
+		TotalPrice        int
 		SupplierId        string
-		CreateBy          string
+		CreatedBy         string
 		ImportNoteDetails []importnotedetailmodel.ImportNoteDetailCreate
 	}
 	tests := []struct {
@@ -26,7 +26,7 @@ func TestImportNoteCreate_TableName(t *testing.T) {
 				Id:                nil,
 				TotalPrice:        0,
 				SupplierId:        "",
-				CreateBy:          "",
+				CreatedBy:         "",
 				ImportNoteDetails: nil,
 			},
 			want: common.TableImportNote,
@@ -38,7 +38,7 @@ func TestImportNoteCreate_TableName(t *testing.T) {
 				Id:                tt.fields.Id,
 				TotalPrice:        tt.fields.TotalPrice,
 				SupplierId:        tt.fields.SupplierId,
-				CreateBy:          tt.fields.CreateBy,
+				CreatedBy:         tt.fields.CreatedBy,
 				ImportNoteDetails: tt.fields.ImportNoteDetails,
 			}
 
@@ -54,9 +54,9 @@ func TestImportNoteCreate_TableName(t *testing.T) {
 func TestImportNoteCreate_Validate(t *testing.T) {
 	type fields struct {
 		Id                *string
-		TotalPrice        float32
+		TotalPrice        int
 		SupplierId        string
-		CreateBy          string
+		CreatedBy         string
 		ImportNoteDetails []importnotedetailmodel.ImportNoteDetailCreate
 	}
 
@@ -64,21 +64,18 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 	invalidId := "1312321321312"
 	validImportNoteDetail := importnotedetailmodel.ImportNoteDetailCreate{
 		IngredientId:   validId,
-		ExpiryDate:     "09/11/2023",
 		Price:          10000,
 		IsReplacePrice: true,
 		AmountImport:   100,
 	}
 	duplicateImportNoteDetail := importnotedetailmodel.ImportNoteDetailCreate{
 		IngredientId:   validId,
-		ExpiryDate:     "09/11/2023",
 		Price:          12,
 		IsReplacePrice: true,
 		AmountImport:   12,
 	}
 	invalidImportNoteDetail := importnotedetailmodel.ImportNoteDetailCreate{
 		IngredientId: "",
-		ExpiryDate:   "09/11/2023",
 		Price:        10000,
 		AmountImport: 100,
 	}
@@ -101,7 +98,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:                validImportNote.Id,
 				TotalPrice:        validImportNote.TotalPrice,
 				SupplierId:        validImportNote.SupplierId,
-				CreateBy:          validImportNote.CreateBy,
+				CreatedBy:         validImportNote.CreatedBy,
 				ImportNoteDetails: validImportNote.ImportNoteDetails,
 			},
 			wantErr: false,
@@ -112,7 +109,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:                &invalidId,
 				TotalPrice:        validImportNote.TotalPrice,
 				SupplierId:        validImportNote.SupplierId,
-				CreateBy:          validImportNote.CreateBy,
+				CreatedBy:         validImportNote.CreatedBy,
 				ImportNoteDetails: validImportNote.ImportNoteDetails,
 			},
 			wantErr: true,
@@ -123,7 +120,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:                &validId,
 				TotalPrice:        validImportNote.TotalPrice,
 				SupplierId:        "",
-				CreateBy:          validImportNote.CreateBy,
+				CreatedBy:         validImportNote.CreatedBy,
 				ImportNoteDetails: validImportNote.ImportNoteDetails,
 			},
 			wantErr: true,
@@ -134,7 +131,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:                &validId,
 				TotalPrice:        validImportNote.TotalPrice,
 				SupplierId:        validImportNote.SupplierId,
-				CreateBy:          validImportNote.CreateBy,
+				CreatedBy:         validImportNote.CreatedBy,
 				ImportNoteDetails: nil,
 			},
 			wantErr: true,
@@ -145,7 +142,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:         &validId,
 				TotalPrice: validImportNote.TotalPrice,
 				SupplierId: validImportNote.SupplierId,
-				CreateBy:   validImportNote.CreateBy,
+				CreatedBy:  validImportNote.CreatedBy,
 				ImportNoteDetails: []importnotedetailmodel.ImportNoteDetailCreate{
 					invalidImportNoteDetail,
 				},
@@ -158,7 +155,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:         &validId,
 				TotalPrice: validImportNote.TotalPrice,
 				SupplierId: validImportNote.SupplierId,
-				CreateBy:   validImportNote.CreateBy,
+				CreatedBy:  validImportNote.CreatedBy,
 				ImportNoteDetails: []importnotedetailmodel.ImportNoteDetailCreate{
 					validImportNoteDetail,
 					duplicateImportNoteDetail,
@@ -173,7 +170,7 @@ func TestImportNoteCreate_Validate(t *testing.T) {
 				Id:                tt.fields.Id,
 				TotalPrice:        tt.fields.TotalPrice,
 				SupplierId:        tt.fields.SupplierId,
-				CreateBy:          tt.fields.CreateBy,
+				CreatedBy:         tt.fields.CreatedBy,
 				ImportNoteDetails: tt.fields.ImportNoteDetails,
 			}
 

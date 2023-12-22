@@ -9,10 +9,6 @@ import (
 )
 
 type UpdateRoleRepo interface {
-	CheckFeatureExist(
-		ctx context.Context,
-		data *rolemodel.RoleUpdate,
-	) error
 	GetListRoleFeatures(
 		ctx context.Context,
 		roleId string,
@@ -47,7 +43,7 @@ func (biz *updateRoleBiz) UpdateRole(
 	ctx context.Context,
 	roleId string,
 	data *rolemodel.RoleUpdate) error {
-	if biz.requester.GetRole().Id != common.RoleAdminId {
+	if biz.requester.GetRoleId() != common.RoleAdminId {
 		return rolemodel.ErrRoleUpdateNoPermission
 	}
 
@@ -62,10 +58,6 @@ func (biz *updateRoleBiz) UpdateRole(
 	}
 
 	if data.Features != nil {
-		if err := biz.repo.CheckFeatureExist(ctx, data); err != nil {
-			return err
-		}
-
 		currentFeatures, errGetCurrentFeatures := biz.repo.GetListRoleFeatures(ctx, roleId)
 		if errGetCurrentFeatures != nil {
 			return errGetCurrentFeatures

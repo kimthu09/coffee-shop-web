@@ -143,8 +143,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(notAdminRole).
+					On("GetRoleId").
+					Return(notAdminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -162,8 +162,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -182,8 +182,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRequest.
@@ -216,8 +216,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRequest.
@@ -257,8 +257,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRequest.
@@ -306,8 +306,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRequest.
@@ -363,8 +363,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRequest.
@@ -436,8 +436,8 @@ func Test_resetPasswordBiz_ResetPassword(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRequest.

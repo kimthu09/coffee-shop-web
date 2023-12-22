@@ -4,6 +4,7 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
+	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ type mockListSupplierRepo struct {
 
 func (m *mockListSupplierRepo) ListSupplier(
 	ctx context.Context,
-	filter *suppliermodel.Filter,
+	filter *filter.Filter,
 	paging *common.Paging) ([]suppliermodel.Supplier, error) {
 	args := m.Called(ctx, filter, paging)
 	return args.Get(0).([]suppliermodel.Supplier), args.Error(1)
@@ -71,7 +72,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 	}
 	type args struct {
 		ctx    context.Context
-		filter *suppliermodel.Filter
+		filter *filter.Filter
 		paging *common.Paging
 	}
 
@@ -81,7 +82,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 	paging := common.Paging{
 		Page: 1,
 	}
-	filter := suppliermodel.Filter{
+	filterSupplier := filter.Filter{
 		SearchKey: "",
 		MinDebt:   nil,
 		MaxDebt:   nil,
@@ -106,7 +107,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 			},
 			args: args{
 				ctx:    context.Background(),
-				filter: &filter,
+				filter: &filterSupplier,
 				paging: &paging,
 			},
 			mock: func() {
@@ -126,7 +127,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 			},
 			args: args{
 				ctx:    context.Background(),
-				filter: &filter,
+				filter: &filterSupplier,
 				paging: &paging,
 			},
 			mock: func() {
@@ -139,7 +140,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 					On(
 						"ListSupplier",
 						context.Background(),
-						&filter,
+						&filterSupplier,
 						&paging).
 					Return(emptyListSuppliers, mockErr).
 					Once()
@@ -155,7 +156,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 			},
 			args: args{
 				ctx:    context.Background(),
-				filter: &filter,
+				filter: &filterSupplier,
 				paging: &paging,
 			},
 			mock: func() {
@@ -168,7 +169,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 					On(
 						"ListSupplier",
 						context.Background(),
-						&filter,
+						&filterSupplier,
 						&paging).
 					Return(listSuppliers, nil).
 					Once()

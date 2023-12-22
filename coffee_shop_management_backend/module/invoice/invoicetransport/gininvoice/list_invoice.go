@@ -31,7 +31,7 @@ func ListInvoice(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
-		biz := invoicebiz.NewListImportNoteBiz(repo, requester)
+		biz := invoicebiz.NewListInvoiceBiz(repo, requester)
 
 		result, err := biz.ListInvoice(c.Request.Context(), &filter, &paging)
 

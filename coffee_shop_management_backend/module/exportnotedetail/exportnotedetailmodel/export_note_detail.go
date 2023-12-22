@@ -7,11 +7,10 @@ import (
 )
 
 type ExportNoteDetail struct {
-	ExportNoteId string                           `json:"exportNoteId" gorm:"column:exportNoteId;"`
+	ExportNoteId string                           `json:"-" gorm:"column:exportNoteId;"`
 	IngredientId string                           `json:"-" gorm:"column:ingredientId;"`
 	Ingredient   ingredientmodel.SimpleIngredient `json:"ingredient" gorm:"foreignKey:IngredientId;references:Id"`
-	ExpiryDate   string                           `json:"expiryDate" gorm:"column:expiryDate;"`
-	AmountExport float32                          `json:"amountExport" gorm:"column:amountExport"`
+	AmountExport int                              `json:"amountExport" gorm:"column:amountExport;"`
 }
 
 func (*ExportNoteDetail) TableName() string {
@@ -23,11 +22,6 @@ var (
 		errors.New("id of ingredient is invalid"),
 		"id of ingredient is invalid",
 		"ErrExportDetailIngredientIdInvalid",
-	)
-	ErrExportDetailExpiryDateInvalid = common.NewCustomError(
-		errors.New("expiry date is invalid"),
-		"expiry date is invalid",
-		"ErrExportDetailExpiryDateInvalid",
 	)
 	ErrExportDetailAmountExportIsNotPositiveNumber = common.NewCustomError(
 		errors.New("amount export is not positive number"),

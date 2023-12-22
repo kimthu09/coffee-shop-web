@@ -6,7 +6,6 @@ import (
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/component/hasher"
 	"coffee_shop_management_backend/middleware"
-	"coffee_shop_management_backend/module/role/rolestore"
 	"coffee_shop_management_backend/module/user/userbiz"
 	"coffee_shop_management_backend/module/user/usermodel"
 	"coffee_shop_management_backend/module/user/userrepo"
@@ -28,8 +27,7 @@ func CreateUser(appCtx appctx.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMainDBConnection().Begin()
 
 		userStore := userstore.NewSQLStore(db)
-		roleStore := rolestore.NewSQLStore(db)
-		repo := userrepo.NewCreateUserRepo(userStore, roleStore)
+		repo := userrepo.NewCreateUserRepo(userStore)
 
 		md5 := hasher.NewMd5Hash()
 		gen := generator.NewShortIdGenerator()
@@ -45,6 +43,6 @@ func CreateUser(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.Id))
 	}
 }

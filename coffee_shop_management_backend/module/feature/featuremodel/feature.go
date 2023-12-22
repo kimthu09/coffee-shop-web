@@ -8,6 +8,7 @@ import (
 type Feature struct {
 	Id          string `json:"id" gorm:"column:id;"`
 	Description string `json:"description" gorm:"column:description;"`
+	GroupName   string `json:"groupName" gorm:"column:groupName"`
 }
 
 func (*Feature) TableName() string {

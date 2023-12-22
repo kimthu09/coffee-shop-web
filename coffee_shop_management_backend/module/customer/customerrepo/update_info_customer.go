@@ -6,11 +6,6 @@ import (
 )
 
 type UpdateInfoCustomerStore interface {
-	FindCustomer(
-		ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*customermodel.Customer, error)
 	UpdateCustomerInfo(
 		ctx context.Context,
 		id string,
@@ -22,22 +17,8 @@ type updateInfoCustomerRepo struct {
 	store UpdateInfoCustomerStore
 }
 
-func NewUpdateInfoSupplierRepo(store UpdateInfoCustomerStore) *updateInfoCustomerRepo {
+func NewUpdateInfoCustomerRepo(store UpdateInfoCustomerStore) *updateInfoCustomerRepo {
 	return &updateInfoCustomerRepo{store: store}
-}
-
-func (repo *updateInfoCustomerRepo) CheckExist(
-	ctx context.Context,
-	customerId string) error {
-	if _, err := repo.store.FindCustomer(
-		ctx,
-		map[string]interface{}{
-			"id": customerId,
-		},
-	); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (repo *updateInfoCustomerRepo) UpdateCustomerInfo(

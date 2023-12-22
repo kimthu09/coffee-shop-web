@@ -9,8 +9,7 @@ import (
 
 func (s *sqlStore) ListExportNoteDetail(
 	ctx context.Context,
-	exportNoteId string,
-	paging *common.Paging) ([]exportnotedetailmodel.ExportNoteDetail, error) {
+	exportNoteId string) ([]exportnotedetailmodel.ExportNoteDetail, error) {
 	var result []exportnotedetailmodel.ExportNoteDetail
 	db := s.db
 
@@ -18,14 +17,7 @@ func (s *sqlStore) ListExportNoteDetail(
 
 	db = db.Where("exportNoteId = ?", exportNoteId)
 
-	dbTemp, errPaging := handlePaging(db, paging)
-	if errPaging != nil {
-		return nil, errPaging
-	}
-	db = dbTemp
-
 	if err := db.
-		Limit(int(paging.Limit)).
 		Preload("Ingredient", func(db *gorm.DB) *gorm.DB {
 			return db.Order("Ingredient.name")
 		}).
@@ -34,15 +26,4 @@ func (s *sqlStore) ListExportNoteDetail(
 	}
 
 	return result, nil
-}
-
-func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
-	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
-
-	return db, nil
 }

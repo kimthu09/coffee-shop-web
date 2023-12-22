@@ -35,13 +35,14 @@ func Test_sqlStore_CreateExportNote(t *testing.T) {
 	}
 
 	exportNoteId := "123"
+	reason := exportnotemodel.OutOfDate
 	exportNoteCreate := exportnotemodel.ExportNoteCreate{
-		Id:         &exportNoteId,
-		TotalPrice: 0,
-		CreateBy:   "123",
+		Id:        &exportNoteId,
+		CreatedBy: "123",
+		Reason:    &reason,
 	}
 	mockErr := errors.New(mock.Anything)
-	expectedSql := "INSERT INTO `ExportNote` (`id`,`totalPrice`,`createBy`) VALUES (?,?,?)"
+	expectedSql := "INSERT INTO `ExportNote` (`id`,`createdBy`,`reason`) VALUES (?,?,?)"
 
 	tests := []struct {
 		name    string
@@ -65,8 +66,8 @@ func Test_sqlStore_CreateExportNote(t *testing.T) {
 					ExpectExec(expectedSql).
 					WithArgs(
 						*exportNoteCreate.Id,
-						exportNoteCreate.TotalPrice,
-						exportNoteCreate.CreateBy).
+						exportNoteCreate.CreatedBy,
+						*exportNoteCreate.Reason).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
@@ -87,10 +88,10 @@ func Test_sqlStore_CreateExportNote(t *testing.T) {
 					ExpectExec(expectedSql).
 					WithArgs(
 						*exportNoteCreate.Id,
-						exportNoteCreate.TotalPrice,
-						exportNoteCreate.CreateBy).
+						exportNoteCreate.CreatedBy,
+						*exportNoteCreate.Reason).
 					WillReturnError(mockErr)
-				sqlDBMock.ExpectCommit()
+				sqlDBMock.ExpectRollback()
 			},
 			wantErr: true,
 		},

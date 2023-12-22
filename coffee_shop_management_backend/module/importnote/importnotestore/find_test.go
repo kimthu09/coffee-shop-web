@@ -47,29 +47,29 @@ func Test_sqlStore_FindImportNote(t *testing.T) {
 		SupplierId: mock.Anything,
 		TotalPrice: 0,
 		Status:     &status,
-		CreateBy:   mock.Anything,
-		CloseBy:    &validId,
-		CreateAt:   &now,
-		CloseAt:    &now,
+		CreatedBy:  mock.Anything,
+		ClosedBy:   &validId,
+		CreatedAt:  &now,
+		ClosedAt:   &now,
 	}
 	importNoteRows := sqlmock.NewRows([]string{
 		"id",
 		"supplierId",
 		"totalPrice",
 		"status",
-		"createBy",
-		"closeBy",
-		"createAt",
-		"closeAt",
+		"createdBy",
+		"closedBy",
+		"createdAt",
+		"closedAt",
 	})
 	importNoteRows.AddRow(importNote.Id,
 		importNote.SupplierId,
 		importNote.TotalPrice,
-		[]byte(importNote.Status.String()),
-		importNote.CreateBy,
-		importNote.CloseBy,
-		importNote.CreateAt,
-		importNote.CloseAt)
+		importNote.Status,
+		importNote.CreatedBy,
+		importNote.ClosedBy,
+		importNote.CreatedAt,
+		importNote.ClosedAt)
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {

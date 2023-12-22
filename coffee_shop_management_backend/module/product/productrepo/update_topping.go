@@ -13,38 +13,21 @@ type UpdateToppingStore interface {
 	UpdateTopping(
 		ctx context.Context,
 		id string,
-		data *productmodel.ToppingUpdate) error
+		data *productmodel.ToppingUpdateInfo) error
 }
 
 type updateToppingRepo struct {
 	toppingStore      UpdateToppingStore
-	ingredientStore   CheckIngredientStore
 	recipeDetailStore UpdateRecipeDetailStore
 }
 
 func NewUpdateToppingRepo(
 	toppingStore UpdateToppingStore,
-	ingredientStore CheckIngredientStore,
 	recipeDetailStore UpdateRecipeDetailStore) *updateToppingRepo {
 	return &updateToppingRepo{
 		toppingStore:      toppingStore,
-		ingredientStore:   ingredientStore,
 		recipeDetailStore: recipeDetailStore,
 	}
-}
-
-func (repo *updateToppingRepo) CheckIngredient(
-	ctx context.Context,
-	data []recipedetailmodel.RecipeDetailUpdate) error {
-	for _, recipeDetail := range data {
-		if _, err := repo.ingredientStore.FindIngredient(
-			ctx,
-			map[string]interface{}{"id": recipeDetail.IngredientId},
-		); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (repo *updateToppingRepo) FindTopping(
@@ -63,7 +46,7 @@ func (repo *updateToppingRepo) FindTopping(
 func (repo *updateToppingRepo) UpdateTopping(
 	ctx context.Context,
 	id string,
-	data *productmodel.ToppingUpdate) error {
+	data *productmodel.ToppingUpdateInfo) error {
 	if err := repo.toppingStore.UpdateTopping(ctx, id, data); err != nil {
 		return err
 	}

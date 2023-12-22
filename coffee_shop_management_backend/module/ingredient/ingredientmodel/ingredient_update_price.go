@@ -9,10 +9,3 @@ type IngredientUpdatePrice struct {
 func (*IngredientUpdatePrice) TableName() string {
 	return common.TableIngredient
 }
-
-func (data *IngredientUpdatePrice) Validate() *common.AppError {
-	if data.Price != nil && common.ValidateNegativeNumber(*data.Price) {
-		return ErrIngredientPriceIsNegativeNumber
-	}
-	return nil
-}

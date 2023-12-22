@@ -9,7 +9,7 @@ import (
 func (s *sqlStore) UpdateTopping(
 	ctx context.Context,
 	id string,
-	data *productmodel.ToppingUpdate,
+	data *productmodel.ToppingUpdateInfo,
 ) error {
 
 	db := s.db

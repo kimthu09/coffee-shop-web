@@ -8,8 +8,9 @@ import (
 
 func TestSupplierUpdateDebt_TableName(t *testing.T) {
 	type fields struct {
-		Amount   *float32
-		CreateBy string
+		Id        *string
+		Amount    *int
+		CreatedBy string
 	}
 	tests := []struct {
 		name   string
@@ -19,8 +20,9 @@ func TestSupplierUpdateDebt_TableName(t *testing.T) {
 		{
 			name: "Get TableName of SupplierUpdateDebt successfully",
 			fields: fields{
-				Amount:   nil,
-				CreateBy: "",
+				Id:        nil,
+				Amount:    nil,
+				CreatedBy: "",
 			},
 			want: common.TableSupplier,
 		},
@@ -28,8 +30,9 @@ func TestSupplierUpdateDebt_TableName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			supplier := &SupplierUpdateDebt{
-				Amount:   tt.fields.Amount,
-				CreateBy: tt.fields.CreateBy,
+				Id:        tt.fields.Id,
+				Amount:    tt.fields.Amount,
+				CreatedBy: tt.fields.CreatedBy,
 			}
 			got := supplier.TableName()
 			assert.Equal(t, tt.want, got, "TableName() = %v, want %v", got, tt.want)
@@ -39,19 +42,30 @@ func TestSupplierUpdateDebt_TableName(t *testing.T) {
 
 func TestSupplierUpdateDebt_Validate(t *testing.T) {
 	type fields struct {
-		Amount   *float32
-		CreateBy string
+		Id        *string
+		Amount    *int
+		CreatedBy string
 	}
-	invalidAmount := float32(0)
-	validAmount := float32(123)
+	invalidId := "0123456789012345678901234567890"
+	invalidAmount := 0
+	validAmount := 123
 	tests := []struct {
 		name    string
 		fields  fields
 		wantErr bool
 	}{
 		{
+			name: "SupplierUpdateDebt is invalid with invalid id",
+			fields: fields{
+				Id:     &invalidId,
+				Amount: &validAmount,
+			},
+			wantErr: true,
+		},
+		{
 			name: "SupplierUpdateDebt is invalid with nil amount",
 			fields: fields{
+				Id:     nil,
 				Amount: nil,
 			},
 			wantErr: true,
@@ -59,6 +73,7 @@ func TestSupplierUpdateDebt_Validate(t *testing.T) {
 		{
 			name: "SupplierUpdateDebt is invalid with amount equal 0",
 			fields: fields{
+				Id:     nil,
 				Amount: &invalidAmount,
 			},
 			wantErr: true,
@@ -66,6 +81,7 @@ func TestSupplierUpdateDebt_Validate(t *testing.T) {
 		{
 			name: "SupplierUpdateDebt is successfully",
 			fields: fields{
+				Id:     nil,
 				Amount: &validAmount,
 			},
 			wantErr: false,
@@ -74,8 +90,9 @@ func TestSupplierUpdateDebt_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := &SupplierUpdateDebt{
-				Amount:   tt.fields.Amount,
-				CreateBy: tt.fields.CreateBy,
+				Id:        tt.fields.Id,
+				Amount:    tt.fields.Amount,
+				CreatedBy: tt.fields.CreatedBy,
 			}
 
 			err := data.Validate()

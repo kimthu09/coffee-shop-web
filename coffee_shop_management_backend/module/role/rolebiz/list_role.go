@@ -26,7 +26,7 @@ func NewListRoleBiz(
 
 func (biz *listRoleBiz) ListRole(
 	ctx context.Context) ([]rolemodel.Role, error) {
-	if biz.requester.GetRole().Id != common.RoleAdminId {
+	if biz.requester.GetRoleId() != common.RoleAdminId {
 		return nil, rolemodel.ErrRoleViewNoPermission
 	}
 

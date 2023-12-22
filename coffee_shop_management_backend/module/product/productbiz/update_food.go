@@ -17,23 +17,15 @@ type UpdateFoodRepo interface {
 		ctx context.Context,
 		id string,
 	) (*productmodel.Food, error)
-	CheckCategoryExist(
-		ctx context.Context,
-		data *productmodel.FoodUpdate,
-	) error
 	FindCategories(
 		ctx context.Context,
 		foodId string,
-	) ([]categorymodel.SimpleCategory, error)
+	) ([]categorymodel.SimpleCategoryWithId, error)
 	HandleCategory(
 		ctx context.Context,
 		foodId string,
-		deletedCategoryFood []categorymodel.SimpleCategory,
-		createdCategoryFood []categorymodel.SimpleCategory,
-	) error
-	CheckIngredientExist(
-		ctx context.Context,
-		data *productmodel.FoodUpdate,
+		deletedCategoryFood []categorymodel.SimpleCategoryWithId,
+		createdCategoryFood []categorymodel.SimpleCategoryWithId,
 	) error
 	FindSizeFoods(
 		ctx context.Context,
@@ -55,7 +47,7 @@ type UpdateFoodRepo interface {
 	UpdateFood(
 		ctx context.Context,
 		id string,
-		data *productmodel.FoodUpdate,
+		data *productmodel.FoodUpdateInfo,
 	) error
 }
 
@@ -79,7 +71,7 @@ func NewUpdateFoodBiz(
 func (biz *updateFoodBiz) UpdateFood(
 	ctx context.Context,
 	id string,
-	data *productmodel.FoodUpdate) error {
+	data *productmodel.FoodUpdateInfo) error {
 	if !biz.requester.IsHasFeature(common.FoodUpdateInfoFeatureCode) {
 		return productmodel.ErrFoodUpdateInfoNoPermission
 	}
@@ -99,13 +91,8 @@ func (biz *updateFoodBiz) UpdateFood(
 
 	//handle update category
 	if data.Categories != nil {
-		var deletedCategories []categorymodel.SimpleCategory
-		var createdCategories []categorymodel.SimpleCategory
-
-		///check category exists
-		if err := biz.repo.CheckCategoryExist(ctx, data); err != nil {
-			return err
-		}
+		var deletedCategories []categorymodel.SimpleCategoryWithId
+		var createdCategories []categorymodel.SimpleCategoryWithId
 
 		///handle get change of amount product
 		simpleCategories, err := biz.repo.FindCategories(ctx, id)
@@ -125,13 +112,13 @@ func (biz *updateFoodBiz) UpdateFood(
 			if value == 0 {
 				continue
 			} else {
-				simpleCategories := categorymodel.SimpleCategory{
+				simpleCategory := categorymodel.SimpleCategoryWithId{
 					CategoryId: key,
 				}
 				if value == 1 {
-					createdCategories = append(createdCategories, simpleCategories)
+					createdCategories = append(createdCategories, simpleCategory)
 				} else if value == -1 {
-					deletedCategories = append(deletedCategories, simpleCategories)
+					deletedCategories = append(deletedCategories, simpleCategory)
 				}
 			}
 		}
@@ -152,11 +139,6 @@ func (biz *updateFoodBiz) UpdateFood(
 		mapDeletedRecipeDetails := make(map[string][]recipedetailmodel.RecipeDetail)
 		mapUpdatedRecipeDetails := make(map[string][]recipedetailmodel.RecipeDetailUpdate)
 		mapCreatedRecipeDetails := make(map[string][]recipedetailmodel.RecipeDetailCreate)
-
-		///check ingredients exists
-		if err := biz.repo.CheckIngredientExist(ctx, data); err != nil {
-			return err
-		}
 
 		///get current size foods
 		currentSizeFoods, err := biz.repo.FindSizeFoods(ctx, id)
@@ -262,12 +244,12 @@ func getSizeFoodCreateFromSizeFoodUpdate(
 		name = *size.Name
 	}
 
-	cost := float32(-1.0)
+	cost := -1
 	if size.Cost != nil {
 		cost = *size.Cost
 	}
 
-	price := float32(-1.0)
+	price := -1
 	if size.Price != nil {
 		price = *size.Price
 	}

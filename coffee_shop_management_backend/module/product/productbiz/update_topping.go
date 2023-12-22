@@ -9,10 +9,6 @@ import (
 )
 
 type UpdateToppingRepo interface {
-	CheckIngredient(
-		ctx context.Context,
-		data []recipedetailmodel.RecipeDetailUpdate,
-	) error
 	FindTopping(
 		ctx context.Context,
 		id string,
@@ -20,7 +16,7 @@ type UpdateToppingRepo interface {
 	UpdateTopping(
 		ctx context.Context,
 		id string,
-		data *productmodel.ToppingUpdate,
+		data *productmodel.ToppingUpdateInfo,
 	) error
 	UpdateRecipeDetailsOfRecipe(
 		ctx context.Context,
@@ -52,7 +48,7 @@ func NewUpdateToppingBiz(
 func (biz *updateToppingBiz) UpdateTopping(
 	ctx context.Context,
 	id string,
-	data *productmodel.ToppingUpdate) error {
+	data *productmodel.ToppingUpdateInfo) error {
 	if !biz.requester.IsHasFeature(common.ToppingUpdateInfoFeatureCode) {
 		return productmodel.ErrToppingUpdateInfoNoPermission
 	}
@@ -88,11 +84,7 @@ func (biz *updateToppingBiz) UpdateTopping(
 func (biz *updateToppingBiz) updateRecipe(
 	ctx context.Context,
 	recipeId string,
-	data *productmodel.ToppingUpdate) error {
-	if err := biz.repo.CheckIngredient(ctx, data.Recipe.Details); err != nil {
-		return err
-	}
-
+	data *productmodel.ToppingUpdateInfo) error {
 	currentRecipeDetails, err := biz.repo.FindRecipeDetails(ctx, recipeId)
 	if err != nil {
 		return err

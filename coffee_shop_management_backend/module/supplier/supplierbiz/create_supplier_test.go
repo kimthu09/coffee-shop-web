@@ -4,13 +4,11 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
-	"coffee_shop_management_backend/module/role/rolemodel"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"reflect"
 	"testing"
 )
 
@@ -54,9 +52,9 @@ func (m *mockRequester) GetEmail() string {
 	args := m.Called()
 	return args.String(0)
 }
-func (m *mockRequester) GetRole() rolemodel.Role {
+func (m *mockRequester) GetRoleId() string {
 	args := m.Called()
-	return args.Get(0).(rolemodel.Role)
+	return args.Get(0).(string)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
 	args := m.Called(featureCode)
@@ -95,15 +93,13 @@ func TestNewCreateSupplierBiz(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewCreateSupplierBiz(tt.args.gen, tt.args.repo, tt.args.requester); !reflect.DeepEqual(got, tt.want) {
-				got := NewCreateSupplierBiz(
-					tt.args.gen,
-					tt.args.repo,
-					tt.args.requester,
-				)
+			got := NewCreateSupplierBiz(
+				tt.args.gen,
+				tt.args.repo,
+				tt.args.requester,
+			)
 
-				assert.Equal(t, tt.want, got, "NewCreateSupplierBiz() = %v, want %v", got, tt.want)
-			}
+			assert.Equal(t, tt.want, got, "NewCreateSupplierBiz() = %v, want %v", got, tt.want)
 		})
 	}
 }
@@ -126,12 +122,16 @@ func Test_createSupplierBiz_CreateSupplier(t *testing.T) {
 	validEmail := "a@gmail.com"
 	validPhone := "0123456789"
 	validId := "0123456789"
+	validName := mock.Anything
+	validDebt := -100
 	supplierCreate := suppliermodel.SupplierCreate{
 		Id:    nil,
-		Name:  mock.Anything,
+		Name:  validName,
 		Email: validEmail,
 		Phone: validPhone,
+		Debt:  validDebt,
 	}
+
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -183,7 +183,7 @@ func Test_createSupplierBiz_CreateSupplier(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Create supplier failed because data is invalid",
+			name: "Create supplier failed because can not generate id",
 			fields: fields{
 				gen:       mockGenerator,
 				repo:      mockRepo,

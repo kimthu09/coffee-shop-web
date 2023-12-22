@@ -9,14 +9,6 @@ import (
 )
 
 type CreateFoodRepo interface {
-	CheckCategoryExist(
-		ctx context.Context,
-		data *productmodel.FoodCreate,
-	) error
-	CheckIngredientExist(
-		ctx context.Context,
-		data *productmodel.FoodCreate,
-	) error
 	CreateFood(
 		ctx context.Context,
 		data *productmodel.FoodCreate,
@@ -61,14 +53,6 @@ func (biz *createFoodBiz) CreateFood(
 	}
 
 	if err := handleFoodId(biz.gen, data); err != nil {
-		return err
-	}
-
-	if err := biz.repo.CheckCategoryExist(ctx, data); err != nil {
-		return err
-	}
-
-	if err := biz.repo.CheckIngredientExist(ctx, data); err != nil {
 		return err
 	}
 

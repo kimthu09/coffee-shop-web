@@ -43,6 +43,6 @@ func ResetPassword(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

@@ -8,14 +8,14 @@ import (
 )
 
 type InvoiceDetailTopping struct {
-	Id    string  `json:"id"`
-	Name  string  `json:"name"`
-	Price float32 `json:"price"`
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Price int    `json:"price"`
 }
 
 func (data *InvoiceDetailTopping) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
-	if ok {
+	if !ok {
 		return errors.New(fmt.Sprint("Failed to unmarshal JSONB value", value))
 	}
 
@@ -40,7 +40,7 @@ type InvoiceDetailToppings []InvoiceDetailTopping
 
 func (data *InvoiceDetailToppings) Scan(value interface{}) error {
 	bytes, ok := value.([]byte)
-	if ok {
+	if !ok {
 		return errors.New(fmt.Sprintf("Failed to unmarshal JSONB %s", value))
 	}
 

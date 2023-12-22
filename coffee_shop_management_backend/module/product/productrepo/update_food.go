@@ -18,7 +18,7 @@ type UpdateFoodStore interface {
 	UpdateFood(
 		ctx context.Context,
 		id string,
-		data *productmodel.FoodUpdate,
+		data *productmodel.FoodUpdateInfo,
 	) error
 }
 
@@ -26,7 +26,7 @@ type CreateOrDeleteCategoryFoodStore interface {
 	FindListCategories(
 		ctx context.Context,
 		foodId string,
-	) ([]categorymodel.SimpleCategory, error)
+	) ([]categorymodel.SimpleCategoryWithId, error)
 	CreateCategoryFood(
 		ctx context.Context,
 		data *categoryfoodmodel.CategoryFoodCreate,
@@ -90,13 +90,12 @@ type UpdateRecipeDetailStore interface {
 	) error
 }
 
-type updateFoodBiz struct {
+type updateFoodRepo struct {
 	foodStore         UpdateFoodStore
 	categoryFoodStore CreateOrDeleteCategoryFoodStore
 	categoryStore     UpdateCategoryStore
 	sizeFoodStore     UpdateSizeFoodStore
 	recipeStore       UpdateRecipeStore
-	ingredientStore   CheckIngredientStore
 	recipeDetailStore UpdateRecipeDetailStore
 }
 
@@ -106,20 +105,18 @@ func NewUpdateFoodRepo(
 	categoryStore UpdateCategoryStore,
 	sizeFoodStore UpdateSizeFoodStore,
 	recipeStore UpdateRecipeStore,
-	ingredientStore CheckIngredientStore,
-	recipeDetailStore UpdateRecipeDetailStore) *updateFoodBiz {
-	return &updateFoodBiz{
+	recipeDetailStore UpdateRecipeDetailStore) *updateFoodRepo {
+	return &updateFoodRepo{
 		foodStore:         foodStore,
 		categoryFoodStore: categoryFoodStore,
 		categoryStore:     categoryStore,
 		sizeFoodStore:     sizeFoodStore,
 		recipeStore:       recipeStore,
-		ingredientStore:   ingredientStore,
 		recipeDetailStore: recipeDetailStore,
 	}
 }
 
-func (repo *updateFoodBiz) FindFood(
+func (repo *updateFoodRepo) FindFood(
 	ctx context.Context,
 	id string) (*productmodel.Food, error) {
 	currentFood, err := repo.foodStore.FindFood(
@@ -132,22 +129,9 @@ func (repo *updateFoodBiz) FindFood(
 	return currentFood, nil
 }
 
-func (repo *updateFoodBiz) CheckCategoryExist(
+func (repo *updateFoodRepo) FindCategories(
 	ctx context.Context,
-	data *productmodel.FoodUpdate) error {
-	for _, v := range *data.Categories {
-		if _, err := repo.categoryStore.FindCategory(
-			ctx,
-			map[string]interface{}{"id": v}); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (repo *updateFoodBiz) FindCategories(
-	ctx context.Context,
-	foodId string) ([]categorymodel.SimpleCategory, error) {
+	foodId string) ([]categorymodel.SimpleCategoryWithId, error) {
 	simpleCategories, err := repo.categoryFoodStore.FindListCategories(ctx, foodId)
 	if err != nil {
 		return nil, err
@@ -155,30 +139,11 @@ func (repo *updateFoodBiz) FindCategories(
 	return simpleCategories, nil
 }
 
-func (repo *updateFoodBiz) CheckIngredientExist(
-	ctx context.Context,
-	data *productmodel.FoodUpdate) error {
-	for _, size := range *data.Sizes {
-		if size.Recipe == nil {
-			continue
-		}
-		for _, recipeDetail := range size.Recipe.Details {
-			if _, err := repo.ingredientStore.FindIngredient(
-				ctx,
-				map[string]interface{}{"id": recipeDetail.IngredientId},
-			); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
-func (repo *updateFoodBiz) HandleCategory(
+func (repo *updateFoodRepo) HandleCategory(
 	ctx context.Context,
 	foodId string,
-	deletedCategoryFood []categorymodel.SimpleCategory,
-	createdCategoryFood []categorymodel.SimpleCategory) error {
+	deletedCategoryFood []categorymodel.SimpleCategoryWithId,
+	createdCategoryFood []categorymodel.SimpleCategoryWithId) error {
 	for _, v := range deletedCategoryFood {
 		if err := repo.updateAmountProduct(ctx, v.CategoryId, -1); err != nil {
 			return err
@@ -199,10 +164,10 @@ func (repo *updateFoodBiz) HandleCategory(
 	return nil
 }
 
-func (repo *updateFoodBiz) deleteCategoryFood(
+func (repo *updateFoodRepo) deleteCategoryFood(
 	ctx context.Context,
 	foodId string,
-	deletedCategoryFood []categorymodel.SimpleCategory) error {
+	deletedCategoryFood []categorymodel.SimpleCategoryWithId) error {
 	for _, v := range deletedCategoryFood {
 		if err := repo.categoryFoodStore.DeleteCategoryFood(ctx, map[string]interface{}{
 			"foodId":     foodId,
@@ -214,10 +179,10 @@ func (repo *updateFoodBiz) deleteCategoryFood(
 	return nil
 }
 
-func (repo *updateFoodBiz) creatCategoryFood(
+func (repo *updateFoodRepo) creatCategoryFood(
 	ctx context.Context,
 	foodId string,
-	createdRecipeDetails []categorymodel.SimpleCategory) error {
+	createdRecipeDetails []categorymodel.SimpleCategoryWithId) error {
 	for _, v := range createdRecipeDetails {
 		categoryFoodCreate := categoryfoodmodel.CategoryFoodCreate{
 			FoodId:     foodId,
@@ -232,7 +197,7 @@ func (repo *updateFoodBiz) creatCategoryFood(
 	return nil
 }
 
-func (repo *updateFoodBiz) updateAmountProduct(
+func (repo *updateFoodRepo) updateAmountProduct(
 	ctx context.Context,
 	categoryId string,
 	amount int) error {
@@ -246,7 +211,7 @@ func (repo *updateFoodBiz) updateAmountProduct(
 	return nil
 }
 
-func (repo *updateFoodBiz) FindSizeFoods(
+func (repo *updateFoodRepo) FindSizeFoods(
 	ctx context.Context,
 	foodId string) ([]sizefoodmodel.SizeFood, error) {
 	sizeFoods, err := repo.sizeFoodStore.FindListSizeFood(ctx, foodId)
@@ -256,7 +221,7 @@ func (repo *updateFoodBiz) FindSizeFoods(
 	return sizeFoods, nil
 }
 
-func (repo *updateFoodBiz) FindRecipeDetails(
+func (repo *updateFoodRepo) FindRecipeDetails(
 	ctx context.Context,
 	recipeId string) ([]recipedetailmodel.RecipeDetail, error) {
 	recipeDetails, err := repo.recipeDetailStore.FindListRecipeDetail(
@@ -269,7 +234,7 @@ func (repo *updateFoodBiz) FindRecipeDetails(
 	return recipeDetails, nil
 }
 
-func (repo *updateFoodBiz) HandleSizeFoods(
+func (repo *updateFoodRepo) HandleSizeFoods(
 	ctx context.Context,
 	foodId string,
 	deletedSizeFood []sizefoodmodel.SizeFood,
@@ -296,11 +261,17 @@ func (repo *updateFoodBiz) HandleSizeFoods(
 	return nil
 }
 
-func (repo *updateFoodBiz) handleDeleteSizeFoods(
+func (repo *updateFoodRepo) handleDeleteSizeFoods(
 	ctx context.Context,
 	foodId string,
 	deletedSizeFood []sizefoodmodel.SizeFood) error {
 	for _, v := range deletedSizeFood {
+		if err := repo.recipeDetailStore.DeleteRecipeDetail(ctx, map[string]interface{}{
+			"recipeId": v.RecipeId,
+		}); err != nil {
+			return err
+		}
+
 		if err := repo.sizeFoodStore.DeleteSizeFood(ctx, map[string]interface{}{
 			"foodId": foodId,
 			"sizeId": v.SizeId,
@@ -313,17 +284,11 @@ func (repo *updateFoodBiz) handleDeleteSizeFoods(
 		}); err != nil {
 			return err
 		}
-
-		if err := repo.recipeDetailStore.DeleteRecipeDetail(ctx, map[string]interface{}{
-			"recipeId": v.RecipeId,
-		}); err != nil {
-			return err
-		}
 	}
 	return nil
 }
 
-func (repo *updateFoodBiz) handleUpdateSizeFoods(
+func (repo *updateFoodRepo) handleUpdateSizeFoods(
 	ctx context.Context,
 	foodId string,
 	updatedSizeFood []sizefoodmodel.SizeFoodUpdate,
@@ -352,7 +317,7 @@ func (repo *updateFoodBiz) handleUpdateSizeFoods(
 	return nil
 }
 
-func (repo *updateFoodBiz) handleUpdateRecipeDetail(
+func (repo *updateFoodRepo) handleUpdateRecipeDetail(
 	ctx context.Context,
 	recipeId string,
 	deletedRecipeDetails []recipedetailmodel.RecipeDetail,
@@ -370,7 +335,7 @@ func (repo *updateFoodBiz) handleUpdateRecipeDetail(
 	return nil
 }
 
-func (repo *updateFoodBiz) deleteRecipeDetails(
+func (repo *updateFoodRepo) deleteRecipeDetails(
 	ctx context.Context,
 	recipeId string,
 	deletedRecipeDetails []recipedetailmodel.RecipeDetail) error {
@@ -385,7 +350,7 @@ func (repo *updateFoodBiz) deleteRecipeDetails(
 	return nil
 }
 
-func (repo *updateFoodBiz) updateRecipeDetails(
+func (repo *updateFoodRepo) updateRecipeDetails(
 	ctx context.Context,
 	recipeId string,
 	updatedRecipeDetails []recipedetailmodel.RecipeDetailUpdate) error {
@@ -402,7 +367,7 @@ func (repo *updateFoodBiz) updateRecipeDetails(
 	return nil
 }
 
-func (repo *updateFoodBiz) creatRecipeDetails(
+func (repo *updateFoodRepo) creatRecipeDetails(
 	ctx context.Context,
 	createdRecipeDetails []recipedetailmodel.RecipeDetailCreate) error {
 	if err := repo.recipeDetailStore.CreateListRecipeDetail(
@@ -413,14 +378,10 @@ func (repo *updateFoodBiz) creatRecipeDetails(
 	return nil
 }
 
-func (repo *updateFoodBiz) handleCreateSizeFoods(
+func (repo *updateFoodRepo) handleCreateSizeFoods(
 	ctx context.Context,
 	createdSizeFood []sizefoodmodel.SizeFoodCreate) error {
 	for _, v := range createdSizeFood {
-		if err := repo.sizeFoodStore.CreateSizeFood(ctx, &v); err != nil {
-			return err
-		}
-
 		if err := repo.recipeStore.CreateRecipe(ctx, v.Recipe); err != nil {
 			return err
 		}
@@ -430,14 +391,18 @@ func (repo *updateFoodBiz) handleCreateSizeFoods(
 			v.Recipe.Details); err != nil {
 			return err
 		}
+
+		if err := repo.sizeFoodStore.CreateSizeFood(ctx, &v); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func (repo *updateFoodBiz) UpdateFood(
+func (repo *updateFoodRepo) UpdateFood(
 	ctx context.Context,
 	id string,
-	data *productmodel.FoodUpdate) error {
+	data *productmodel.FoodUpdateInfo) error {
 	if err := repo.foodStore.UpdateFood(ctx, id, data); err != nil {
 		return err
 	}

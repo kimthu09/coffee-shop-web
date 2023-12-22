@@ -19,8 +19,9 @@ func (m *mockListExportNoteStore) ListExportNote(
 	filter *exportnotemodel.Filter,
 	propertiesContainSearchKey []string,
 	paging *common.Paging,
+	moreKeys ...string,
 ) ([]exportnotemodel.ExportNote, error) {
-	args := m.Called(ctx, filter, propertiesContainSearchKey, paging)
+	args := m.Called(ctx, filter, propertiesContainSearchKey, paging, moreKeys)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -70,26 +71,25 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 	mockExportNote := new(mockListExportNoteStore)
 	mockFilter := exportnotemodel.Filter{
 		SearchKey: "",
-		MinPrice:  nil,
-		MaxPrice:  nil,
 	}
 	mockPaging := common.Paging{
 		Page: 1,
 	}
 	mockExportNotes := []exportnotemodel.ExportNote{
 		{
-			Id:         mock.Anything,
-			TotalPrice: 0,
-			CreateAt:   nil,
-			CreateBy:   mock.Anything,
+			Id:        mock.Anything,
+			Reason:    nil,
+			CreatedAt: nil,
+			CreatedBy: mock.Anything,
 		},
 		{
-			Id:         mock.Anything,
-			TotalPrice: 0,
-			CreateAt:   nil,
-			CreateBy:   mock.Anything,
+			Id:        mock.Anything,
+			Reason:    nil,
+			CreatedAt: nil,
+			CreatedBy: mock.Anything,
 		},
 	}
+	moreKeys := []string{"CreatedByUser"}
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -101,7 +101,7 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "List cancel note successfully",
+			name: "List export note successfully",
 			fields: fields{
 				store: mockExportNote,
 			},
@@ -117,7 +117,8 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 						context.Background(),
 						&mockFilter,
 						mock.Anything,
-						&mockPaging).
+						&mockPaging,
+						moreKeys).
 					Return(mockExportNotes, nil).
 					Once()
 			},
@@ -125,7 +126,7 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "List cancel note successfully",
+			name: "List export note successfully",
 			fields: fields{
 				store: mockExportNote,
 			},
@@ -141,7 +142,8 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 						context.Background(),
 						&mockFilter,
 						mock.Anything,
-						&mockPaging).
+						&mockPaging,
+						moreKeys).
 					Return(nil, mockErr).
 					Once()
 			},

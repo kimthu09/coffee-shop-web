@@ -1,17 +1,14 @@
 package importnoterepo
 
 import (
-	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/common/enum"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
 	"coffee_shop_management_backend/module/importnotedetail/importnotedetailmodel"
 	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
-	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailmodel"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebtmodel"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -55,36 +52,6 @@ func (m *mockGetImportNoteDetailStore) FindListImportNoteDetail(
 		args.Error(1)
 }
 
-type mockUpdateOrCreateIngredientDetailStore struct {
-	mock.Mock
-}
-
-func (m *mockUpdateOrCreateIngredientDetailStore) FindIngredientDetail(
-	ctx context.Context,
-	conditions map[string]interface{},
-	moreKeys ...string) (*ingredientdetailmodel.IngredientDetail, error) {
-	args := m.Called(ctx, conditions, moreKeys)
-	if args.Get(0) == nil {
-		return nil, args.Error(1)
-	}
-	return args.Get(0).(*ingredientdetailmodel.IngredientDetail),
-		args.Error(1)
-}
-func (m *mockUpdateOrCreateIngredientDetailStore) UpdateIngredientDetail(
-	ctx context.Context,
-	ingredientId string,
-	expiryDate string,
-	data *ingredientdetailmodel.IngredientDetailUpdate) error {
-	args := m.Called(ctx, ingredientId, expiryDate, data)
-	return args.Error(0)
-}
-func (m *mockUpdateOrCreateIngredientDetailStore) CreateIngredientDetail(
-	ctx context.Context,
-	data *ingredientdetailmodel.IngredientDetailCreate) error {
-	args := m.Called(ctx, data)
-	return args.Error(0)
-}
-
 type mockUpdateAmountIngredientStore struct {
 	mock.Mock
 }
@@ -101,14 +68,15 @@ type mockUpdateDebtOfSupplierStore struct {
 	mock.Mock
 }
 
-func (m *mockUpdateDebtOfSupplierStore) GetDebtSupplier(
+func (m *mockUpdateDebtOfSupplierStore) FindSupplier(
 	ctx context.Context,
-	supplierId string) (*float32, error) {
-	args := m.Called(ctx, supplierId)
+	conditions map[string]interface{},
+	moreKeys ...string) (*suppliermodel.Supplier, error) {
+	args := m.Called(ctx, conditions, moreKeys)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*float32), args.Error(1)
+	return args.Get(0).(*suppliermodel.Supplier), args.Error(1)
 }
 func (m *mockUpdateDebtOfSupplierStore) UpdateSupplierDebt(
 	ctx context.Context,
@@ -131,18 +99,16 @@ func (m *mockCreateSupplierDebtStorage) CreateSupplierDebt(
 
 func TestNewChangeStatusImportNoteRepo(t *testing.T) {
 	type args struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 
 	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
 	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
 	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
 	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
 	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
 
@@ -157,7 +123,6 @@ func TestNewChangeStatusImportNoteRepo(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -165,7 +130,6 @@ func TestNewChangeStatusImportNoteRepo(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -177,7 +141,6 @@ func TestNewChangeStatusImportNoteRepo(t *testing.T) {
 				tt.args.importNoteStore,
 				tt.args.importNoteDetailStore,
 				tt.args.ingredientStore,
-				tt.args.ingredientDetailStore,
 				tt.args.supplierStore,
 				tt.args.supplierDebtStore)
 
@@ -193,12 +156,11 @@ func TestNewChangeStatusImportNoteRepo(t *testing.T) {
 
 func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 	type args struct {
 		ctx            context.Context
@@ -209,30 +171,34 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
 	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
 	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
 	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
 	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
 
 	supplierId := mock.Anything
+
+	conditionFindSupplier := map[string]interface{}{"id": supplierId}
+	var moreKeys []string
+	supplier := suppliermodel.Supplier{
+		Debt: -30000,
+	}
+
 	importNoteId := mock.Anything
 	status := importnotemodel.Done
-	importDebt := float32(10000)
-	currentDebt := float32(30000)
 	debtType := enum.Debt
 	importNote := importnotemodel.ImportNoteUpdate{
-		CloseBy:    mock.Anything,
+		ClosedBy:   mock.Anything,
 		Id:         importNoteId,
 		SupplierId: supplierId,
-		TotalPrice: importDebt,
+		TotalPrice: 10000,
 		Status:     &status,
 	}
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
 		Id:         mock.Anything,
 		SupplierId: supplierId,
-		Amount:     importDebt,
-		AmountLeft: currentDebt + importDebt,
+		Amount:     -10000,
+		AmountLeft: -40000,
 		DebtType:   &debtType,
-		CreateBy:   mock.Anything,
+		CreatedBy:  mock.Anything,
 	}
 	mockErr := errors.New(mock.Anything)
 
@@ -249,7 +215,6 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -261,10 +226,10 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 			mock: func() {
 				mockSupplierStore.
 					On(
-						"GetDebtSupplier",
+						"FindSupplier",
 						context.Background(),
-						supplierId,
-						mock.Anything).
+						conditionFindSupplier,
+						moreKeys).
 					Return(
 						nil,
 						mockErr).
@@ -278,7 +243,6 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -290,12 +254,12 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 			mock: func() {
 				mockSupplierStore.
 					On(
-						"GetDebtSupplier",
+						"FindSupplier",
 						context.Background(),
-						supplierId,
-						mock.Anything).
+						conditionFindSupplier,
+						moreKeys).
 					Return(
-						&currentDebt,
+						&supplier,
 						nil).
 					Once()
 
@@ -315,7 +279,6 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -327,12 +290,12 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 			mock: func() {
 				mockSupplierStore.
 					On(
-						"GetDebtSupplier",
+						"FindSupplier",
 						context.Background(),
-						supplierId,
-						mock.Anything).
+						conditionFindSupplier,
+						moreKeys).
 					Return(
-						&currentDebt,
+						&supplier,
 						nil).
 					Once()
 
@@ -353,7 +316,6 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 				importNoteStore:       tt.fields.importNoteStore,
 				importNoteDetailStore: tt.fields.importNoteDetailStore,
 				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
 				supplierStore:         tt.fields.supplierStore,
 				supplierDebtStore:     tt.fields.supplierDebtStore,
 			}
@@ -362,9 +324,9 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 
 			err := repo.CreateSupplierDebt(tt.args.ctx, tt.args.supplierDebtId, tt.args.importNote)
 			if tt.wantErr {
-				assert.NotNil(t, err, "CheckIngredient() error = %v, wantErr %v", err, tt.wantErr)
+				assert.NotNil(t, err, "CreateSupplierDebt() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
-				assert.Nil(t, err, "CheckIngredient() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Nil(t, err, "CreateSupplierDebt() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
@@ -372,12 +334,11 @@ func Test_changeStatusImportNoteRepo_CreateSupplierDebt(t *testing.T) {
 
 func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 	type args struct {
 		ctx          context.Context
@@ -387,7 +348,6 @@ func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
 	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
 	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
 	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
 	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
 
@@ -410,7 +370,6 @@ func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -439,7 +398,6 @@ func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -469,7 +427,6 @@ func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 				importNoteStore:       tt.fields.importNoteStore,
 				importNoteDetailStore: tt.fields.importNoteDetailStore,
 				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
 				supplierStore:         tt.fields.supplierStore,
 				supplierDebtStore:     tt.fields.supplierDebtStore,
 			}
@@ -489,12 +446,11 @@ func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 
 func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 	type args struct {
 		ctx          context.Context
@@ -504,7 +460,6 @@ func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
 	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
 	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
 	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
 	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
 
@@ -514,14 +469,12 @@ func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 		{
 			ImportNoteId: importNoteId,
 			IngredientId: mock.Anything,
-			ExpiryDate:   mock.Anything,
 			Price:        0,
 			AmountImport: 0,
 		},
 		{
 			ImportNoteId: importNoteId,
 			IngredientId: mock.Anything,
-			ExpiryDate:   mock.Anything,
 			Price:        0,
 			AmountImport: 0,
 		},
@@ -541,7 +494,6 @@ func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -570,7 +522,6 @@ func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -600,7 +551,6 @@ func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 				importNoteStore:       tt.fields.importNoteStore,
 				importNoteDetailStore: tt.fields.importNoteDetailStore,
 				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
 				supplierStore:         tt.fields.supplierStore,
 				supplierDebtStore:     tt.fields.supplierDebtStore,
 			}
@@ -619,434 +569,13 @@ func Test_changeStatusImportNoteRepo_FindListImportNoteDetail(t *testing.T) {
 	}
 }
 
-func Test_changeStatusImportNoteRepo_HandleIngredientDetails(t *testing.T) {
-	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
-	}
-	type args struct {
-		ctx               context.Context
-		importNoteDetails []importnotedetailmodel.ImportNoteDetail
-	}
-
-	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
-	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
-	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
-	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
-	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
-
-	importNoteId := mock.Anything
-	importNoteDetail := importnotedetailmodel.ImportNoteDetail{
-		ImportNoteId: importNoteId,
-		IngredientId: mock.Anything,
-		ExpiryDate:   mock.Anything,
-		Price:        0,
-		AmountImport: 0,
-	}
-	importNoteDetails := []importnotedetailmodel.ImportNoteDetail{
-		importNoteDetail,
-		importNoteDetail,
-	}
-	ingredientDetail := ingredientdetailmodel.IngredientDetail{}
-	createIngredientDetail := ingredientdetailmodel.IngredientDetailCreate{
-		IngredientId: importNoteDetail.IngredientId,
-		ExpiryDate:   importNoteDetail.ExpiryDate,
-		Amount:       importNoteDetail.AmountImport,
-	}
-	updateIngredientDetail := ingredientdetailmodel.IngredientDetailUpdate{
-		IngredientId: importNoteDetail.IngredientId,
-		ExpiryDate:   importNoteDetail.ExpiryDate,
-		Amount:       importNoteDetail.AmountImport,
-	}
-
-	mockNormalErr := errors.New(mock.Anything)
-	mockRecordNotFoundErr := common.ErrRecordNotFound()
-
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		mock    func()
-		wantErr bool
-	}{
-		{
-			name: "Handle ingredient detail failed because database has some error",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:               context.Background(),
-				importNoteDetails: importNoteDetails,
-			},
-			mock: func() {
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						nil,
-						mockNormalErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Handle ingredient detail failed because can not update ingredient detail",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:               context.Background(),
-				importNoteDetails: importNoteDetails,
-			},
-			mock: func() {
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						nil,
-						mockRecordNotFoundErr).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						&ingredientDetail,
-						nil).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"UpdateIngredientDetail",
-						context.Background(),
-						updateIngredientDetail.IngredientId,
-						updateIngredientDetail.ExpiryDate,
-						&updateIngredientDetail).
-					Return(mockNormalErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Handle ingredient detail failed because can not create ingredient detail",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:               context.Background(),
-				importNoteDetails: importNoteDetails,
-			},
-			mock: func() {
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						nil,
-						mockRecordNotFoundErr).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						&ingredientDetail,
-						nil).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"UpdateIngredientDetail",
-						context.Background(),
-						updateIngredientDetail.IngredientId,
-						updateIngredientDetail.ExpiryDate,
-						&updateIngredientDetail).
-					Return(nil).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"CreateIngredientDetail",
-						context.Background(),
-						&createIngredientDetail).
-					Return(mockNormalErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Handle ingredient detail successfully because can not create ingredient detail",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:               context.Background(),
-				importNoteDetails: importNoteDetails,
-			},
-			mock: func() {
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						nil,
-						mockRecordNotFoundErr).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"FindIngredientDetail",
-						context.Background(),
-						map[string]interface{}{
-							"ingredientId": mock.Anything,
-							"expiryDate":   mock.Anything,
-						},
-						mock.Anything).
-					Return(
-						&ingredientDetail,
-						nil).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"UpdateIngredientDetail",
-						context.Background(),
-						updateIngredientDetail.IngredientId,
-						updateIngredientDetail.ExpiryDate,
-						&updateIngredientDetail).
-					Return(nil).
-					Once()
-
-				mockIngredientDetailStore.
-					On(
-						"CreateIngredientDetail",
-						context.Background(),
-						&createIngredientDetail).
-					Return(nil).
-					Once()
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := &changeStatusImportNoteRepo{
-				importNoteStore:       tt.fields.importNoteStore,
-				importNoteDetailStore: tt.fields.importNoteDetailStore,
-				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
-				supplierStore:         tt.fields.supplierStore,
-				supplierDebtStore:     tt.fields.supplierDebtStore,
-			}
-
-			tt.mock()
-
-			err := repo.HandleIngredientDetails(tt.args.ctx, tt.args.importNoteDetails)
-			if tt.wantErr {
-				assert.NotNil(t, err, "HandleIngredientDetails() error = %v, wantErr %v", err, tt.wantErr)
-			} else {
-				assert.Nil(t, err, "HandleIngredientDetails() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func Test_changeStatusImportNoteRepo_HandleIngredientTotalAmount(t *testing.T) {
-	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
-	}
-	type args struct {
-		ctx                             context.Context
-		ingredientTotalAmountNeedUpdate map[string]float32
-	}
-
-	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
-	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
-	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
-	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
-	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
-
-	ingredientKey1 := mock.Anything
-	ingredientAmount1 := float32(30)
-	ingredientKey2 := mock.Anything
-	ingredientAmount2 := float32(60)
-	ingredientTotalAmountNeedUpdate := map[string]float32{
-		ingredientKey1: ingredientAmount1,
-		ingredientKey2: ingredientAmount2,
-	}
-	ingredientUpdate1 := ingredientmodel.IngredientUpdateAmount{
-		Amount: ingredientAmount1,
-	}
-	ingredientUpdate2 := ingredientmodel.IngredientUpdateAmount{
-		Amount: ingredientAmount2,
-	}
-	mockErr := errors.New(mock.Anything)
-
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		mock    func()
-		wantErr bool
-	}{
-		{
-			name: "Handle ingredient total amount failed because can not update amount of ingredient",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:                             context.Background(),
-				ingredientTotalAmountNeedUpdate: ingredientTotalAmountNeedUpdate,
-			},
-			mock: func() {
-				mockIngredientStore.
-					On(
-						"UpdateAmountIngredient",
-						context.Background(),
-						ingredientKey2,
-						&ingredientUpdate2).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Handle ingredient total amount failed because can not update amount of ingredient",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:                             context.Background(),
-				ingredientTotalAmountNeedUpdate: ingredientTotalAmountNeedUpdate,
-			},
-			mock: func() {
-				mockIngredientStore.
-					On(
-						"UpdateAmountIngredient",
-						context.Background(),
-						ingredientKey1,
-						&ingredientUpdate1).
-					Return(nil).
-					Once()
-
-				mockIngredientStore.
-					On(
-						"UpdateAmountIngredient",
-						context.Background(),
-						ingredientKey2,
-						&ingredientUpdate2).
-					Return(nil).
-					Once()
-			},
-			wantErr: false,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := &changeStatusImportNoteRepo{
-				importNoteStore:       tt.fields.importNoteStore,
-				importNoteDetailStore: tt.fields.importNoteDetailStore,
-				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
-				supplierStore:         tt.fields.supplierStore,
-				supplierDebtStore:     tt.fields.supplierDebtStore,
-			}
-
-			tt.mock()
-
-			err := repo.HandleIngredientTotalAmount(tt.args.ctx, tt.args.ingredientTotalAmountNeedUpdate)
-			if tt.wantErr {
-				assert.NotNil(t, err, "HandleIngredientTotalAmount() error = %v, wantErr %v", err, tt.wantErr)
-			} else {
-				assert.Nil(t, err, "HandleIngredientTotalAmount() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
 func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 
 	type args struct {
@@ -1057,7 +586,6 @@ func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
 	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
 	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
 	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
 	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
 
@@ -1065,8 +593,10 @@ func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 		SupplierId: mock.Anything,
 		TotalPrice: 100,
 	}
+
+	amount := -importNote.TotalPrice
 	supplierUpdateDebt := suppliermodel.SupplierUpdateDebt{
-		Amount: &importNote.TotalPrice,
+		Amount: &amount,
 	}
 	mockErr := errors.New(mock.Anything)
 
@@ -1083,7 +613,6 @@ func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -1109,7 +638,6 @@ func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -1136,7 +664,6 @@ func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 				importNoteStore:       tt.fields.importNoteStore,
 				importNoteDetailStore: tt.fields.importNoteDetailStore,
 				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
 				supplierStore:         tt.fields.supplierStore,
 				supplierDebtStore:     tt.fields.supplierDebtStore,
 			}
@@ -1155,12 +682,11 @@ func Test_changeStatusImportNoteRepo_UpdateDebtSupplier(t *testing.T) {
 
 func Test_changeStatusImportNoteRepo_UpdateImportNote(t *testing.T) {
 	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 	type args struct {
 		ctx          context.Context
@@ -1171,14 +697,13 @@ func Test_changeStatusImportNoteRepo_UpdateImportNote(t *testing.T) {
 	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
 	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
 	mockIngredientStore := new(mockUpdateAmountIngredientStore)
-	mockIngredientDetailStore := new(mockUpdateOrCreateIngredientDetailStore)
 	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
 	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
 
 	importNoteId := mock.Anything
 	status := importnotemodel.Done
 	importNoteUpdate := importnotemodel.ImportNoteUpdate{
-		CloseBy:    mock.Anything,
+		ClosedBy:   mock.Anything,
 		Id:         importNoteId,
 		SupplierId: mock.Anything,
 		TotalPrice: 10000,
@@ -1199,7 +724,6 @@ func Test_changeStatusImportNoteRepo_UpdateImportNote(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -1226,7 +750,6 @@ func Test_changeStatusImportNoteRepo_UpdateImportNote(t *testing.T) {
 				importNoteStore:       mockImportNoteStore,
 				importNoteDetailStore: mockImportNoteDetail,
 				ingredientStore:       mockIngredientStore,
-				ingredientDetailStore: mockIngredientDetailStore,
 				supplierStore:         mockSupplierStore,
 				supplierDebtStore:     mockSupplierDebtStore,
 			},
@@ -1254,7 +777,6 @@ func Test_changeStatusImportNoteRepo_UpdateImportNote(t *testing.T) {
 				importNoteStore:       tt.fields.importNoteStore,
 				importNoteDetailStore: tt.fields.importNoteDetailStore,
 				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
 				supplierStore:         tt.fields.supplierStore,
 				supplierDebtStore:     tt.fields.supplierDebtStore,
 			}
@@ -1263,34 +785,147 @@ func Test_changeStatusImportNoteRepo_UpdateImportNote(t *testing.T) {
 
 			err := repo.UpdateImportNote(tt.args.ctx, tt.args.importNoteId, tt.args.data)
 			if tt.wantErr {
-				assert.NotNil(t, err, "CheckIngredient() error = %v, wantErr %v", err, tt.wantErr)
+				assert.NotNil(t, err, "UpdateImportNote() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
-				assert.Nil(t, err, "CheckIngredient() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Nil(t, err, "UpdateImportNote() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
 }
 
-func Test_changeStatusImportNoteRepo_createIngredientDetails(t *testing.T) {
+func Test_changeStatusImportNoteRepo_HandleIngredient(t *testing.T) {
 	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
+		importNoteStore       ChangeStatusImportNoteStore
+		importNoteDetailStore GetImportNoteDetailStore
+		ingredientStore       UpdateAmountIngredientStore
+		supplierStore         UpdateDebtOfSupplierStore
+		supplierDebtStore     CreateSupplierDebtStore
 	}
 	type args struct {
-		ctx                      context.Context
-		createdIngredientDetails []ingredientdetailmodel.IngredientDetailCreate
+		ctx                             context.Context
+		importNoteId                    string
+		ingredientTotalAmountNeedUpdate map[string]int
 	}
+
+	mockImportNoteStore := new(mockChangeStatusImportNoteStore)
+	mockImportNoteDetail := new(mockGetImportNoteDetailStore)
+	mockIngredientStore := new(mockUpdateAmountIngredientStore)
+	mockSupplierStore := new(mockUpdateDebtOfSupplierStore)
+	mockSupplierDebtStore := new(mockCreateSupplierDebtStorage)
+
+	importNoteId := "importNote123"
+
+	ingredientTotalAmountNeedUpdate := map[string]int{
+		"ingredient1": 10,
+		"ingredient2": 15,
+	}
+	ingredientUpdate1 := ingredientmodel.IngredientUpdateAmount{Amount: 10}
+	ingredientUpdate2 := ingredientmodel.IngredientUpdateAmount{Amount: 15}
+	mockErr := errors.New(mock.Anything)
+
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
-		wantErr assert.ErrorAssertionFunc
+		mock    func()
+		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Handle ingredient failed because can not update amount of ingredient 1",
+			fields: fields{
+				importNoteStore:       mockImportNoteStore,
+				importNoteDetailStore: mockImportNoteDetail,
+				ingredientStore:       mockIngredientStore,
+				supplierStore:         mockSupplierStore,
+				supplierDebtStore:     mockSupplierDebtStore,
+			},
+			args: args{
+				ctx:                             context.Background(),
+				importNoteId:                    importNoteId,
+				ingredientTotalAmountNeedUpdate: ingredientTotalAmountNeedUpdate,
+			},
+			mock: func() {
+				mockIngredientStore.
+					On(
+						"UpdateAmountIngredient",
+						context.Background(),
+						"ingredient1",
+						&ingredientUpdate1).
+					Return(mockErr).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Handle ingredient failed because can not update amount of ingredient 2",
+			fields: fields{
+				importNoteStore:       mockImportNoteStore,
+				importNoteDetailStore: mockImportNoteDetail,
+				ingredientStore:       mockIngredientStore,
+				supplierStore:         mockSupplierStore,
+				supplierDebtStore:     mockSupplierDebtStore,
+			},
+			args: args{
+				ctx:                             context.Background(),
+				importNoteId:                    importNoteId,
+				ingredientTotalAmountNeedUpdate: ingredientTotalAmountNeedUpdate,
+			},
+			mock: func() {
+				mockIngredientStore.
+					On(
+						"UpdateAmountIngredient",
+						context.Background(),
+						"ingredient1",
+						&ingredientUpdate1).
+					Return(nil).
+					Once()
+
+				mockIngredientStore.
+					On(
+						"UpdateAmountIngredient",
+						context.Background(),
+						"ingredient2",
+						&ingredientUpdate2).
+					Return(mockErr).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Handle ingredient changes successfully",
+			fields: fields{
+				importNoteStore:       mockImportNoteStore,
+				importNoteDetailStore: mockImportNoteDetail,
+				ingredientStore:       mockIngredientStore,
+				supplierStore:         mockSupplierStore,
+				supplierDebtStore:     mockSupplierDebtStore,
+			},
+			args: args{
+				ctx:                             context.Background(),
+				importNoteId:                    importNoteId,
+				ingredientTotalAmountNeedUpdate: ingredientTotalAmountNeedUpdate,
+			},
+			mock: func() {
+				mockIngredientStore.
+					On(
+						"UpdateAmountIngredient",
+						context.Background(),
+						"ingredient1",
+						&ingredientUpdate1).
+					Return(nil).
+					Once()
+
+				mockIngredientStore.
+					On(
+						"UpdateAmountIngredient",
+						context.Background(),
+						"ingredient2",
+						&ingredientUpdate2).
+					Return(nil).
+					Once()
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1298,47 +933,19 @@ func Test_changeStatusImportNoteRepo_createIngredientDetails(t *testing.T) {
 				importNoteStore:       tt.fields.importNoteStore,
 				importNoteDetailStore: tt.fields.importNoteDetailStore,
 				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
 				supplierStore:         tt.fields.supplierStore,
 				supplierDebtStore:     tt.fields.supplierDebtStore,
 			}
-			tt.wantErr(t, repo.createIngredientDetails(tt.args.ctx, tt.args.createdIngredientDetails), fmt.Sprintf("createIngredientDetails(%v, %v)", tt.args.ctx, tt.args.createdIngredientDetails))
-		})
-	}
-}
 
-func Test_changeStatusImportNoteRepo_updateIngredientDetails(t *testing.T) {
-	type fields struct {
-		importNoteStore       ChangeStatusImportNoteStorage
-		importNoteDetailStore GetImportNoteDetailStorage
-		ingredientStore       UpdateAmountIngredientStorage
-		ingredientDetailStore UpdateOrCreateIngredientDetailStorage
-		supplierStore         UpdateDebtOfSupplierStorage
-		supplierDebtStore     CreateSupplierDebtStorage
-	}
-	type args struct {
-		ctx                      context.Context
-		updatedIngredientDetails []ingredientdetailmodel.IngredientDetailUpdate
-	}
-	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		wantErr assert.ErrorAssertionFunc
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repo := &changeStatusImportNoteRepo{
-				importNoteStore:       tt.fields.importNoteStore,
-				importNoteDetailStore: tt.fields.importNoteDetailStore,
-				ingredientStore:       tt.fields.ingredientStore,
-				ingredientDetailStore: tt.fields.ingredientDetailStore,
-				supplierStore:         tt.fields.supplierStore,
-				supplierDebtStore:     tt.fields.supplierDebtStore,
+			tt.mock()
+
+			err := repo.HandleIngredient(tt.args.ctx, tt.args.ingredientTotalAmountNeedUpdate)
+			if tt.wantErr {
+				assert.NotNil(t, err, "HandleIngredient() error = %v, wantErr %v", err, tt.wantErr)
+			} else {
+				assert.Nil(t, err, "HandleIngredient() error = %v, wantErr %v", err, tt.wantErr)
 			}
-			tt.wantErr(t, repo.updateIngredientDetails(tt.args.ctx, tt.args.updatedIngredientDetails), fmt.Sprintf("updateIngredientDetails(%v, %v)", tt.args.ctx, tt.args.updatedIngredientDetails))
+
 		})
 	}
 }

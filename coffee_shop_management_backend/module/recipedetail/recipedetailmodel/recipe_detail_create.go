@@ -3,9 +3,9 @@ package recipedetailmodel
 import "coffee_shop_management_backend/common"
 
 type RecipeDetailCreate struct {
-	RecipeId     string  `json:"-" gorm:"column:recipeId;"`
-	IngredientId string  `json:"ingredientId" gorm:"column:ingredientId;"`
-	AmountNeed   float32 `json:"amountNeed" gorm:"column:amountNeed;"`
+	RecipeId     string `json:"-" gorm:"column:recipeId;"`
+	IngredientId string `json:"ingredientId" gorm:"column:ingredientId;"`
+	AmountNeed   int    `json:"amountNeed" gorm:"column:amountNeed;"`
 }
 
 func (*RecipeDetailCreate) TableName() string {

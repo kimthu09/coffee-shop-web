@@ -10,7 +10,6 @@ import (
 type ChangeStatusUserRepo interface {
 	UpdateStatusUser(
 		ctx context.Context,
-		userId string,
 		data *usermodel.UserUpdateStatus,
 	) error
 }
@@ -31,18 +30,21 @@ func NewChangeStatusUserBiz(
 
 func (biz *changeStatusUserBiz) ChangeStatusUser(
 	ctx context.Context,
-	id string,
-	data *usermodel.UserUpdateStatus) error {
+	data []usermodel.UserUpdateStatus) error {
 	if !biz.requester.IsHasFeature(common.UserUpdateStatusFeatureCode) {
 		return usermodel.ErrUserUpdateStatusNoPermission
 	}
 
-	if err := data.Validate(); err != nil {
-		return err
+	for _, v := range data {
+		if err := v.Validate(); err != nil {
+			return err
+		}
 	}
 
-	if err := biz.repo.UpdateStatusUser(ctx, id, data); err != nil {
-		return err
+	for _, v := range data {
+		if err := biz.repo.UpdateStatusUser(ctx, &v); err != nil {
+			return err
+		}
 	}
 
 	return nil

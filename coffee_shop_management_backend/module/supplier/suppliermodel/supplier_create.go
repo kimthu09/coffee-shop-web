@@ -7,6 +7,7 @@ type SupplierCreate struct {
 	Name  string  `json:"name" gorm:"column:name;"`
 	Email string  `json:"email" gorm:"column:email;"`
 	Phone string  `json:"phone" gorm:"column:phone;"`
+	Debt  int     `json:"debt" gorm:"column:debt"`
 }
 
 func (*SupplierCreate) TableName() string {
@@ -25,6 +26,9 @@ func (data *SupplierCreate) Validate() *common.AppError {
 	}
 	if !common.ValidatePhone(data.Phone) {
 		return ErrSupplierPhoneInvalid
+	}
+	if common.ValidatePositiveNumber(data.Debt) {
+		return ErrSupplierInitDebtInvalid
 	}
 	return nil
 }

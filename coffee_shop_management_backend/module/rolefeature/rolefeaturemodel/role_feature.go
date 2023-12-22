@@ -2,7 +2,6 @@ package rolefeaturemodel
 
 import (
 	"coffee_shop_management_backend/common"
-	"errors"
 )
 
 type RoleFeature struct {
@@ -13,11 +12,3 @@ type RoleFeature struct {
 func (*RoleFeature) TableName() string {
 	return common.TableRoleFeature
 }
-
-var (
-	ErrRoleFeatureIdFeatureInvalid = common.NewCustomError(
-		errors.New("id of feature is invalid"),
-		"id of feature is invalid",
-		"ErrRoleFeatureIdFeatureInvalid",
-	)
-)

@@ -3,7 +3,6 @@ package ginimportnote
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
-	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/importnote/importnotebiz"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
@@ -11,7 +10,6 @@ import (
 	"coffee_shop_management_backend/module/importnote/importnotestore"
 	"coffee_shop_management_backend/module/importnotedetail/importnotedetailstore"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
-	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailstore"
 	"coffee_shop_management_backend/module/supplier/supplierstore"
 	"coffee_shop_management_backend/module/supplierdebt/supplierdebtstore"
 	"errors"
@@ -33,13 +31,12 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
-		data.CloseBy = requester.GetUserId()
+		data.ClosedBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
 
 		importNoteStore := importnotestore.NewSQLStore(db)
 		importNoteDetailStore := importnotedetailstore.NewSQLStore(db)
-		ingredientDetailStore := ingredientdetailstore.NewSQLStore(db)
 		ingredientStore := ingredientstore.NewSQLStore(db)
 		supplierStore := supplierstore.NewSQLStore(db)
 		supplierDebtStore := supplierdebtstore.NewSQLStore(db)
@@ -48,14 +45,11 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			importNoteStore,
 			importNoteDetailStore,
 			ingredientStore,
-			ingredientDetailStore,
 			supplierStore,
 			supplierDebtStore,
 		)
 
-		gen := generator.NewShortIdGenerator()
-
-		business := importnotebiz.NewChangeStatusImportNoteBiz(gen, repo, requester)
+		business := importnotebiz.NewChangeStatusImportNoteBiz(repo, requester)
 
 		if err := business.ChangeStatusImportNote(
 			c.Request.Context(),
@@ -71,6 +65,6 @@ func ChangeStatusImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

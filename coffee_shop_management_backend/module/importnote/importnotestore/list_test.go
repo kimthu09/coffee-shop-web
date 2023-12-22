@@ -3,6 +3,7 @@ package importnotestore
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -37,11 +38,12 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 		MaxPrice:  &maxPrice,
 		Status:    "Done",
 	}
-	properties := []string{"id", "supplierId", "createBy", "closeBy"}
+	properties := []string{"id", "supplierId", "createdBy", "closedBy"}
 	paging := common.Paging{
 		Page:  1,
 		Limit: 10,
 	}
+	moreKeys := []string{"Supplier"}
 	status := importnotemodel.Done
 	validId := "012345678901"
 	now := time.Now()
@@ -49,16 +51,16 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 		{
 			Id:         validId,
 			SupplierId: validId,
-			Supplier: importnotemodel.SimpleSupplier{
+			Supplier: suppliermodel.SimpleSupplier{
 				Id:   validId,
 				Name: "hello",
 			},
 			TotalPrice: 0,
 			Status:     &status,
-			CreateBy:   validId,
-			CloseBy:    &validId,
-			CreateAt:   &now,
-			CloseAt:    &now,
+			CreatedBy:  validId,
+			ClosedBy:   &validId,
+			CreatedAt:  &now,
+			ClosedAt:   &now,
 		},
 	}
 	mockErr := errors.New(mock.Anything)
@@ -68,36 +70,36 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 		"supplierId",
 		"totalPrice",
 		"status",
-		"createBy",
-		"closeBy",
-		"createAt",
-		"closeAt",
+		"createdBy",
+		"closedBy",
+		"createdAt",
+		"closedAt",
 	})
 	for _, importNote := range listImportNote {
 		rows.AddRow(
 			importNote.Id,
 			importNote.SupplierId,
 			importNote.TotalPrice,
-			[]byte(importNote.Status.String()),
-			importNote.CreateBy,
-			importNote.CloseBy,
-			importNote.CreateAt,
-			importNote.CloseAt)
+			importNote.Status,
+			importNote.CreatedBy,
+			importNote.ClosedBy,
+			importNote.CreatedAt,
+			importNote.ClosedAt)
 	}
 
 	queryString := "SELECT * FROM `ImportNote` " +
-		"WHERE (id LIKE ? OR supplierId LIKE ? OR createBy LIKE ? OR closeBy LIKE ?) " +
+		"WHERE (id LIKE ? OR supplierId LIKE ? OR createdBy LIKE ? OR closedBy LIKE ?) " +
 		"AND status = ? " +
 		"AND totalPrice >= ? " +
 		"AND totalPrice <= ? " +
-		"ORDER BY createAt desc LIMIT " + strconv.FormatInt(paging.Limit, 10)
+		"ORDER BY createdAt desc LIMIT " + strconv.FormatInt(paging.Limit, 10)
 
 	countRows := sqlmock.NewRows([]string{
 		"count",
 	})
 	countRows.AddRow(len(listImportNote))
 	queryStringCount := "SELECT count(*) FROM `ImportNote` " +
-		"WHERE (id LIKE ? OR supplierId LIKE ? OR createBy LIKE ? OR closeBy LIKE ?) " +
+		"WHERE (id LIKE ? OR supplierId LIKE ? OR createdBy LIKE ? OR closedBy LIKE ?) " +
 		"AND status = ? " +
 		"AND totalPrice >= ? " +
 		"AND totalPrice <= ?"
@@ -120,6 +122,7 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 		filter                     *importnotemodel.Filter
 		propertiesContainSearchKey []string
 		paging                     *common.Paging
+		moreKeys                   []string
 	}
 	tests := []struct {
 		name    string
@@ -137,6 +140,7 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 				filter:                     &filter,
 				propertiesContainSearchKey: properties,
 				paging:                     &paging,
+				moreKeys:                   moreKeys,
 			},
 			mock: func() {
 				mockSqlDB.
@@ -163,6 +167,7 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 				filter:                     &filter,
 				propertiesContainSearchKey: properties,
 				paging:                     &paging,
+				moreKeys:                   moreKeys,
 			},
 			mock: func() {
 				mockSqlDB.
@@ -202,6 +207,7 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 				filter:                     &filter,
 				propertiesContainSearchKey: properties,
 				paging:                     &paging,
+				moreKeys:                   moreKeys,
 			},
 			mock: func() {
 				mockSqlDB.
@@ -248,7 +254,12 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 
 			tt.mock()
 
-			got, err := s.ListImportNote(tt.args.ctx, tt.args.filter, tt.args.propertiesContainSearchKey, tt.args.paging)
+			got, err := s.ListImportNote(
+				tt.args.ctx,
+				tt.args.filter,
+				tt.args.propertiesContainSearchKey,
+				tt.args.paging,
+				tt.args.moreKeys...)
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "ListIngredient() err = %v, wantErr = %v", err, tt.wantErr)

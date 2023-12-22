@@ -10,8 +10,7 @@ func TestExportNoteDetailCreate_TableName(t *testing.T) {
 	type fields struct {
 		ExportNoteId string
 		IngredientId string
-		ExpiryDate   string
-		AmountExport float32
+		AmountExport int
 	}
 	tests := []struct {
 		name   string
@@ -23,7 +22,6 @@ func TestExportNoteDetailCreate_TableName(t *testing.T) {
 			fields: fields{
 				ExportNoteId: "",
 				IngredientId: "",
-				ExpiryDate:   "",
 				AmountExport: 0,
 			},
 			want: common.TableExportNoteDetail,
@@ -34,7 +32,6 @@ func TestExportNoteDetailCreate_TableName(t *testing.T) {
 			detail := &ExportNoteDetailCreate{
 				ExportNoteId: tt.fields.ExportNoteId,
 				IngredientId: tt.fields.IngredientId,
-				ExpiryDate:   tt.fields.ExpiryDate,
 				AmountExport: tt.fields.AmountExport,
 			}
 			got := detail.TableName()
@@ -48,13 +45,11 @@ func TestExportNoteDetailCreate_Validate(t *testing.T) {
 	type fields struct {
 		ExportNoteId string
 		IngredientId string
-		ExpiryDate   string
-		AmountExport float32
+		AmountExport int
 	}
 
 	mockExportNoteDetail := ExportNoteDetailCreate{
 		IngredientId: "123456789",
-		ExpiryDate:   "08/11/2023",
 		AmountExport: 1,
 	}
 
@@ -67,7 +62,6 @@ func TestExportNoteDetailCreate_Validate(t *testing.T) {
 			name: "ExportNoteDetailCreate is valid",
 			fields: fields{
 				IngredientId: mockExportNoteDetail.IngredientId,
-				ExpiryDate:   mockExportNoteDetail.ExpiryDate,
 				AmountExport: mockExportNoteDetail.AmountExport,
 			},
 			wantErr: false,
@@ -76,16 +70,6 @@ func TestExportNoteDetailCreate_Validate(t *testing.T) {
 			name: "ExportNoteDetailCreate is invalid with invalid ingredient id",
 			fields: fields{
 				IngredientId: "",
-				ExpiryDate:   mockExportNoteDetail.ExpiryDate,
-				AmountExport: mockExportNoteDetail.AmountExport,
-			},
-			wantErr: true,
-		},
-		{
-			name: "ExportNoteDetailCreate is invalid with invalid expiry date",
-			fields: fields{
-				IngredientId: mockExportNoteDetail.IngredientId,
-				ExpiryDate:   "This is invalid expiry date",
 				AmountExport: mockExportNoteDetail.AmountExport,
 			},
 			wantErr: true,
@@ -94,7 +78,6 @@ func TestExportNoteDetailCreate_Validate(t *testing.T) {
 			name: "ExportNoteDetailCreate is invalid with not positive number",
 			fields: fields{
 				IngredientId: mockExportNoteDetail.IngredientId,
-				ExpiryDate:   mockExportNoteDetail.ExpiryDate,
 				AmountExport: 0,
 			},
 			wantErr: true,
@@ -105,7 +88,6 @@ func TestExportNoteDetailCreate_Validate(t *testing.T) {
 			data := &ExportNoteDetailCreate{
 				ExportNoteId: tt.fields.ExportNoteId,
 				IngredientId: tt.fields.IngredientId,
-				ExpiryDate:   tt.fields.ExpiryDate,
 				AmountExport: tt.fields.AmountExport,
 			}
 			err := data.Validate()

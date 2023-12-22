@@ -8,10 +8,10 @@ import (
 
 type Topping struct {
 	*Product `json:",inline"`
-	Cost     float32            `json:"cost" gorm:"column:cost;"`
-	Price    float32            `json:"price" gorm:"column:price;"`
-	RecipeId string             `json:"-" gorm:"column:recipeId;"`
-	Recipe   recipemodel.Recipe `json:"recipe" gorm:"foreignkey:recipeId"`
+	Cost     int                 `json:"cost" gorm:"column:cost;"`
+	Price    int                 `json:"price" gorm:"column:price;"`
+	RecipeId string              `json:"-" gorm:"column:recipeId;"`
+	Recipe   *recipemodel.Recipe `json:"recipe" gorm:"foreignkey:recipeId"`
 }
 
 func (*Topping) TableName() string {
@@ -19,6 +19,11 @@ func (*Topping) TableName() string {
 }
 
 var (
+	ErrToppingProductInfoEmpty = common.NewCustomError(
+		errors.New("product info of topping is empty"),
+		"product info of topping is empty",
+		"ErrToppingProductInfoEmpty",
+	)
 	ErrToppingCostIsNegativeNumber = common.NewCustomError(
 		errors.New("cost is negative number"),
 		"cost is negative number",

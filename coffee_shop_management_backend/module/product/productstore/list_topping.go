@@ -18,16 +18,14 @@ func (s *sqlStore) ListTopping(
 
 	handleFilter(db, filter, propertiesContainSearchKey)
 
-	dbTemp, errPaging := handlePaging(db, paging)
+	dbTemp, errPaging := common.HandlePaging(db, paging)
 	if errPaging != nil {
 		return nil, errPaging
 	}
 	db = dbTemp
 
 	if err := db.
-		Limit(int(paging.Limit)).
 		Order("name").
-		Preload("Recipe.Details.Ingredient").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}

@@ -11,7 +11,8 @@ func (s *sqlStore) ListImportNote(
 	ctx context.Context,
 	filter *importnotemodel.Filter,
 	propertiesContainSearchKey []string,
-	paging *common.Paging) ([]importnotemodel.ImportNote, error) {
+	paging *common.Paging,
+	moreKeys ...string) ([]importnotemodel.ImportNote, error) {
 	var result []importnotemodel.ImportNote
 	db := s.db
 
@@ -19,16 +20,18 @@ func (s *sqlStore) ListImportNote(
 
 	handleFilter(db, filter, propertiesContainSearchKey)
 
-	dbTemp, errPaging := handlePaging(db, paging)
+	dbTemp, errPaging := common.HandlePaging(db, paging)
 	if errPaging != nil {
 		return nil, errPaging
 	}
 	db = dbTemp
 
+	for i := range moreKeys {
+		db = db.Preload(moreKeys[i])
+	}
+
 	if err := db.
-		Limit(int(paging.Limit)).
-		Order("createAt desc").
-		Preload("Supplier").
+		Order("createdAt desc").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
@@ -54,15 +57,4 @@ func handleFilter(
 			db = db.Where("totalPrice <= ?", filter.MaxPrice)
 		}
 	}
-}
-
-func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
-	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
-
-	return db, nil
 }

@@ -36,6 +36,11 @@ var (
 	ErrFoodNameDuplicate = common.ErrDuplicateKey(
 		errors.New("name of food is duplicate"),
 	)
+	ErrFoodProductInfoEmpty = common.NewCustomError(
+		errors.New("product info of food is empty"),
+		"product info of food is empty",
+		"ErrFoodProductInfoEmpty",
+	)
 	ErrFoodCategoryEmpty = common.NewCustomError(
 		errors.New("category of food is empty"),
 		"category of food is empty",

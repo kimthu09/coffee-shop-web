@@ -4,11 +4,16 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
+	"coffee_shop_management_backend/module/customer/customermodel"
 	"coffee_shop_management_backend/module/invoice/invoicemodel"
+	"coffee_shop_management_backend/module/shopgeneral/shopgeneralmodel"
 	"context"
 )
 
 type CreateInvoiceRepo interface {
+	GetShopGeneral(
+		ctx context.Context,
+	) (*shopgeneralmodel.ShopGeneral, error)
 	HandleCheckPermissionStatus(
 		ctx context.Context,
 		data *invoicemodel.InvoiceCreate,
@@ -17,16 +22,23 @@ type CreateInvoiceRepo interface {
 		ctx context.Context,
 		data *invoicemodel.InvoiceCreate,
 	) error
-	CreateCustomerDebt(
+	FindCustomer(
 		ctx context.Context,
-		supplierDebtId string,
-		data *invoicemodel.InvoiceCreate) error
-	UpdateDebtCustomer(
+		customerId string,
+	) (*customermodel.Customer, error)
+	UpdateCustomerPoint(
 		ctx context.Context,
-		data *invoicemodel.InvoiceCreate) error
+		customerId string,
+		data customermodel.CustomerUpdatePoint,
+	) error
 	HandleInvoice(
 		ctx context.Context,
 		data *invoicemodel.InvoiceCreate,
+	) error
+	HandleIngredientTotalAmount(
+		ctx context.Context,
+		invoiceId string,
+		ingredientTotalAmountNeedUpdate map[string]int,
 	) error
 }
 
@@ -70,22 +82,60 @@ func (biz *createInvoiceBiz) CreateInvoice(
 		return err
 	}
 
-	if err := checkPrice(data); err != nil {
+	general, errGetShopGeneral := biz.repo.GetShopGeneral(ctx)
+	if errGetShopGeneral != nil {
+		return errGetShopGeneral
+	}
+	data.ShopName = general.Name
+	data.ShopPhone = general.Phone
+	data.ShopAddress = general.Address
+	data.ShopPassWifi = general.WifiPass
+	if err := biz.repo.HandleIngredientTotalAmount(
+		ctx, data.Id, data.MapIngredient); err != nil {
 		return err
 	}
 
 	if data.CustomerId != nil {
-		customerDebtId, errGenerateId := biz.gen.GenerateId()
-		if errGenerateId != nil {
-			return errGenerateId
+		customer, errGetCustomer := biz.repo.FindCustomer(ctx, *data.CustomerId)
+		if errGetCustomer != nil {
+			return errGetCustomer
 		}
 
-		if err := biz.repo.CreateCustomerDebt(ctx, customerDebtId, data); err != nil {
+		data.Customer.Id = customer.Id
+		data.Customer.Name = customer.Name
+		data.Customer.Phone = customer.Phone
+
+		priceUseForPoint := float32(0)
+		pointUse := float32(0)
+		if data.IsUsePoint {
+			if float32(data.TotalPrice) >= customer.Point*general.UsePointPercent {
+				pointUse = customer.Point
+				priceUseForPoint = customer.Point * general.UsePointPercent
+			} else {
+				pointUse = float32(data.TotalPrice) / general.UsePointPercent
+				priceUseForPoint = float32(data.TotalPrice)
+			}
+		}
+		priceUseForPointInt := common.RoundToInt(priceUseForPoint)
+
+		amountPointNeedUpdate :=
+			float32(data.AmountReceived)*general.AccumulatePointPercent - pointUse
+		common.CustomRound(&amountPointNeedUpdate)
+		customerUpdatePoint := customermodel.CustomerUpdatePoint{
+			Amount: &amountPointNeedUpdate,
+		}
+		if err := biz.repo.UpdateCustomerPoint(
+			ctx, *data.CustomerId, customerUpdatePoint); err != nil {
 			return err
 		}
 
-		if err := biz.repo.UpdateDebtCustomer(ctx, data); err != nil {
-			return err
+		common.CustomRound(&priceUseForPoint)
+		data.AmountReceived = data.TotalPrice - priceUseForPointInt
+		data.AmountPriceUsePoint = priceUseForPointInt
+
+	} else {
+		if data.IsUsePoint {
+			return invoicemodel.ErrInvoiceNotHaveCustomerToUsePoint
 		}
 	}
 
@@ -107,15 +157,4 @@ func handleInvoiceId(gen generator.IdGenerator, data *invoicemodel.InvoiceCreate
 	}
 
 	return err
-}
-
-func checkPrice(data *invoicemodel.InvoiceCreate) error {
-	data.AmountDebt = data.TotalPrice - data.AmountReceived
-	if data.CustomerId == nil && data.AmountDebt > 0 {
-		return invoicemodel.ErrInvoiceNotHaveCustomerForDebt
-	}
-	if common.ValidateNegativeNumber(data.AmountDebt) {
-		return invoicemodel.ErrInvoiceAmountDebtIsNegativeNumber
-	}
-	return nil
 }

@@ -8,10 +8,6 @@ import (
 )
 
 type UpdateInfoSupplierRepo interface {
-	CheckExist(
-		ctx context.Context,
-		supplierId string,
-	) error
 	UpdateSupplierInfo(
 		ctx context.Context,
 		supplierId string,
@@ -39,10 +35,6 @@ func (biz *updateInfoSupplierBiz) UpdateInfoSupplier(
 	}
 
 	if err := data.Validate(); err != nil {
-		return err
-	}
-
-	if err := biz.repo.CheckExist(ctx, id); err != nil {
 		return err
 	}
 

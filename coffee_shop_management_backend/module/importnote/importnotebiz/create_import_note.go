@@ -9,10 +9,6 @@ import (
 )
 
 type CreateImportNoteRepo interface {
-	CheckIngredient(
-		ctx context.Context,
-		ingredientId string,
-	) error
 	HandleCreateImportNote(
 		ctx context.Context,
 		data *importnotemodel.ImportNoteCreate,
@@ -21,10 +17,6 @@ type CreateImportNoteRepo interface {
 		ctx context.Context,
 		ingredientId string,
 		price float32,
-	) error
-	CheckSupplier(
-		ctx context.Context,
-		supplierId string,
 	) error
 }
 
@@ -56,20 +48,11 @@ func (biz *createImportNoteBiz) CreateImportNote(
 		return err
 	}
 
-	for _, v := range data.ImportNoteDetails {
-		if err := biz.repo.CheckIngredient(ctx, v.IngredientId); err != nil {
-			return err
-		}
-	}
+	data.Round()
 
 	if err := handleImportNoteCreateId(biz.gen, data); err != nil {
 		return err
 	}
-
-	if err := biz.repo.CheckSupplier(ctx, data.SupplierId); err != nil {
-		return err
-	}
-
 	handleTotalPrice(data)
 
 	if err := biz.repo.HandleCreateImportNote(ctx, data); err != nil {
@@ -106,8 +89,14 @@ func handleImportNoteCreateId(
 
 func handleTotalPrice(data *importnotemodel.ImportNoteCreate) {
 	var totalPrice float32 = 0
-	for _, importNoteDetail := range data.ImportNoteDetails {
-		totalPrice += importNoteDetail.Price * importNoteDetail.AmountImport
+	for i, importNoteDetail := range data.ImportNoteDetails {
+		totalUnit := importNoteDetail.Price * float32(importNoteDetail.AmountImport)
+		common.CustomRound(&totalUnit)
+		data.ImportNoteDetails[i].TotalUnit = totalUnit
+		totalPrice += totalUnit
 	}
-	data.TotalPrice = totalPrice
+
+	totalPriceInt := common.RoundToInt(totalPrice)
+
+	data.TotalPrice = totalPriceInt
 }

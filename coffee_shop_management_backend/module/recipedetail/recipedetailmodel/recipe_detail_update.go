@@ -3,8 +3,8 @@ package recipedetailmodel
 import "coffee_shop_management_backend/common"
 
 type RecipeDetailUpdate struct {
-	IngredientId string  `json:"ingredientId" gorm:"-"`
-	AmountNeed   float32 `json:"amountNeed" gorm:"column:amountNeed;"`
+	IngredientId string `json:"ingredientId" gorm:"-"`
+	AmountNeed   int    `json:"amountNeed" gorm:"column:amountNeed;"`
 }
 
 func (*RecipeDetailUpdate) TableName() string {

@@ -16,12 +16,6 @@ type mockUpdateRoleRepo struct {
 	mock.Mock
 }
 
-func (m *mockUpdateRoleRepo) CheckFeatureExist(
-	ctx context.Context,
-	data *rolemodel.RoleUpdate) error {
-	args := m.Called(ctx, data)
-	return args.Error(0)
-}
 func (m *mockUpdateRoleRepo) GetListRoleFeatures(
 	ctx context.Context,
 	roleId string) ([]string, error) {
@@ -149,8 +143,8 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(noAdminRole).
+					On("GetRoleId").
+					Return(noAdminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -171,8 +165,8 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -193,8 +187,8 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRepo.
@@ -228,8 +222,8 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRepo.
@@ -248,40 +242,6 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Update role failed because can not check features is exist",
-			fields: fields{
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:    context.Background(),
-				roleId: roleId,
-				data: &rolemodel.RoleUpdate{
-					Name:     nil,
-					Features: &features,
-				},
-			},
-			mock: func() {
-				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						&rolemodel.RoleUpdate{
-							Name:     nil,
-							Features: &features,
-						},
-					).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
 			name: "Update role failed because can not get current list features",
 			fields: fields{
 				repo:      mockRepo,
@@ -297,21 +257,9 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						&rolemodel.RoleUpdate{
-							Name:     nil,
-							Features: &features,
-						},
-					).
-					Return(nil).
-					Times(len(features))
 
 				mockRepo.
 					On(
@@ -340,17 +288,8 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						roleId,
-					).
-					Return(nil).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRepo.
@@ -390,18 +329,9 @@ func Test_updateRoleBiz_UpdateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						roleId,
-					).
-					Return(nil).
-					Times(len(features))
 
 				mockRepo.
 					On(

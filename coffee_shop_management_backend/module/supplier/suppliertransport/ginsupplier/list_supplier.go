@@ -5,7 +5,7 @@ import (
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/supplierbiz"
-	"coffee_shop_management_backend/module/supplier/suppliermodel"
+	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"coffee_shop_management_backend/module/supplier/supplierrepo"
 	"coffee_shop_management_backend/module/supplier/supplierstore"
 	"github.com/gin-gonic/gin"
@@ -14,8 +14,8 @@ import (
 
 func ListSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var filter suppliermodel.Filter
-		if err := c.ShouldBind(&filter); err != nil {
+		var filterSupplier filter.Filter
+		if err := c.ShouldBind(&filterSupplier); err != nil {
 			panic(common.ErrInvalidRequest(err))
 		}
 
@@ -33,12 +33,12 @@ func ListSupplier(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		biz := supplierbiz.NewListSupplierRepo(repo, requester)
 
-		result, err := biz.ListSupplier(c.Request.Context(), &filter, &paging)
+		result, err := biz.ListSupplier(c.Request.Context(), &filterSupplier, &paging)
 
 		if err != nil {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filter))
+		c.JSON(http.StatusOK, common.NewSuccessResponse(result, paging, filterSupplier))
 	}
 }

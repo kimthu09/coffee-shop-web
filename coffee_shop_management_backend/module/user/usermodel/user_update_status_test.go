@@ -37,6 +37,7 @@ func TestUserUpdateStatus_TableName(t *testing.T) {
 
 func TestUserUpdateStatus_Validate(t *testing.T) {
 	type fields struct {
+		UserId   string
 		IsActive *bool
 	}
 
@@ -50,6 +51,15 @@ func TestUserUpdateStatus_Validate(t *testing.T) {
 		{
 			name: "UserUpdateStatus is invalid with nil active status",
 			fields: fields{
+				UserId:   "User001",
+				IsActive: nil,
+			},
+			wantErr: true,
+		},
+		{
+			name: "UserUpdateStatus is invalid with invalid user",
+			fields: fields{
+				UserId:   "12345678901234567890",
 				IsActive: nil,
 			},
 			wantErr: true,
@@ -57,6 +67,7 @@ func TestUserUpdateStatus_Validate(t *testing.T) {
 		{
 			name: "UserUpdateStatus is valid",
 			fields: fields{
+				UserId:   "User001",
 				IsActive: &validStatus,
 			},
 			wantErr: false,
@@ -66,6 +77,7 @@ func TestUserUpdateStatus_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			data := &UserUpdateStatus{
 				IsActive: tt.fields.IsActive,
+				UserId:   tt.fields.UserId,
 			}
 
 			err := data.Validate()

@@ -14,7 +14,7 @@ type PaySupplierStoreRepo interface {
 	GetDebtSupplier(
 		ctx context.Context,
 		supplierId string,
-	) (*float32, error)
+	) (*int, error)
 	CreateSupplierDebt(
 		ctx context.Context,
 		data *supplierdebtmodel.SupplierDebtCreate,
@@ -51,6 +51,8 @@ func (biz *paySupplierBiz) PaySupplier(
 		return nil, suppliermodel.ErrSupplierPayNoPermission
 	}
 
+	data.CreatedBy = biz.requester.GetUserId()
+
 	if err := validateSupplierUpdateDebt(data); err != nil {
 		return nil, err
 	}
@@ -58,6 +60,9 @@ func (biz *paySupplierBiz) PaySupplier(
 	debtCurrent, errGetDebt := biz.repo.GetDebtSupplier(ctx, supplierId)
 	if errGetDebt != nil {
 		return nil, errGetDebt
+	}
+	if *debtCurrent+*data.Amount > 0 {
+		return nil, suppliermodel.ErrSupplierInitDebtInvalid
 	}
 
 	supplierDebtCreate, errGetSupplierDebtCreate := getSupplierDebtCreate(
@@ -93,25 +98,25 @@ func validateSupplierUpdateDebt(data *suppliermodel.SupplierUpdateDebt) error {
 func getSupplierDebtCreate(
 	gen generator.IdGenerator,
 	supplierId string,
-	currentDebt float32,
+	currentDebt int,
 	data *suppliermodel.SupplierUpdateDebt,
 ) (*supplierdebtmodel.SupplierDebtCreate, error) {
 	amountPay := *data.Amount
 	amountLeft := currentDebt + amountPay
 
-	id, errGenerateId := gen.GenerateId()
+	id, errGenerateId := gen.IdProcess(data.Id)
 	if errGenerateId != nil {
 		return nil, errGenerateId
 	}
 
 	debtType := enum.Pay
 	supplierDebtCreate := supplierdebtmodel.SupplierDebtCreate{
-		Id:         id,
+		Id:         *id,
 		SupplierId: supplierId,
 		Amount:     amountPay,
 		AmountLeft: amountLeft,
 		DebtType:   &debtType,
-		CreateBy:   data.CreateBy,
+		CreatedBy:  data.CreatedBy,
 	}
 
 	return &supplierDebtCreate, nil

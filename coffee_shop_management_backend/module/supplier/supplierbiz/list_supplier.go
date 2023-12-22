@@ -4,13 +4,14 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
+	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"context"
 )
 
 type ListSupplierRepo interface {
 	ListSupplier(
 		ctx context.Context,
-		filter *suppliermodel.Filter,
+		filter *filter.Filter,
 		paging *common.Paging,
 	) ([]suppliermodel.Supplier, error)
 }
@@ -28,7 +29,7 @@ func NewListSupplierRepo(
 
 func (biz *listSupplierBiz) ListSupplier(
 	ctx context.Context,
-	filter *suppliermodel.Filter,
+	filter *filter.Filter,
 	paging *common.Paging) ([]suppliermodel.Supplier, error) {
 	if !biz.requester.IsHasFeature(common.SupplierViewFeatureCode) {
 		return nil, suppliermodel.ErrSupplierViewNoPermission

@@ -6,13 +6,14 @@ import (
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/customer/customerstore"
-	"coffee_shop_management_backend/module/customerdebt/customerdebtstore"
+	"coffee_shop_management_backend/module/ingredient/ingredientstore"
 	"coffee_shop_management_backend/module/invoice/invoicebiz"
 	"coffee_shop_management_backend/module/invoice/invoicemodel"
 	"coffee_shop_management_backend/module/invoice/invoicerepo"
 	"coffee_shop_management_backend/module/invoice/invoicestore"
 	"coffee_shop_management_backend/module/invoicedetail/invoicedetailstore"
 	"coffee_shop_management_backend/module/product/productstore"
+	"coffee_shop_management_backend/module/shopgeneral/shopgeneralstore"
 	"coffee_shop_management_backend/module/sizefood/sizefoodstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -27,26 +28,28 @@ func CreateInvoice(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
-		data.CreateBy = requester.GetUserId()
+		data.CreatedBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
 
 		invoiceStore := invoicestore.NewSQLStore(db)
 		invoiceDetailStore := invoicedetailstore.NewSQLStore(db)
 		customerStore := customerstore.NewSQLStore(db)
-		customerDebtStore := customerdebtstore.NewSQLStore(db)
 		sizeFoodStore := sizefoodstore.NewSQLStore(db)
 		foodStore := productstore.NewSQLStore(db)
 		toppingStore := productstore.NewSQLStore(db)
+		ingredientStore := ingredientstore.NewSQLStore(db)
+		shopGeneralStore := shopgeneralstore.NewSQLStore(db)
 
 		repo := invoicerepo.NewCreateInvoiceRepo(
 			invoiceStore,
 			invoiceDetailStore,
 			customerStore,
-			customerDebtStore,
 			sizeFoodStore,
 			foodStore,
 			toppingStore,
+			ingredientStore,
+			shopGeneralStore,
 		)
 
 		gen := generator.NewShortIdGenerator()
@@ -63,6 +66,17 @@ func CreateInvoice(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, gin.H{
+			"id":           data.Id,
+			"customer":     data.Customer,
+			"shopName":     data.ShopName,
+			"shopPhone":    data.ShopPhone,
+			"shopAddress":  data.ShopAddress,
+			"shopPassWifi": data.ShopPassWifi,
+			"details":      data.InvoiceDetails,
+			"total":        data.TotalPrice,
+			"received":     data.AmountReceived,
+			"discount":     data.AmountPriceUsePoint,
+		})
 	}
 }

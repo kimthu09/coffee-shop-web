@@ -28,11 +28,11 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 
 	validId := "123"
 	expectedSql := "UPDATE `ImportNote` " +
-		"SET `closeBy`=?,`status`=? " +
+		"SET `closedBy`=?,`status`=? " +
 		"WHERE id = ?"
 	status := importnotemodel.Done
 	dataUpdate := importnotemodel.ImportNoteUpdate{
-		CloseBy:    mock.Anything,
+		ClosedBy:   mock.Anything,
 		Id:         validId,
 		SupplierId: mock.Anything,
 		TotalPrice: 0,
@@ -70,7 +70,7 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 				sqlDBMock.
 					ExpectExec(expectedSql).
 					WithArgs(
-						dataUpdate.CloseBy,
+						dataUpdate.ClosedBy,
 						dataUpdate.Status,
 						validId,
 					).
@@ -94,7 +94,7 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 				sqlDBMock.
 					ExpectExec(expectedSql).
 					WithArgs(
-						dataUpdate.CloseBy,
+						dataUpdate.ClosedBy,
 						dataUpdate.Status,
 						validId,
 					).

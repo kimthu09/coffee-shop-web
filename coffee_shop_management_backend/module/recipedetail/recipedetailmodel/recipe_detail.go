@@ -10,7 +10,7 @@ type RecipeDetail struct {
 	RecipeId     string                           `json:"recipeId" gorm:"column:recipeId;"`
 	IngredientId string                           `json:"-" gorm:"column:ingredientId;"`
 	Ingredient   ingredientmodel.SimpleIngredient `json:"ingredient" gorm:"foreignKey:IngredientId;references:Id"`
-	AmountNeed   float32                          `json:"amountNeed" gorm:"column:amountNeed;"`
+	AmountNeed   int                              `json:"amountNeed" gorm:"column:amountNeed;"`
 }
 
 func (*RecipeDetail) TableName() string {

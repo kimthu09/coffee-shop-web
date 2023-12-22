@@ -8,10 +8,10 @@ import (
 
 func TestImportNoteUpdate_TableName(t *testing.T) {
 	type fields struct {
-		CloseBy    string
+		ClosedBy   string
 		Id         string
 		SupplierId string
-		TotalPrice float32
+		TotalPrice int
 		Status     *ImportNoteStatus
 	}
 	tests := []struct {
@@ -22,7 +22,7 @@ func TestImportNoteUpdate_TableName(t *testing.T) {
 		{
 			name: "Get TableName of ImportNoteUpdate successfully",
 			fields: fields{
-				CloseBy:    "",
+				ClosedBy:   "",
 				Id:         "",
 				SupplierId: "",
 				TotalPrice: 0,
@@ -34,7 +34,7 @@ func TestImportNoteUpdate_TableName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			importNote := &ImportNoteUpdate{
-				CloseBy:    tt.fields.CloseBy,
+				ClosedBy:   tt.fields.ClosedBy,
 				Id:         tt.fields.Id,
 				SupplierId: tt.fields.SupplierId,
 				TotalPrice: tt.fields.TotalPrice,
@@ -51,10 +51,10 @@ func TestImportNoteUpdate_TableName(t *testing.T) {
 
 func TestImportNoteUpdate_Validate(t *testing.T) {
 	type fields struct {
-		CloseBy    string
+		ClosedBy   string
 		Id         string
 		SupplierId string
-		TotalPrice float32
+		TotalPrice int
 		Status     *ImportNoteStatus
 	}
 
@@ -99,7 +99,7 @@ func TestImportNoteUpdate_Validate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			data := &ImportNoteUpdate{
-				CloseBy:    tt.fields.CloseBy,
+				ClosedBy:   tt.fields.ClosedBy,
 				Id:         tt.fields.Id,
 				SupplierId: tt.fields.SupplierId,
 				TotalPrice: tt.fields.TotalPrice,

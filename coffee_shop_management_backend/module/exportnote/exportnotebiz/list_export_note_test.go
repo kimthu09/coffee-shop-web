@@ -4,7 +4,6 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
-	"coffee_shop_management_backend/module/role/rolemodel"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
@@ -36,9 +35,9 @@ func (m *mockRequester) GetEmail() string {
 	args := m.Called()
 	return args.String(0)
 }
-func (m *mockRequester) GetRole() rolemodel.Role {
+func (m *mockRequester) GetRoleId() string {
 	args := m.Called()
-	return args.Get(0).(rolemodel.Role)
+	return args.Get(0).(string)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
 	args := m.Called(featureCode)
@@ -103,8 +102,6 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 	mockRequest := new(mockRequester)
 	mockFilter := exportnotemodel.Filter{
 		SearchKey: "",
-		MinPrice:  nil,
-		MaxPrice:  nil,
 	}
 	mockPaging := common.Paging{
 		Page: 1,

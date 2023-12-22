@@ -6,7 +6,6 @@ import (
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
-	"coffee_shop_management_backend/module/role/rolemodel"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
@@ -54,9 +53,9 @@ func (m *mockRequester) GetEmail() string {
 	args := m.Called()
 	return args.String(0)
 }
-func (m *mockRequester) GetRole() rolemodel.Role {
+func (m *mockRequester) GetRoleId() string {
 	args := m.Called()
-	return args.Get(0).(rolemodel.Role)
+	return args.Get(0).(string)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
 	args := m.Called(featureCode)
@@ -123,10 +122,12 @@ func Test_createIngredientBiz_CreateIngredient(t *testing.T) {
 
 	validId := "012345678901"
 	measureType := enum.Weight
+	roundedPrice := float32(0.001)
 	ingredient := ingredientmodel.IngredientCreate{
 		Id:          &validId,
 		Name:        mock.Anything,
 		MeasureType: &measureType,
+		Price:       0.0006,
 	}
 	mockErr := errors.New(mock.Anything)
 
@@ -281,6 +282,7 @@ func Test_createIngredientBiz_CreateIngredient(t *testing.T) {
 				assert.NotNil(t, err, "CreateIngredient() = %v, wantErr %v", err, tt.wantErr)
 			} else {
 				assert.Nil(t, err, "CreateIngredient() = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, tt.args.data.Price, roundedPrice, "Param.Price = %v, want = %v", tt.args.data.Price, roundedPrice)
 			}
 		})
 	}
