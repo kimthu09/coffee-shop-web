@@ -6,6 +6,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:5.7
+        env:
+          MYSQL_ROOT_PASSWORD: 123456
+          MYSQL_DATABASE: cfshopmanagement
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v2
@@ -14,6 +28,23 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: "1.21"
+
+      - name: Set up Node.js for Next.js frontend
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18.18.0"
+
+      - name: Wait for MySQL to start
+        run: |
+          until mysqladmin ping -h"127.0.0.1" -P"3306" --silent; do
+            echo "waiting for mysql"
+            sleep 2
+          done
+
+      - name: Replace DSN in .env
+        run: |
+          cd coffee_shop_management_backend
+          sed -i "s|(cfsm-mysql:3306)|(127.0.0.1:3306)|" .env
 
       - name: Build Go backend
         run: |
@@ -25,11 +56,6 @@ jobs:
           cd coffee_shop_management_backend
           go test -v ./...
 
-      - name: Set up Node.js for Next.js frontend
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18.18.0"
-
       - name: Install dependencies for Next.js frontend
         run: |
           cd coffee_shop_management
@@ -39,8 +65,3 @@ jobs:
         run: |
           cd coffee_shop_management
           npm run build
-
-      # - name: Test Next.js frontend
-      #   run: |
-      #     cd coffee_shop_management
-      #     npm test
