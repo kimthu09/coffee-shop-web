@@ -170,6 +170,9 @@ func Test_createInvoiceBiz_CreateInvoice(t *testing.T) {
 			},
 		},
 	}
+	customer := customermodel.Customer{
+		Id: customerId,
+	}
 	invoiceCreateWithUsePointButWithoutCustomer := invoicemodel.InvoiceCreate{
 		CustomerId: nil,
 		IsUsePoint: true,
@@ -577,6 +580,79 @@ func Test_createInvoiceBiz_CreateInvoice(t *testing.T) {
 						"GetShopGeneral",
 						context.Background()).
 					Return(&shopGeneral, nil).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Create invoice failed because can not update customer point",
+			fields: fields{
+				repo:      mockRepo,
+				requester: mockRequest,
+				gen:       mockGen,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &invoiceCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InvoiceCreateFeatureCode).
+					Return(true).
+					Once()
+
+				mockGen.
+					On("GenerateId").
+					Return(invoiceId, nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleCheckPermissionStatus",
+						context.Background(),
+						&invoiceCreate).
+					Return(nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleData",
+						context.Background(),
+						&invoiceCreate).
+					Return(nil).
+					Once()
+
+				mockRepo.
+					On(
+						"GetShopGeneral",
+						context.Background()).
+					Return(&shopGeneral, nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleIngredientTotalAmount",
+						context.Background(),
+						invoiceId,
+						mock.Anything).
+					Return(nil).
+					Once()
+
+				mockRepo.
+					On(
+						"FindCustomer",
+						context.Background(),
+						customerId).
+					Return(&customer, nil).
+					Once()
+
+				mockRepo.
+					On(
+						"UpdateCustomerPoint",
+						context.Background(),
+						customerId,
+						mock.Anything).
+					Return(mockErr).
 					Once()
 			},
 			wantErr: true,
