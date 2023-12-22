@@ -11,39 +11,41 @@ import (
 	"testing"
 )
 
-type mockListCustomerRepo struct {
+type mockSeeCustomerRepo struct {
 	mock.Mock
 }
 
-func (m *mockListCustomerRepo) ListCustomer(
+func (m *mockSeeCustomerRepo) SeeCustomerDetail(
 	ctx context.Context,
-	filter *customermodel.Filter,
-	paging *common.Paging) ([]customermodel.Customer, error) {
-	args := m.Called(ctx, filter, paging)
-	return args.Get(0).([]customermodel.Customer), args.Error(1)
+	customerId string) (*customermodel.Customer, error) {
+	args := m.Called(ctx, customerId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*customermodel.Customer), args.Error(1)
 }
 
-func TestNewListCustomerBiz(t *testing.T) {
+func TestNewSeeCustomerDetailBiz(t *testing.T) {
 	type args struct {
-		repo      ListCustomerRepo
+		repo      SeeCustomerRepo
 		requester middleware.Requester
 	}
 
 	mockRequest := new(mockRequester)
-	mockRepo := new(mockListCustomerRepo)
+	mockRepo := new(mockSeeCustomerRepo)
 
 	tests := []struct {
 		name string
 		args args
-		want *listCustomerBiz
+		want *seeCustomerDetailBiz
 	}{
 		{
-			name: "Create object has type ListCustomerBiz",
+			name: "Create object has type SeeCustomerDetailBiz",
 			args: args{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
-			want: &listCustomerBiz{
+			want: &seeCustomerDetailBiz{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
@@ -51,43 +53,41 @@ func TestNewListCustomerBiz(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewListCustomerBiz(tt.args.repo, tt.args.requester)
+			got := NewSeeCustomerDetailBiz(tt.args.repo, tt.args.requester)
 
 			assert.Equal(
 				t,
 				tt.want,
 				got,
-				"NewListCustomerRepo() = %v, want %v",
+				"NewSeeCustomerDetailBiz() = %v, want %v",
 				got,
 				tt.want)
 		})
 	}
 }
 
-func Test_listCustomerBiz_ListCustomer(t *testing.T) {
+func Test_seeCustomerDetailBiz_SeeCustomerDetail(t *testing.T) {
 	type fields struct {
-		repo      ListCustomerRepo
+		repo      SeeCustomerRepo
 		requester middleware.Requester
 	}
 	type args struct {
-		ctx    context.Context
-		filter *customermodel.Filter
-		paging *common.Paging
+		ctx        context.Context
+		customerId string
 	}
 
-	mockRepo := new(mockListCustomerRepo)
 	mockRequest := new(mockRequester)
+	mockRepo := new(mockSeeCustomerRepo)
 
-	paging := common.Paging{
-		Page: 1,
+	customerId := mock.Anything
+	customer := customermodel.Customer{
+		Id:       customerId,
+		Name:     mock.Anything,
+		Email:    mock.Anything,
+		Phone:    mock.Anything,
+		Point:    0,
+		Invoices: nil, // Fill with appropriate data
 	}
-	filter := customermodel.Filter{
-		SearchKey: "",
-		MinPoint:  nil,
-		MaxPoint:  nil,
-	}
-	listCustomers := make([]customermodel.Customer, 0)
-	var emptyListCustomers []customermodel.Customer
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -95,19 +95,18 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
-		want    []customermodel.Customer
+		want    *customermodel.Customer
 		wantErr bool
 	}{
 		{
-			name: "List customer failed because user is not allowed",
+			name: "See customer detail failed because user is not allowed",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:        context.Background(),
+				customerId: customerId,
 			},
 			mock: func() {
 				mockRequest.
@@ -115,19 +114,18 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listCustomers,
+			want:    &customer,
 			wantErr: true,
 		},
 		{
-			name: "List customer failed because can not get list from database",
+			name: "See customer detail failed because can not get data from database",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:        context.Background(),
+				customerId: customerId,
 			},
 			mock: func() {
 				mockRequest.
@@ -137,26 +135,24 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 
 				mockRepo.
 					On(
-						"ListCustomer",
+						"SeeCustomerDetail",
 						context.Background(),
-						&filter,
-						&paging).
-					Return(emptyListCustomers, mockErr).
+						customerId).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    listCustomers,
+			want:    &customer,
 			wantErr: true,
 		},
 		{
-			name: "List customer successfully",
+			name: "See customer detail failed because can not get data from database",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:        context.Background(),
+				customerId: customerId,
 			},
 			mock: func() {
 				mockRequest.
@@ -166,50 +162,47 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 
 				mockRepo.
 					On(
-						"ListCustomer",
+						"SeeCustomerDetail",
 						context.Background(),
-						&filter,
-						&paging).
-					Return(listCustomers, nil).
+						customerId).
+					Return(&customer, nil).
 					Once()
 			},
-			want:    listCustomers,
+			want:    &customer,
 			wantErr: false,
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			biz := &listCustomerBiz{
+			biz := &seeCustomerDetailBiz{
 				repo:      tt.fields.repo,
 				requester: tt.fields.requester,
 			}
 
 			tt.mock()
 
-			got, err := biz.ListCustomer(
-				tt.args.ctx,
-				tt.args.filter,
-				tt.args.paging)
+			got, err := biz.SeeCustomerDetail(tt.args.ctx, tt.args.customerId)
 
 			if tt.wantErr {
 				assert.NotNil(
 					t,
 					err,
-					"ListCustomer() error = %v, wantErr %v",
+					"SeeCustomerDetail() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 			} else {
 				assert.Nil(
 					t,
 					err,
-					"ListCustomer() error = %v, wantErr %v",
+					"SeeCustomerDetail() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 				assert.Equal(
 					t,
 					tt.want,
 					got,
-					"ListCustomer() = %v, want %v",
+					"SeeCustomerDetail() = %v, want %v",
 					got,
 					tt.want)
 			}

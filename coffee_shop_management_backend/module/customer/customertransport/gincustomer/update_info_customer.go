@@ -27,7 +27,7 @@ func UpdateInfoCustomer(appCtx appctx.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMainDBConnection().Begin()
 
 		store := customerstore.NewSQLStore(db)
-		repo := customerrepo.NewUpdateInfoSupplierRepo(store)
+		repo := customerrepo.NewUpdateInfoCustomerRepo(store)
 		biz := customerbiz.NewUpdateInfoCustomerBiz(repo, requester)
 
 		if err := biz.UpdateInfoCustomer(c.Request.Context(), id, &data); err != nil {
@@ -39,6 +39,6 @@ func UpdateInfoCustomer(appCtx appctx.AppContext) gin.HandlerFunc {
 			db.Rollback()
 			panic(err)
 		}
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

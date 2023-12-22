@@ -2,15 +2,17 @@ package customermodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/invoice/invoicemodel"
 	"errors"
 )
 
 type Customer struct {
-	Id    string  `json:"id" gorm:"column:id;"`
-	Name  string  `json:"name" gorm:"column:name;"`
-	Email string  `json:"email" gorm:"column:email;"`
-	Phone string  `json:"phone" gorm:"column:phone;"`
-	Debt  float32 `json:"debt" gorm:"column:debt;"`
+	Id       string                 `json:"id" gorm:"column:id;"`
+	Name     string                 `json:"name" gorm:"column:name;"`
+	Email    string                 `json:"email" gorm:"column:email;"`
+	Phone    string                 `json:"phone" gorm:"column:phone;"`
+	Point    float32                `json:"point" gorm:"column:point;"`
+	Invoices []invoicemodel.Invoice `json:"invoices"`
 }
 
 func (*Customer) TableName() string {
@@ -59,9 +61,6 @@ var (
 	)
 	ErrCustomerUpdateInfoNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to update info customer"),
-	)
-	ErrCustomerPayNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to pay customer"),
 	)
 	ErrCustomerViewNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to view customer"),

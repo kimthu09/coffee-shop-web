@@ -5,7 +5,6 @@ import (
 	"coffee_shop_management_backend/component/generator"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/customer/customermodel"
-	"coffee_shop_management_backend/module/role/rolemodel"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
@@ -53,9 +52,9 @@ func (m *mockRequester) GetEmail() string {
 	args := m.Called()
 	return args.String(0)
 }
-func (m *mockRequester) GetRole() rolemodel.Role {
+func (m *mockRequester) GetRoleId() string {
 	args := m.Called()
-	return args.Get(0).(rolemodel.Role)
+	return args.Get(0).(string)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
 	args := m.Called(featureCode)
@@ -180,7 +179,7 @@ func Test_createCustomerBiz_CreateCustomer(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Create customer failed because data is invalid",
+			name: "Create customer failed because can not generate id",
 			fields: fields{
 				gen:       mockGenerator,
 				repo:      mockRepo,

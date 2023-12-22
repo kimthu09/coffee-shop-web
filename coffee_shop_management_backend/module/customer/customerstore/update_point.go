@@ -7,15 +7,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) UpdateCustomerDebt(
+func (s *sqlStore) UpdateCustomerPoint(
 	ctx context.Context,
 	id string,
-	data *customermodel.CustomerUpdateDebt) error {
+	data *customermodel.CustomerUpdatePoint) error {
 	db := s.db
 
 	if err := db.Table(common.TableCustomer).
 		Where("id = ?", id).
-		Update("debt", gorm.Expr("debt + ?", data.Amount)).
+		Update("point", gorm.Expr("point + ?", data.Amount)).
 		Error; err != nil {
 		return common.ErrDB(err)
 	}

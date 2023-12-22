@@ -5,7 +5,6 @@ import (
 	"coffee_shop_management_backend/module/customer/customermodel"
 	"context"
 	"gorm.io/gorm"
-	"strings"
 )
 
 func (s *sqlStore) ListCustomer(
@@ -20,14 +19,13 @@ func (s *sqlStore) ListCustomer(
 
 	handleFilter(db, filter, propertiesContainSearchKey)
 
-	dbTemp, errPaging := handlePaging(db, paging)
+	dbTemp, errPaging := common.HandlePaging(db, paging)
 	if errPaging != nil {
 		return nil, errPaging
 	}
 	db = dbTemp
 
 	if err := db.
-		Limit(int(paging.Limit)).
 		Order("name").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
@@ -36,47 +34,19 @@ func (s *sqlStore) ListCustomer(
 	return result, nil
 }
 
-func getWhereClause(
-	db *gorm.DB,
-	searchKey string,
-	propertiesContainSearchKey []string) *gorm.DB {
-	conditions := make([]string, len(propertiesContainSearchKey))
-	args := make([]interface{}, len(propertiesContainSearchKey))
-
-	for i, prop := range propertiesContainSearchKey {
-		conditions[i] = prop + " LIKE ?"
-		args[i] = "%" + searchKey + "%"
-	}
-
-	whereClause := strings.Join(conditions, " OR ")
-
-	return db.Where(whereClause, args...)
-}
-
 func handleFilter(
 	db *gorm.DB,
 	filter *customermodel.Filter,
 	propertiesContainSearchKey []string) {
 	if filter != nil {
 		if filter.SearchKey != "" {
-			db = getWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
+			db = common.GetWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
 		}
-		if filter.MinDebt != nil {
-			db = db.Where("debt >= ?", filter.MinDebt)
+		if filter.MinPoint != nil {
+			db = db.Where("point >= ?", filter.MinPoint)
 		}
-		if filter.MaxDebt != nil {
-			db = db.Where("debt <= ?", filter.MaxDebt)
+		if filter.MaxPoint != nil {
+			db = db.Where("point <= ?", filter.MaxPoint)
 		}
 	}
-}
-
-func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
-	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
-
-	return db, nil
 }
