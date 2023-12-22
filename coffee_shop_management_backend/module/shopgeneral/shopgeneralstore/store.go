@@ -1,4 +1,4 @@
-package cancelnotestore
+package shopgeneralstore
 
 import "gorm.io/gorm"
 
