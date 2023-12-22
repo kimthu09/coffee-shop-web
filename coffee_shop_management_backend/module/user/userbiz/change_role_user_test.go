@@ -50,9 +50,9 @@ func (m *mockRequester) GetEmail() string {
 	args := m.Called()
 	return args.String(0)
 }
-func (m *mockRequester) GetRole() rolemodel.Role {
+func (m *mockRequester) GetRoleId() string {
 	args := m.Called()
-	return args.Get(0).(rolemodel.Role)
+	return args.Get(0).(string)
 }
 func (m *mockRequester) IsHasFeature(featureCode string) bool {
 	args := m.Called(featureCode)
@@ -139,8 +139,8 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(noAdminRole).
+					On("GetRoleId").
+					Return(noAdminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -158,8 +158,8 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -177,8 +177,8 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRepo.
@@ -186,41 +186,6 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 						"CheckUserStatusPermission",
 						context.Background(),
 						mock.Anything).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Change role failed because role need to update is not exist",
-			fields: fields{
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				id:   userId,
-				data: &usermodel.UserUpdateRole{RoleId: validId},
-			},
-			mock: func() {
-				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckUserStatusPermission",
-						context.Background(),
-						mock.Anything).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						validId).
 					Return(mockErr).
 					Once()
 			},
@@ -239,8 +204,8 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRepo.
@@ -248,14 +213,6 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 						"CheckUserStatusPermission",
 						context.Background(),
 						mock.Anything).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						validId).
 					Return(nil).
 					Once()
 
@@ -283,8 +240,8 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockRepo.
@@ -292,14 +249,6 @@ func Test_changeRoleUserBiz_ChangeRoleUser(t *testing.T) {
 						"CheckUserStatusPermission",
 						context.Background(),
 						mock.Anything).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						validId).
 					Return(nil).
 					Once()
 

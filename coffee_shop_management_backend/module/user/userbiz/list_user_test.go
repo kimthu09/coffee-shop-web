@@ -17,9 +17,10 @@ type mockListUserRepo struct {
 
 func (m *mockListUserRepo) ListUser(
 	ctx context.Context,
+	userSearch string,
 	filter *usermodel.Filter,
 	paging *common.Paging) ([]usermodel.User, error) {
-	args := m.Called(ctx, filter, paging)
+	args := m.Called(ctx, userSearch, filter, paging)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -88,6 +89,7 @@ func Test_listUserBiz_ListUser(t *testing.T) {
 	paging := common.Paging{
 		Page: 1,
 	}
+	userSearch := "User001"
 	listUser := make([]usermodel.User, 0)
 	mockErr := errors.New(mock.Anything)
 
@@ -136,10 +138,16 @@ func Test_listUserBiz_ListUser(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(userSearch).
+					Once()
+
 				mockRepo.
 					On(
 						"ListUser",
 						context.Background(),
+						userSearch,
 						&filter,
 						&paging,
 					).
@@ -166,10 +174,16 @@ func Test_listUserBiz_ListUser(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(userSearch).
+					Once()
+
 				mockRepo.
 					On(
 						"ListUser",
 						context.Background(),
+						userSearch,
 						&filter,
 						&paging,
 					).

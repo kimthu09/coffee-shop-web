@@ -8,7 +8,6 @@ import (
 type ChangeStatusUserStore interface {
 	UpdateStatusUser(
 		ctx context.Context,
-		id string,
 		data *usermodel.UserUpdateStatus) error
 }
 
@@ -25,9 +24,8 @@ func NewChangeStatusUserRepo(
 
 func (repo *changeStatusUserRepo) UpdateStatusUser(
 	ctx context.Context,
-	userId string,
 	data *usermodel.UserUpdateStatus) error {
-	if err := repo.userStore.UpdateStatusUser(ctx, userId, data); err != nil {
+	if err := repo.userStore.UpdateStatusUser(ctx, data); err != nil {
 		return err
 	}
 	return nil

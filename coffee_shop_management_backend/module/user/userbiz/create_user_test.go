@@ -18,13 +18,6 @@ type mockCreateUserRepo struct {
 	mock.Mock
 }
 
-func (m *mockCreateUserRepo) CheckRoleExist(
-	ctx context.Context,
-	roleId string) error {
-	args := m.Called(ctx, roleId)
-	return args.Error(0)
-}
-
 func (m *mockCreateUserRepo) CreateUser(
 	ctx context.Context,
 	data *usermodel.UserCreate) error {
@@ -142,7 +135,7 @@ func Test_createUserBiz_CreateUser(t *testing.T) {
 		Salt:     salt,
 	}
 	adminRole := rolemodel.Role{Id: common.RoleAdminId}
-	noteAdminRole := rolemodel.Role{Id: mock.Anything}
+	notAdminRole := rolemodel.Role{Id: mock.Anything}
 
 	mockErr := errors.New(mock.Anything)
 
@@ -167,8 +160,8 @@ func Test_createUserBiz_CreateUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(noteAdminRole).
+					On("GetRoleId").
+					Return(notAdminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -189,66 +182,8 @@ func Test_createUserBiz_CreateUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Create user failed because role is not exist",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				hasher:    mockHash,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &data,
-			},
-			mock: func() {
-				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						mock.Anything,
-					).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Create user failed because role is not exist",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				hasher:    mockHash,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &data,
-			},
-			mock: func() {
-				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						mock.Anything,
-					).
-					Return(mockErr).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -267,17 +202,8 @@ func Test_createUserBiz_CreateUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						mock.Anything,
-					).
-					Return(nil).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockHash.
@@ -311,17 +237,8 @@ func Test_createUserBiz_CreateUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						mock.Anything,
-					).
-					Return(nil).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockHash.
@@ -364,17 +281,8 @@ func Test_createUserBiz_CreateUser(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckRoleExist",
-						context.Background(),
-						mock.Anything,
-					).
-					Return(nil).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockHash.

@@ -4,7 +4,6 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/middleware"
-	"coffee_shop_management_backend/module/role/rolestore"
 	"coffee_shop_management_backend/module/user/userbiz"
 	"coffee_shop_management_backend/module/user/usermodel"
 	"coffee_shop_management_backend/module/user/userrepo"
@@ -28,8 +27,7 @@ func ChangeRoleUser(appCtx appctx.AppContext) gin.HandlerFunc {
 		db := appCtx.GetMainDBConnection().Begin()
 
 		userStore := userstore.NewSQLStore(db)
-		roleStore := rolestore.NewSQLStore(db)
-		repo := userrepo.NewChangeRoleUserRepo(userStore, roleStore)
+		repo := userrepo.NewChangeRoleUserRepo(userStore)
 
 		business := userbiz.NewChangeRoleUserBiz(repo, requester)
 
@@ -43,6 +41,6 @@ func ChangeRoleUser(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

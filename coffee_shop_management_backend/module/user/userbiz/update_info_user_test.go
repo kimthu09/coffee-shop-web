@@ -44,7 +44,7 @@ func TestNewUpdateInfoUserBiz(t *testing.T) {
 		want *updateInfoUserBiz
 	}{
 		{
-			name: "Create object has type UpdateInfoUserRepo",
+			name: "Create object has type UpdateInfoUserBiz",
 			args: args{
 				repo:      mockRepo,
 				requester: mockRequest,

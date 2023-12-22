@@ -4,7 +4,7 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
 	"coffee_shop_management_backend/component/hasher"
-	"coffee_shop_management_backend/component/token_provider/jwt"
+	"coffee_shop_management_backend/component/tokenprovider/jwt"
 	"coffee_shop_management_backend/module/user/userbiz"
 	"coffee_shop_management_backend/module/user/usermodel"
 	"coffee_shop_management_backend/module/user/userrepo"
@@ -30,13 +30,13 @@ func Login(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		md5 := hasher.NewMd5Hash()
 
-		business := userbiz.NewLoginBiz(repo, 60*60*24*30, tokenProvider, md5)
+		business := userbiz.NewLoginBiz(repo, 60*60*24, 60*60*24*3, tokenProvider, md5)
 		account, err := business.Login(c.Request.Context(), &data)
 
 		if err != nil {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(account))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(account))
 	}
 }

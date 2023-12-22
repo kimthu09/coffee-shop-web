@@ -10,6 +10,7 @@ import (
 type ListUserRepo interface {
 	ListUser(
 		ctx context.Context,
+		userSearch string,
 		filter *usermodel.Filter,
 		paging *common.Paging,
 	) ([]usermodel.User, error)
@@ -34,7 +35,7 @@ func (biz *listUserBiz) ListUser(
 		return nil, usermodel.ErrUserViewNoPermission
 	}
 
-	result, err := biz.repo.ListUser(ctx, filter, paging)
+	result, err := biz.repo.ListUser(ctx, biz.requester.GetUserId(), filter, paging)
 	if err != nil {
 		return nil, err
 	}

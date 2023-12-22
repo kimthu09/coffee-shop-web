@@ -12,8 +12,8 @@ type User struct {
 	Email    string         `json:"email" gorm:"column:email;"`
 	Password string         `json:"-" gorm:"column:password;"`
 	Salt     string         `json:"-" gorm:"column:salt;"`
-	RoleId   string         `json:"roleId" gorm:"column:roleId;"`
-	Role     rolemodel.Role `json:"-" gorm:"foreignkey:roleId"`
+	RoleId   string         `json:"-" gorm:"column:roleId;"`
+	Role     rolemodel.Role `json:"role" gorm:"foreignkey:roleId"`
 	IsActive bool           `json:"isActive" gorm:"column:isActive;"`
 }
 
@@ -25,8 +25,8 @@ func (u *User) GetEmail() string {
 	return u.Email
 }
 
-func (u *User) GetRole() rolemodel.Role {
-	return u.Role
+func (u *User) GetRoleId() string {
+	return u.Role.Id
 }
 
 func (u *User) IsHasFeature(featureCode string) bool {
@@ -87,6 +87,11 @@ var (
 		errors.New("user has been inactive"),
 		"user has been inactive",
 		"ErrUserInactive",
+	)
+	ErrUserIdInvalid = common.NewCustomError(
+		errors.New("user id is invalid"),
+		"user id is invalid",
+		"ErrUserStatusEmpty",
 	)
 	ErrUserStatusEmpty = common.NewCustomError(
 		errors.New("user status is empty"),

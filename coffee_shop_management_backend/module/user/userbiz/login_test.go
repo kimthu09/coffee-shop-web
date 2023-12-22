@@ -2,7 +2,7 @@ package userbiz
 
 import (
 	"coffee_shop_management_backend/component/hasher"
-	"coffee_shop_management_backend/component/token_provider"
+	"coffee_shop_management_backend/component/tokenprovider"
 	"coffee_shop_management_backend/module/role/rolemodel"
 	"coffee_shop_management_backend/module/user/usermodel"
 	"context"
@@ -32,30 +32,31 @@ type mockTokenProvider struct {
 }
 
 func (m *mockTokenProvider) Generate(
-	data token_provider.TokenPayload,
-	expiry int) (*token_provider.Token, error) {
+	data tokenprovider.TokenPayload,
+	expiry int) (*tokenprovider.Token, error) {
 	args := m.Called(data, expiry)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*token_provider.Token), args.Error(1)
+	return args.Get(0).(*tokenprovider.Token), args.Error(1)
 }
 
 func (m *mockTokenProvider) Validate(
-	token string) (*token_provider.TokenPayload, error) {
+	token string) (*tokenprovider.TokenPayload, error) {
 	args := m.Called(token)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*token_provider.TokenPayload), args.Error(1)
+	return args.Get(0).(*tokenprovider.TokenPayload), args.Error(1)
 }
 
 func TestNewLoginBiz(t *testing.T) {
 	type args struct {
 		repo          LoginRepo
-		expiry        int
-		tokenProvider token_provider.Provider
+		tokenProvider tokenprovider.Provider
 		hasher        hasher.Hasher
+		expiry        int
+		expiryRefresh int
 	}
 
 	mockRepo := new(mockLoginRepo)
@@ -71,15 +72,17 @@ func TestNewLoginBiz(t *testing.T) {
 			name: "Create object has type LoginBiz",
 			args: args{
 				repo:          mockRepo,
-				expiry:        1000,
 				tokenProvider: mockTokenPro,
 				hasher:        mockHash,
+				expiry:        1000,
+				expiryRefresh: 1000,
 			},
 			want: &loginBiz{
 				repo:          mockRepo,
 				expiry:        1000,
-				hasher:        mockHash,
+				expiryRefresh: 1000,
 				tokenProvider: mockTokenPro,
+				hasher:        mockHash,
 			},
 		},
 	}
@@ -88,6 +91,7 @@ func TestNewLoginBiz(t *testing.T) {
 			got := NewLoginBiz(
 				tt.args.repo,
 				tt.args.expiry,
+				tt.args.expiryRefresh,
 				tt.args.tokenProvider,
 				tt.args.hasher,
 			)
@@ -101,7 +105,8 @@ func Test_loginBiz_Login(t *testing.T) {
 	type fields struct {
 		repo          LoginRepo
 		expiry        int
-		tokenProvider token_provider.Provider
+		expiryRefresh int
+		tokenProvider tokenprovider.Provider
 		hasher        hasher.Hasher
 	}
 	type args struct {
@@ -113,7 +118,7 @@ func Test_loginBiz_Login(t *testing.T) {
 	mockHash := new(mockHasher)
 	mockTokenPro := new(mockTokenProvider)
 	expiry := 1000
-
+	expiryRefresh := 2000
 	requestEmail := "a@gmail.com"
 	requestPassword := "123456"
 	salt := mock.Anything
@@ -133,18 +138,23 @@ func Test_loginBiz_Login(t *testing.T) {
 		RoleId:   roleId,
 		Role:     role,
 	}
-	payload := token_provider.TokenPayload{
+	payload := tokenprovider.TokenPayload{
 		UserId: userId,
 		Role:   roleId,
 	}
-	token := token_provider.Token{
+	token := tokenprovider.Token{
 		Token:   mock.Anything,
 		Created: time.Time{},
 		Expiry:  expiry,
 	}
+	refreshToken := tokenprovider.Token{
+		Token:   mock.Anything,
+		Created: time.Time{},
+		Expiry:  expiryRefresh,
+	}
 	account := usermodel.Account{
 		AccessToken:  &token,
-		RefreshToken: &token,
+		RefreshToken: &refreshToken,
 	}
 	mockErr := errors.New(mock.Anything)
 
@@ -161,6 +171,7 @@ func Test_loginBiz_Login(t *testing.T) {
 			fields: fields{
 				repo:          mockRepo,
 				expiry:        expiry,
+				expiryRefresh: expiryRefresh,
 				tokenProvider: mockTokenPro,
 				hasher:        mockHash,
 			},
@@ -185,6 +196,7 @@ func Test_loginBiz_Login(t *testing.T) {
 			fields: fields{
 				repo:          mockRepo,
 				expiry:        expiry,
+				expiryRefresh: expiryRefresh,
 				tokenProvider: mockTokenPro,
 				hasher:        mockHash,
 			},
@@ -216,6 +228,7 @@ func Test_loginBiz_Login(t *testing.T) {
 			fields: fields{
 				repo:          mockRepo,
 				expiry:        expiry,
+				expiryRefresh: expiryRefresh,
 				tokenProvider: mockTokenPro,
 				hasher:        mockHash,
 			},
@@ -256,6 +269,7 @@ func Test_loginBiz_Login(t *testing.T) {
 			fields: fields{
 				repo:          mockRepo,
 				expiry:        expiry,
+				expiryRefresh: expiryRefresh,
 				tokenProvider: mockTokenPro,
 				hasher:        mockHash,
 			},
@@ -292,7 +306,7 @@ func Test_loginBiz_Login(t *testing.T) {
 					On(
 						"Generate",
 						payload,
-						expiry,
+						expiryRefresh,
 					).
 					Return(nil, mockErr).
 					Once()
@@ -305,6 +319,7 @@ func Test_loginBiz_Login(t *testing.T) {
 			fields: fields{
 				repo:          mockRepo,
 				expiry:        expiry,
+				expiryRefresh: expiryRefresh,
 				tokenProvider: mockTokenPro,
 				hasher:        mockHash,
 			},
@@ -335,7 +350,16 @@ func Test_loginBiz_Login(t *testing.T) {
 						expiry,
 					).
 					Return(&token, nil).
-					Times(2)
+					Once()
+
+				mockTokenPro.
+					On(
+						"Generate",
+						payload,
+						expiryRefresh,
+					).
+					Return(&refreshToken, nil).
+					Once()
 			},
 			want:    &account,
 			wantErr: false,
@@ -346,6 +370,7 @@ func Test_loginBiz_Login(t *testing.T) {
 			biz := &loginBiz{
 				repo:          tt.fields.repo,
 				expiry:        tt.fields.expiry,
+				expiryRefresh: tt.fields.expiryRefresh,
 				tokenProvider: tt.fields.tokenProvider,
 				hasher:        tt.fields.hasher,
 			}

@@ -17,9 +17,8 @@ type mockChangeStatusUserRepo struct {
 
 func (m *mockChangeStatusUserRepo) UpdateStatusUser(
 	ctx context.Context,
-	userId string,
 	data *usermodel.UserUpdateStatus) error {
-	args := m.Called(ctx, userId, data)
+	args := m.Called(ctx, data)
 	return args.Error(0)
 }
 
@@ -68,16 +67,27 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 	}
 	type args struct {
 		ctx  context.Context
-		id   string
-		data *usermodel.UserUpdateStatus
+		data []usermodel.UserUpdateStatus
 	}
 
 	mockRepo := new(mockChangeStatusUserRepo)
 	mockRequest := new(mockRequester)
 
-	userId := mock.Anything
 	mockErr := errors.New(mock.Anything)
+
 	validStatus := true
+	userStatus := []usermodel.UserUpdateStatus{
+		{
+			UserId:   "User001",
+			IsActive: &validStatus,
+		},
+	}
+	invalidUserStatus := []usermodel.UserUpdateStatus{
+		{
+			UserId:   "",
+			IsActive: &validStatus,
+		},
+	}
 
 	tests := []struct {
 		name    string
@@ -94,8 +104,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 			},
 			args: args{
 				ctx:  context.Background(),
-				id:   userId,
-				data: &usermodel.UserUpdateStatus{IsActive: &validStatus},
+				data: userStatus,
 			},
 			mock: func() {
 				mockRequest.
@@ -113,8 +122,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 			},
 			args: args{
 				ctx:  context.Background(),
-				id:   userId,
-				data: &usermodel.UserUpdateStatus{IsActive: nil},
+				data: invalidUserStatus,
 			},
 			mock: func() {
 				mockRequest.
@@ -132,8 +140,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 			},
 			args: args{
 				ctx:  context.Background(),
-				id:   userId,
-				data: &usermodel.UserUpdateStatus{IsActive: &validStatus},
+				data: userStatus,
 			},
 			mock: func() {
 				mockRequest.
@@ -145,8 +152,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 					On(
 						"UpdateStatusUser",
 						context.Background(),
-						userId,
-						&usermodel.UserUpdateStatus{IsActive: &validStatus}).
+						&userStatus[0]).
 					Return(mockErr).
 					Once()
 			},
@@ -160,8 +166,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 			},
 			args: args{
 				ctx:  context.Background(),
-				id:   userId,
-				data: &usermodel.UserUpdateStatus{IsActive: &validStatus},
+				data: userStatus,
 			},
 			mock: func() {
 				mockRequest.
@@ -173,8 +178,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 					On(
 						"UpdateStatusUser",
 						context.Background(),
-						userId,
-						&usermodel.UserUpdateStatus{IsActive: &validStatus}).
+						&userStatus[0]).
 					Return(nil).
 					Once()
 			},
@@ -190,7 +194,7 @@ func Test_changeStatusUserBiz_ChangeStatusUser(t *testing.T) {
 
 			tt.mock()
 
-			err := biz.ChangeStatusUser(tt.args.ctx, tt.args.id, tt.args.data)
+			err := biz.ChangeStatusUser(tt.args.ctx, tt.args.data)
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "ChangeStatusUser() error = %v, wantErr %v", err, tt.wantErr)

@@ -8,10 +8,6 @@ import (
 )
 
 type UpdateRoleUserRepo interface {
-	CheckRoleExist(
-		ctx context.Context,
-		roleId string,
-	) error
 	CheckUserStatusPermission(
 		ctx context.Context,
 		userId string,
@@ -40,7 +36,7 @@ func (biz *changeRoleUserBiz) ChangeRoleUser(
 	ctx context.Context,
 	id string,
 	data *usermodel.UserUpdateRole) error {
-	if biz.requester.GetRole().Id != common.RoleAdminId {
+	if biz.requester.GetRoleId() != common.RoleAdminId {
 		return usermodel.ErrUserUpdateRoleNoPermission
 	}
 
@@ -49,10 +45,6 @@ func (biz *changeRoleUserBiz) ChangeRoleUser(
 	}
 
 	if err := biz.repo.CheckUserStatusPermission(ctx, id); err != nil {
-		return err
-	}
-
-	if err := biz.repo.CheckRoleExist(ctx, data.RoleId); err != nil {
 		return err
 	}
 

@@ -12,11 +12,9 @@ import (
 	"net/http"
 )
 
-func ChangeStatusUser(appCtx appctx.AppContext) gin.HandlerFunc {
+func ChangeStatusUsers(appCtx appctx.AppContext) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
-
-		var data usermodel.UserUpdateStatus
+		var data []usermodel.UserUpdateStatus
 
 		if err := c.ShouldBind(&data); err != nil {
 			panic(common.ErrInvalidRequest(err))
@@ -31,7 +29,7 @@ func ChangeStatusUser(appCtx appctx.AppContext) gin.HandlerFunc {
 
 		business := userbiz.NewChangeStatusUserBiz(repo, requester)
 
-		if err := business.ChangeStatusUser(c.Request.Context(), id, &data); err != nil {
+		if err := business.ChangeStatusUser(c.Request.Context(), data); err != nil {
 			db.Rollback()
 			panic(err)
 		}
@@ -41,6 +39,6 @@ func ChangeStatusUser(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(true))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(true))
 	}
 }

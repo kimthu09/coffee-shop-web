@@ -8,11 +8,13 @@ import (
 
 func (s *sqlStore) UpdateStatusUser(
 	ctx context.Context,
-	id string,
 	data *usermodel.UserUpdateStatus) error {
 	db := s.db
 
-	if err := db.Where("id = ?", id).Updates(data).Error; err != nil {
+	if err := db.
+		Table(common.TableUser).
+		Where("id = ?", data.UserId).
+		Update("isActive", data.IsActive).Error; err != nil {
 		return common.ErrDB(err)
 	}
 
