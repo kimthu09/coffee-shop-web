@@ -1,4 +1,4 @@
-package customerdebtstore
+package inventorychecknotedetailstore
 
 import "gorm.io/gorm"
 

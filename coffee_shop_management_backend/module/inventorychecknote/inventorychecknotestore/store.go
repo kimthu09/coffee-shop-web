@@ -1,4 +1,4 @@
-package ingredientdetailstore
+package inventorychecknotestore
 
 import "gorm.io/gorm"
 

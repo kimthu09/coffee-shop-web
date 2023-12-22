@@ -1,0 +1,357 @@
+package inventorychecknotebiz
+
+import (
+	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/component/generator"
+	"coffee_shop_management_backend/middleware"
+	"coffee_shop_management_backend/module/inventorychecknote/inventorychecknotemodel"
+	"coffee_shop_management_backend/module/inventorychecknotedetail/inventorychecknotedetailmodel"
+	"context"
+	"errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
+)
+
+type mockIdGenerator struct {
+	mock.Mock
+}
+
+func (m *mockIdGenerator) GenerateId() (string, error) {
+	args := m.Called()
+	return args.String(0), args.Error(1)
+}
+
+func (m *mockIdGenerator) IdProcess(id *string) (*string, error) {
+	args := m.Called(id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*string), args.Error(1)
+}
+
+type mockCreateInventoryCheckNoteRepo struct {
+	mock.Mock
+}
+
+func (m *mockCreateInventoryCheckNoteRepo) HandleInventoryCheckNote(
+	ctx context.Context,
+	data *inventorychecknotemodel.InventoryCheckNoteCreate) error {
+	args := m.Called(ctx, data)
+	return args.Error(0)
+}
+func (m *mockCreateInventoryCheckNoteRepo) HandleIngredientAmount(
+	ctx context.Context,
+	data *inventorychecknotemodel.InventoryCheckNoteCreate) error {
+	args := m.Called(ctx, data)
+	return args.Error(0)
+}
+
+type mockRequester struct {
+	mock.Mock
+}
+
+func (m *mockRequester) GetUserId() string {
+	args := m.Called()
+	return args.String(0)
+}
+func (m *mockRequester) GetEmail() string {
+	args := m.Called()
+	return args.String(0)
+}
+func (m *mockRequester) GetRoleId() string {
+	args := m.Called()
+	return args.Get(0).(string)
+}
+func (m *mockRequester) IsHasFeature(featureCode string) bool {
+	args := m.Called(featureCode)
+	return args.Bool(0)
+}
+
+func TestNewCreateInventoryCheckNoteBiz(t *testing.T) {
+	type args struct {
+		gen       generator.IdGenerator
+		repo      CreateInventoryCheckNoteRepo
+		requester middleware.Requester
+	}
+
+	mockGenerator := new(mockIdGenerator)
+	mockRepo := new(mockCreateInventoryCheckNoteRepo)
+	mockRequest := new(mockRequester)
+
+	tests := []struct {
+		name string
+		args args
+		want *createInventoryCheckNoteBiz
+	}{
+		{
+			name: "Create object has type CreateInventoryCheckNoteBiz",
+			args: args{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			want: &createInventoryCheckNoteBiz{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewCreateInventoryCheckNoteBiz(
+				tt.args.gen,
+				tt.args.repo,
+				tt.args.requester,
+			)
+
+			assert.Equal(t, tt.want, got, "NewCreateInventoryCheckNoteBiz() = %v, want %v", got, tt.want)
+		})
+	}
+}
+
+func Test_createInventoryCheckNoteBiz_CreateInventoryCheckNote(t *testing.T) {
+	type fields struct {
+		gen       generator.IdGenerator
+		repo      CreateInventoryCheckNoteRepo
+		requester middleware.Requester
+	}
+	type args struct {
+		ctx  context.Context
+		data *inventorychecknotemodel.InventoryCheckNoteCreate
+	}
+
+	mockGenerator := new(mockIdGenerator)
+	mockRepo := new(mockCreateInventoryCheckNoteRepo)
+	mockRequest := new(mockRequester)
+
+	inventoryId := "Inventory001"
+	inventoryCreate := inventorychecknotemodel.InventoryCheckNoteCreate{
+		Details: []inventorychecknotedetailmodel.InventoryCheckNoteDetailCreate{
+			{
+				IngredientId: "Ing001",
+				Difference:   11,
+			},
+		},
+	}
+	invalidInventoryCreate := inventorychecknotemodel.InventoryCheckNoteCreate{
+		Details: []inventorychecknotedetailmodel.InventoryCheckNoteDetailCreate{
+			{
+				IngredientId: "",
+				Difference:   0,
+			},
+		},
+	}
+	mockErr := errors.New(mock.Anything)
+
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		mock    func()
+		wantErr bool
+	}{
+		{
+			name: "Create inventory note failed because user is not allowed",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &inventoryCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InventoryCheckNoteCreateFeatureCode).
+					Return(false).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Create inventory note failed because data is invalid",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &invalidInventoryCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InventoryCheckNoteCreateFeatureCode).
+					Return(true).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Create inventory note failed because can not generate id or id is invalid",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &inventoryCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InventoryCheckNoteCreateFeatureCode).
+					Return(true).
+					Once()
+
+				mockGenerator.
+					On("IdProcess", inventoryCreate.Id).
+					Return(nil, mockErr).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Create inventory note failed because can not handle ingredient amount",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &inventoryCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InventoryCheckNoteCreateFeatureCode).
+					Return(true).
+					Once()
+
+				mockGenerator.
+					On("IdProcess", inventoryCreate.Id).
+					Return(&inventoryId, nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleIngredientAmount",
+						context.Background(),
+						&inventoryCreate,
+					).
+					Return(mockErr).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Create inventory note failed because can not handle inventory check note",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &inventoryCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InventoryCheckNoteCreateFeatureCode).
+					Return(true).
+					Once()
+
+				mockGenerator.
+					On("IdProcess", inventoryCreate.Id).
+					Return(&inventoryId, nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleIngredientAmount",
+						context.Background(),
+						&inventoryCreate,
+					).
+					Return(nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleInventoryCheckNote",
+						context.Background(),
+						&inventoryCreate,
+					).
+					Return(mockErr).
+					Once()
+			},
+			wantErr: true,
+		},
+		{
+			name: "Create inventory note successfully",
+			fields: fields{
+				gen:       mockGenerator,
+				repo:      mockRepo,
+				requester: mockRequest,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &inventoryCreate,
+			},
+			mock: func() {
+				mockRequest.
+					On("IsHasFeature", common.InventoryCheckNoteCreateFeatureCode).
+					Return(true).
+					Once()
+
+				mockGenerator.
+					On("IdProcess", inventoryCreate.Id).
+					Return(&inventoryId, nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleIngredientAmount",
+						context.Background(),
+						&inventoryCreate,
+					).
+					Return(nil).
+					Once()
+
+				mockRepo.
+					On(
+						"HandleInventoryCheckNote",
+						context.Background(),
+						&inventoryCreate,
+					).
+					Return(nil).
+					Once()
+			},
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			biz := &createInventoryCheckNoteBiz{
+				gen:       tt.fields.gen,
+				repo:      tt.fields.repo,
+				requester: tt.fields.requester,
+			}
+			tt.mock()
+
+			err := biz.CreateInventoryCheckNote(tt.args.ctx, tt.args.data)
+			if tt.wantErr {
+				assert.NotNil(t, err, "CreateInventoryCheckNote() error = %v, wantErr %v", err, tt.wantErr)
+			} else {
+				assert.Nil(t, err, "CreateInventoryCheckNote() error = %v, wantErr %v", err, tt.wantErr)
+				for i, v := range inventoryCreate.Details {
+					assert.Equal(t, v.InventoryCheckNoteId, inventoryId,
+						"Details[%v].InventoryCheckNoteId = %v, want = %v",
+						i, v.InventoryCheckNoteId, inventoryId)
+				}
+			}
+		})
+	}
+}
