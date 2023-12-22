@@ -26,7 +26,7 @@ func NewListFeatureBiz(
 
 func (biz *listFeatureBiz) ListFeature(
 	ctx context.Context) ([]featuremodel.Feature, error) {
-	if biz.requester.GetRole().Id != common.RoleAdminId {
+	if biz.requester.GetRoleId() != common.RoleAdminId {
 		return nil, featuremodel.ErrFeatureViewNoPermission
 	}
 

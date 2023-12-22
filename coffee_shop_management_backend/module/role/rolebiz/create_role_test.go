@@ -33,13 +33,6 @@ type mockCreateRoleRepo struct {
 	mock.Mock
 }
 
-func (m *mockCreateRoleRepo) CheckFeatureExist(
-	ctx context.Context,
-	data *rolemodel.RoleCreate) error {
-	args := m.Called(ctx, data)
-	return args.Error(0)
-}
-
 func (m *mockCreateRoleRepo) CreateRole(
 	ctx context.Context,
 	data *rolemodel.RoleCreate) error {
@@ -145,8 +138,8 @@ func Test_createRoleStore_CreateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(noAdminRole).
+					On("GetRoleId").
+					Return(noAdminRole.Id).
 					Once()
 			},
 			wantErr: true,
@@ -164,14 +157,14 @@ func Test_createRoleStore_CreateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 			},
 			wantErr: true,
 		},
 		{
-			name: "Create role failed because user need to update is inactive",
+			name: "Create role failed because can not handle role id",
 			fields: fields{
 				gen:       mockGenerator,
 				repo:      mockRepo,
@@ -183,45 +176,13 @@ func Test_createRoleStore_CreateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockGenerator.
 					On("GenerateId").
 					Return(mock.Anything, mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Create role failed because feature is not exist",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &validData,
-			},
-			mock: func() {
-				mockRequest.
-					On("GetRole").
-					Return(adminRole).
-					Once()
-
-				mockGenerator.
-					On("GenerateId").
-					Return(validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						&validData).
-					Return(mockErr).
 					Once()
 			},
 			wantErr: true,
@@ -239,21 +200,13 @@ func Test_createRoleStore_CreateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockGenerator.
 					On("GenerateId").
 					Return(validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						&validData).
-					Return(nil).
 					Once()
 
 				mockRepo.
@@ -279,21 +232,13 @@ func Test_createRoleStore_CreateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockGenerator.
 					On("GenerateId").
 					Return(validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						&validData).
-					Return(nil).
 					Once()
 
 				mockRepo.
@@ -328,21 +273,13 @@ func Test_createRoleStore_CreateRole(t *testing.T) {
 			},
 			mock: func() {
 				mockRequest.
-					On("GetRole").
-					Return(adminRole).
+					On("GetRoleId").
+					Return(adminRole.Id).
 					Once()
 
 				mockGenerator.
 					On("GenerateId").
 					Return(validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckFeatureExist",
-						context.Background(),
-						&validData).
-					Return(nil).
 					Once()
 
 				mockRepo.

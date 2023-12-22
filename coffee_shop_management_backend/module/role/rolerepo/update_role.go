@@ -14,7 +14,7 @@ type UpdateRoleStore interface {
 }
 
 type UpdateRoleFeature interface {
-	CreateListImportNoteDetail(
+	CreateListRoleFeatureDetail(
 		ctx context.Context,
 		data []rolefeaturemodel.RoleFeature,
 	) error
@@ -31,29 +31,15 @@ type UpdateRoleFeature interface {
 type updateRoleRepo struct {
 	roleStore        UpdateRoleStore
 	roleFeatureStore UpdateRoleFeature
-	featureStore     CheckFeatureStore
 }
 
 func NewUpdateRoleRepo(
 	roleStore UpdateRoleStore,
-	roleFeatureStore UpdateRoleFeature,
-	featureStore CheckFeatureStore) *updateRoleRepo {
+	roleFeatureStore UpdateRoleFeature) *updateRoleRepo {
 	return &updateRoleRepo{
 		roleStore:        roleStore,
 		roleFeatureStore: roleFeatureStore,
-		featureStore:     featureStore,
 	}
-}
-
-func (repo *updateRoleRepo) CheckFeatureExist(
-	ctx context.Context,
-	data *rolemodel.RoleUpdate) error {
-	for _, v := range *data.Features {
-		if _, err := repo.featureStore.FindFeature(ctx, v); err != nil {
-			return err
-		}
-	}
-	return nil
 }
 
 func (repo *updateRoleRepo) GetListRoleFeatures(
@@ -88,7 +74,7 @@ func (repo *updateRoleRepo) UpdateRoleFeatures(
 	if err := repo.deleteRoleFeatures(ctx, deletedRoleFeatures); err != nil {
 		return err
 	}
-	if err := repo.roleFeatureStore.CreateListImportNoteDetail(
+	if err := repo.roleFeatureStore.CreateListRoleFeatureDetail(
 		ctx, createdRoleFeatures,
 	); err != nil {
 		return err
