@@ -60,9 +60,9 @@ func (m *mockChangeStatusImportNote) HandleIngredientDetails(
 	args := m.Called(ctx, importNoteDetails)
 	return args.Error(0)
 }
-func (m *mockChangeStatusImportNote) HandleIngredientTotalAmount(
+func (m *mockChangeStatusImportNote) HandleIngredient(
 	ctx context.Context,
-	ingredientTotalAmountNeedUpdate map[string]float32) error {
+	ingredientTotalAmountNeedUpdate map[string]int) error {
 	args := m.Called(ctx, ingredientTotalAmountNeedUpdate)
 	return args.Error(0)
 }
@@ -90,7 +90,6 @@ func TestNewChangeStatusImportNoteBiz(t *testing.T) {
 				requester: mockRequest,
 			},
 			want: &changeStatusImportNoteRepo{
-				gen:       mockGenerator,
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
@@ -99,7 +98,6 @@ func TestNewChangeStatusImportNoteBiz(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := NewChangeStatusImportNoteBiz(
-				tt.args.gen,
 				tt.args.repo,
 				tt.args.requester,
 			)
@@ -135,33 +133,32 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 		Status: &doneStatus,
 	}
 	now := time.Now()
-	invalidImportNote := importnotemodel.ImportNote{
+	closedImportNote := importnotemodel.ImportNote{
 		Id:         validId,
 		SupplierId: validId,
 		TotalPrice: 1000,
 		Status:     &doneStatus,
-		CreateBy:   validId,
-		CreateAt:   &now,
+		CreatedBy:  validId,
+		CreatedAt:  &now,
 	}
-	validImportNote := importnotemodel.ImportNote{
+	inProgressImportNote := importnotemodel.ImportNote{
 		Id:         validId,
 		SupplierId: validId,
 		TotalPrice: 1000,
 		Status:     &inProgressStatus,
-		CreateBy:   validId,
-		CreateAt:   &now,
+		CreatedBy:  validId,
+		CreatedAt:  &now,
 	}
 	emptyImportNoteDetail := []importnotedetailmodel.ImportNoteDetail{}
 	importNoteDetails := []importnotedetailmodel.ImportNoteDetail{
 		{
 			ImportNoteId: validId,
 			IngredientId: validId,
-			ExpiryDate:   mock.Anything,
 			Price:        10000,
 			AmountImport: 100,
 		},
 	}
-	mapIngrdientDetail := map[string]float32{"012345678901": 100}
+	mapIngredientDetail := map[string]int{"012345678901": 100}
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -228,6 +225,11 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
@@ -256,33 +258,9 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
-				mockRepo.
-					On(
-						"FindImportNote",
-						context.Background(),
-						validId).
-					Return(&invalidImportNote, nil).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Change status import note failed because can not " +
-				"generate id case status need to update is Done",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:          context.Background(),
-				importNoteId: validId,
-				data:         &importNoteUpdateStatus,
-			},
-			mock: func() {
 				mockRequest.
-					On("IsHasFeature", common.ImportNoteChangeStatusFeatureCode).
-					Return(true).
+					On("GetUserId").
+					Return(mock.Anything).
 					Once()
 
 				mockRepo.
@@ -290,13 +268,7 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return("", mockErr).
+					Return(&closedImportNote, nil).
 					Once()
 			},
 			wantErr: true,
@@ -320,18 +292,17 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
+					Return(&inProgressImportNote, nil).
 					Once()
 
 				mockRepo.
@@ -364,18 +335,17 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
+					Return(&inProgressImportNote, nil).
 					Once()
 
 				mockRepo.
@@ -416,18 +386,17 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
+					Return(&inProgressImportNote, nil).
 					Once()
 
 				mockRepo.
@@ -459,74 +428,6 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 		},
 		{
 			name: "Change status import note failed because can not " +
-				"handle ingredient detail when status need to change is Done",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:          context.Background(),
-				importNoteId: validId,
-				data:         &importNoteUpdateStatus,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.ImportNoteChangeStatusFeatureCode).
-					Return(true).
-					Once()
-
-				mockRepo.
-					On(
-						"FindImportNote",
-						context.Background(),
-						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CreateSupplierDebt",
-						context.Background(),
-						validId,
-						&importNoteUpdateStatus).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"UpdateDebtSupplier",
-						context.Background(),
-						&importNoteUpdateStatus).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"FindListImportNoteDetail",
-						context.Background(),
-						validId).
-					Return(importNoteDetails, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"HandleIngredientDetails",
-						context.Background(),
-						importNoteDetails).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Change status import note failed because can not " +
 				"handle total amount of ingredient when status need to change is Done",
 			fields: fields{
 				gen:       mockGenerator,
@@ -544,18 +445,17 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
+					Return(&inProgressImportNote, nil).
 					Once()
 
 				mockRepo.
@@ -585,17 +485,9 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 
 				mockRepo.
 					On(
-						"HandleIngredientDetails",
+						"HandleIngredient",
 						context.Background(),
-						importNoteDetails).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"HandleIngredientTotalAmount",
-						context.Background(),
-						mapIngrdientDetail).
+						mapIngredientDetail).
 					Return(mockErr).
 					Once()
 			},
@@ -620,18 +512,17 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
+					Return(&inProgressImportNote, nil).
 					Once()
 
 				mockRepo.
@@ -661,17 +552,9 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 
 				mockRepo.
 					On(
-						"HandleIngredientDetails",
+						"HandleIngredient",
 						context.Background(),
-						importNoteDetails).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"HandleIngredientTotalAmount",
-						context.Background(),
-						mapIngrdientDetail).
+						mapIngredientDetail).
 					Return(nil).
 					Once()
 
@@ -704,18 +587,17 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
+				mockRequest.
+					On("GetUserId").
+					Return(mock.Anything).
+					Once()
+
 				mockRepo.
 					On(
 						"FindImportNote",
 						context.Background(),
 						validId).
-					Return(&validImportNote, nil).
-					Once()
-
-				mockGenerator.
-					On(
-						"GenerateId").
-					Return(validId, nil).
+					Return(&inProgressImportNote, nil).
 					Once()
 
 				mockRepo.
@@ -745,17 +627,9 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 
 				mockRepo.
 					On(
-						"HandleIngredientDetails",
+						"HandleIngredient",
 						context.Background(),
-						importNoteDetails).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On(
-						"HandleIngredientTotalAmount",
-						context.Background(),
-						mapIngrdientDetail).
+						mapIngredientDetail).
 					Return(nil).
 					Once()
 
@@ -774,7 +648,6 @@ func Test_changeStatusImportNoteRepo_ChangeStatusImportNote(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			biz := &changeStatusImportNoteRepo{
-				gen:       tt.fields.gen,
 				repo:      tt.fields.repo,
 				requester: tt.fields.requester,
 			}

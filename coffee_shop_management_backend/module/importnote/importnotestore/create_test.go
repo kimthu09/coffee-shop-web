@@ -39,11 +39,11 @@ func Test_sqlStore_CreateImportNote(t *testing.T) {
 		Id:         &validId,
 		TotalPrice: 0,
 		SupplierId: validId,
-		CreateBy:   "123",
+		CreatedBy:  "123",
 	}
 	mockErr := errors.New(mock.Anything)
 	expectedSql := "INSERT INTO `ImportNote` " +
-		"(`id`,`totalPrice`,`supplierId`,`createBy`) VALUES (?,?,?,?)"
+		"(`id`,`totalPrice`,`supplierId`,`createdBy`) VALUES (?,?,?,?)"
 
 	tests := []struct {
 		name    string
@@ -69,7 +69,7 @@ func Test_sqlStore_CreateImportNote(t *testing.T) {
 						*importNoteCreate.Id,
 						importNoteCreate.TotalPrice,
 						importNoteCreate.SupplierId,
-						importNoteCreate.CreateBy).
+						importNoteCreate.CreatedBy).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
@@ -92,9 +92,9 @@ func Test_sqlStore_CreateImportNote(t *testing.T) {
 						*importNoteCreate.Id,
 						importNoteCreate.TotalPrice,
 						importNoteCreate.SupplierId,
-						importNoteCreate.CreateBy).
+						importNoteCreate.CreatedBy).
 					WillReturnError(mockErr)
-				sqlDBMock.ExpectCommit()
+				sqlDBMock.ExpectRollback()
 			},
 			wantErr: true,
 		},

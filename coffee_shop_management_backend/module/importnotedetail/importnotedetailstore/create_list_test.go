@@ -1,7 +1,7 @@
-package importnotestore
+package importnotedetailstore
 
 import (
-	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/importnotedetail/importnotedetailmodel"
 	"context"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func Test_sqlStore_UpdateImportNote(t *testing.T) {
+func Test_sqlStore_CreateListImportNoteDetail(t *testing.T) {
 	sqlDB, sqlDBMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	if err != nil {
 		panic(err)
@@ -23,21 +23,16 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 		SkipInitializeWithVersion: true,
 	}), &gorm.Config{})
 	if err != nil {
-		panic(err) // Error here
+		panic(err)
 	}
 
-	validId := "123"
-	expectedSql := "UPDATE `ImportNote` " +
-		"SET `closedBy`=?,`status`=? " +
-		"WHERE id = ?"
-	status := importnotemodel.Done
-	dataUpdate := importnotemodel.ImportNoteUpdate{
-		ClosedBy:   mock.Anything,
-		Id:         validId,
-		SupplierId: mock.Anything,
-		TotalPrice: 0,
-		Status:     &status,
+	importNoteDetails := []importnotedetailmodel.ImportNoteDetailCreate{
+		{ImportNoteId: "1", IngredientId: "ingredient1", Price: float32(20), AmountImport: 10, TotalUnit: float32(200)},
+		{ImportNoteId: "1", IngredientId: "ingredient2", Price: float32(15), AmountImport: 5, TotalUnit: float32(75)},
 	}
+
+	expectedSql := "INSERT INTO `ImportNoteDetail` (`importNoteId`,`ingredientId`,`price`,`amountImport`,`totalUnit`) VALUES (?,?,?,?,?),(?,?,?,?,?)"
+
 	mockErr := errors.New(mock.Anything)
 
 	type fields struct {
@@ -45,9 +40,9 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 	}
 	type args struct {
 		ctx  context.Context
-		id   string
-		data *importnotemodel.ImportNoteUpdate
+		data []importnotedetailmodel.ImportNoteDetailCreate
 	}
+
 	tests := []struct {
 		name    string
 		fields  fields
@@ -56,47 +51,43 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "Update import note successfully",
+			name: "Create list of import note details successfully",
 			fields: fields{
 				db: gormDB,
 			},
 			args: args{
 				ctx:  context.Background(),
-				id:   validId,
-				data: &dataUpdate,
+				data: importNoteDetails,
 			},
 			mock: func() {
 				sqlDBMock.ExpectBegin()
 				sqlDBMock.
 					ExpectExec(expectedSql).
 					WithArgs(
-						dataUpdate.ClosedBy,
-						dataUpdate.Status,
-						validId,
+						"1", "ingredient1", float32(20), 10, float32(200),
+						"1", "ingredient2", float32(15), 5, float32(75),
 					).
-					WillReturnResult(sqlmock.NewResult(1, 1))
+					WillReturnResult(sqlmock.NewResult(1, 2))
 				sqlDBMock.ExpectCommit()
 			},
 			wantErr: false,
 		},
 		{
-			name: "Update import note failed",
+			name: "Create list of import note details failed",
 			fields: fields{
 				db: gormDB,
 			},
 			args: args{
 				ctx:  context.Background(),
-				id:   validId,
-				data: &dataUpdate,
+				data: importNoteDetails,
 			},
 			mock: func() {
 				sqlDBMock.ExpectBegin()
 				sqlDBMock.
 					ExpectExec(expectedSql).
 					WithArgs(
-						dataUpdate.ClosedBy,
-						dataUpdate.Status,
-						validId,
+						"1", "ingredient1", float32(20), 10, float32(200),
+						"1", "ingredient2", float32(15), 5, float32(75),
 					).
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
@@ -112,12 +103,12 @@ func Test_sqlStore_UpdateImportNote(t *testing.T) {
 
 			tt.mock()
 
-			err := s.UpdateImportNote(tt.args.ctx, tt.args.id, tt.args.data)
+			err := s.CreateListImportNoteDetail(tt.args.ctx, tt.args.data)
 
 			if tt.wantErr {
-				assert.NotNil(t, err, "UpdateImportNote() err = %v, wantErr = %v", err, tt.wantErr)
+				assert.NotNil(t, err, "CreateListRoleFeatureDetail() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
-				assert.Nil(t, err, "UpdateImportNote() err = %v, wantErr = %v", err, tt.wantErr)
+				assert.Nil(t, err, "CreateListRoleFeatureDetail() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

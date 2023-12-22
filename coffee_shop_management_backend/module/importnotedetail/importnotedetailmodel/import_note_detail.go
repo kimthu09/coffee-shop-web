@@ -10,9 +10,9 @@ type ImportNoteDetail struct {
 	ImportNoteId string                           `json:"importNoteId" gorm:"column:importNoteId;"`
 	IngredientId string                           `json:"-" gorm:"column:ingredientId;"`
 	Ingredient   ingredientmodel.SimpleIngredient `json:"ingredient" gorm:"foreignKey:IngredientId;references:Id"`
-	ExpiryDate   string                           `json:"expiryDate" gorm:"column:expiryDate;"`
 	Price        float32                          `json:"price" gorm:"column:price"`
-	AmountImport float32                          `json:"amountImport" gorm:"column:amountImport"`
+	TotalUnit    float32                          `json:"totalUnit" gorm:"column:totalUnit"`
+	AmountImport int                              `json:"amountImport" gorm:"column:amountImport"`
 }
 
 func (*ImportNoteDetail) TableName() string {
@@ -39,8 +39,5 @@ var (
 		errors.New("amount import is not positive number"),
 		"amount import is not positive number",
 		"ErrImportDetailAmountImportIsNotPositiveNumber",
-	)
-	ErrImportDetailViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view import note"),
 	)
 )

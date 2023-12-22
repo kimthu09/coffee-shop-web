@@ -25,7 +25,7 @@ func CreateImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
-		data.CreateBy = requester.GetUserId()
+		data.CreatedBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
 
@@ -55,6 +55,6 @@ func CreateImportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.Id))
 	}
 }

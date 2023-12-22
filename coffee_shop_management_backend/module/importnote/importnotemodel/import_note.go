@@ -2,29 +2,24 @@ package importnotemodel
 
 import (
 	"coffee_shop_management_backend/common"
+	"coffee_shop_management_backend/module/supplier/suppliermodel"
+	"coffee_shop_management_backend/module/user/usermodel"
 	"errors"
 	"time"
 )
 
-type SimpleSupplier struct {
-	Id   string `json:"id" gorm:"column:id;"`
-	Name string `json:"name" gorm:"column:name;"`
-}
-
-func (*SimpleSupplier) TableName() string {
-	return common.TableSupplier
-}
-
 type ImportNote struct {
-	Id         string            `json:"id" gorm:"column:id;"`
-	SupplierId string            `json:"-" gorm:"column:supplierId;"`
-	Supplier   SimpleSupplier    `json:"supplier" gorm:"foreignKey:SupplierId;references:Id"`
-	TotalPrice float32           `json:"totalPrice" gorm:"column:totalPrice;"`
-	Status     *ImportNoteStatus `json:"status" gorm:"column:status;"`
-	CreateBy   string            `json:"createBy" gorm:"column:createBy;"`
-	CloseBy    *string           `json:"closeBy" gorm:"column:closeBy;"`
-	CreateAt   *time.Time        `json:"createAt" gorm:"column:createAt;"`
-	CloseAt    *time.Time        `json:"closeAt" gorm:"column:closeAt;"`
+	Id            string                       `json:"id" gorm:"column:id;"`
+	SupplierId    string                       `json:"-" gorm:"column:supplierId;"`
+	Supplier      suppliermodel.SimpleSupplier `json:"supplier" gorm:"foreignKey:SupplierId;references:Id"`
+	TotalPrice    int                          `json:"totalPrice" gorm:"column:totalPrice;"`
+	Status        *ImportNoteStatus            `json:"status" gorm:"column:status;"`
+	CreatedBy     string                       `json:"-" gorm:"column:createdBy;"`
+	CreatedByUser usermodel.SimpleUser         `json:"createdBy" gorm:"foreignKey:CreatedBy;references:Id"`
+	ClosedBy      *string                      `json:"-" gorm:"column:closedBy;"`
+	ClosedByUser  usermodel.SimpleUser         `json:"closedBy" gorm:"foreignKey:ClosedBy;references:Id"`
+	CreatedAt     *time.Time                   `json:"createdAt" gorm:"column:createdAt;"`
+	ClosedAt      *time.Time                   `json:"closedAt" gorm:"column:closedAt;"`
 }
 
 func (*ImportNote) TableName() string {

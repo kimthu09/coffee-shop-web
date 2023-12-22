@@ -3,14 +3,16 @@ package importnotestore
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
-func (s *sqlStore) ListImportNote(
+func (s *sqlStore) ListImportNoteBySupplier(
 	ctx context.Context,
-	filter *importnotemodel.Filter,
-	propertiesContainSearchKey []string,
+	supplierId string,
+	filter *filter.SupplierImportFilter,
 	paging *common.Paging,
 	moreKeys ...string) ([]importnotemodel.ImportNote, error) {
 	var result []importnotemodel.ImportNote
@@ -18,7 +20,9 @@ func (s *sqlStore) ListImportNote(
 
 	db = db.Table(common.TableImportNote)
 
-	handleFilter(db, filter, propertiesContainSearchKey)
+	handleSupplierImportFilter(db, filter)
+
+	db = db.Where("supplierId = ?", supplierId)
 
 	dbTemp, errPaging := common.HandlePaging(db, paging)
 	if errPaging != nil {
@@ -31,7 +35,6 @@ func (s *sqlStore) ListImportNote(
 	}
 
 	if err := db.
-		Order("createdAt desc").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
@@ -39,22 +42,17 @@ func (s *sqlStore) ListImportNote(
 	return result, nil
 }
 
-func handleFilter(
+func handleSupplierImportFilter(
 	db *gorm.DB,
-	filter *importnotemodel.Filter,
-	propertiesContainSearchKey []string) {
-	if filter != nil {
-		if filter.SearchKey != "" {
-			db = common.GetWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
+	filterSupplierDebt *filter.SupplierImportFilter) {
+	if filterSupplierDebt != nil {
+		if filterSupplierDebt.DateFrom != nil {
+			timeFrom := time.Unix(*filterSupplierDebt.DateFrom, 0)
+			db = db.Where("createdAt >= ?", timeFrom)
 		}
-		if filter.Status != "" {
-			db = db.Where("status = ?", filter.Status)
-		}
-		if filter.MinPrice != nil {
-			db = db.Where("totalPrice >= ?", filter.MinPrice)
-		}
-		if filter.MaxPrice != nil {
-			db = db.Where("totalPrice <= ?", filter.MaxPrice)
+		if filterSupplierDebt.DateTo != nil {
+			timeTo := time.Unix(*filterSupplierDebt.DateTo, 0)
+			db = db.Where("createdAt <= ?", timeTo)
 		}
 	}
 }

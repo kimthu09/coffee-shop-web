@@ -34,12 +34,6 @@ type mockCreateImportNoteRepo struct {
 	mock.Mock
 }
 
-func (m *mockCreateImportNoteRepo) CheckIngredient(
-	ctx context.Context,
-	ingredientId string) error {
-	args := m.Called(ctx, ingredientId)
-	return args.Error(0)
-}
 func (m *mockCreateImportNoteRepo) HandleCreateImportNote(
 	ctx context.Context,
 	data *importnotemodel.ImportNoteCreate) error {
@@ -51,12 +45,6 @@ func (m *mockCreateImportNoteRepo) UpdatePriceIngredient(
 	ingredientId string,
 	price float32) error {
 	args := m.Called(ctx, ingredientId, price)
-	return args.Error(0)
-}
-func (m *mockCreateImportNoteRepo) CheckSupplier(
-	ctx context.Context,
-	supplierId string) error {
-	args := m.Called(ctx, supplierId)
 	return args.Error(0)
 }
 
@@ -118,53 +106,82 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 	mockRepo := new(mockCreateImportNoteRepo)
 	mockRequest := new(mockRequester)
 
-	validId := "012345678901"
+	importNoteId := "importNote1"
+	ingredient1 := "ingredient1"
+	ingredient2 := "ingredient2"
+	price1 := float32(0.0015)
+	price2 := float32(0.2)
+	roundedPrice1 := float32(0.002)
+	amountImport := 10
 	validDetails := []importnotedetailmodel.ImportNoteDetailCreate{
 		{
-			IngredientId:   validId,
-			ExpiryDate:     "11/11/2023",
-			Price:          10000,
+			IngredientId:   ingredient1,
+			Price:          price1,
 			IsReplacePrice: true,
-			AmountImport:   100,
+			AmountImport:   amountImport,
 		},
 		{
-			IngredientId:   validId,
-			ExpiryDate:     "12/11/2023",
-			Price:          1000,
+			IngredientId:   ingredient2,
+			Price:          price2,
 			IsReplacePrice: false,
-			AmountImport:   100,
+			AmountImport:   amountImport,
+		},
+	}
+	finalDetails := []importnotedetailmodel.ImportNoteDetailCreate{
+		{
+			ImportNoteId:   importNoteId,
+			IngredientId:   ingredient1,
+			Price:          roundedPrice1,
+			IsReplacePrice: true,
+			AmountImport:   amountImport,
+			TotalUnit:      float32(0.02),
+		},
+		{
+			ImportNoteId:   importNoteId,
+			IngredientId:   ingredient2,
+			Price:          price2,
+			IsReplacePrice: false,
+			AmountImport:   amountImport,
+			TotalUnit:      float32(2),
 		},
 	}
 	invalidDetails := []importnotedetailmodel.ImportNoteDetailCreate{
 		{
-			IngredientId:   validId,
-			ExpiryDate:     "11/11/2023",
-			Price:          10000,
+			IngredientId:   ingredient1,
+			Price:          price1,
 			IsReplacePrice: true,
-			AmountImport:   100,
+			AmountImport:   amountImport,
 		},
 		{
-			IngredientId:   validId,
-			ExpiryDate:     "12/11/2023",
-			Price:          1000,
+			IngredientId:   ingredient1,
+			Price:          price1,
 			IsReplacePrice: true,
-			AmountImport:   100,
+			AmountImport:   amountImport,
 		},
 	}
+	supplierId := "supplier1"
+	createdBy := "user1"
 	importNoteCreate := importnotemodel.ImportNoteCreate{
-		TotalPrice:        200000,
-		SupplierId:        validId,
-		CreateBy:          validId,
+		SupplierId:        supplierId,
+		CreatedBy:         createdBy,
 		ImportNoteDetails: validDetails,
+	}
+	finalImportNoteCreate := importnotemodel.ImportNoteCreate{
+		Id:                &importNoteId,
+		TotalPrice:        2,
+		SupplierId:        supplierId,
+		CreatedBy:         createdBy,
+		ImportNoteDetails: finalDetails,
 	}
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
-		name    string
-		fields  fields
-		args    args
-		mock    func()
-		wantErr bool
+		name       string
+		fields     fields
+		args       args
+		mock       func()
+		finalParam *importnotemodel.ImportNoteCreate
+		wantErr    bool
 	}{
 		{
 			name: "Create import note failed because user is not allowed",
@@ -183,7 +200,8 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			wantErr: true,
+			finalParam: nil,
+			wantErr:    true,
 		},
 		{
 			name: "Create import note failed because data is invalid",
@@ -195,10 +213,10 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 			args: args{
 				ctx: context.Background(),
 				data: &importnotemodel.ImportNoteCreate{
-					Id:                &validId,
+					Id:                &importNoteId,
 					TotalPrice:        1000,
 					SupplierId:        mock.Anything,
-					CreateBy:          mock.Anything,
+					CreatedBy:         mock.Anything,
 					ImportNoteDetails: invalidDetails,
 				},
 			},
@@ -208,31 +226,8 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(true).
 					Once()
 			},
-			wantErr: true,
-		},
-		{
-			name: "Create import note failed because can not check ingredient",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &importNoteCreate,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.ImportNoteCreateFeatureCode).
-					Return(true).
-					Once()
-
-				mockRepo.
-					On("CheckIngredient", context.Background(), mock.Anything).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
+			finalParam: nil,
+			wantErr:    true,
 		},
 		{
 			name: "Create import note failed because can not handle id of import note",
@@ -251,17 +246,13 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
-				mockRepo.
-					On("CheckIngredient", context.Background(), mock.Anything).
-					Return(nil).
-					Times(2)
-
 				mockGenerator.
 					On("IdProcess", importNoteCreate.Id).
 					Return(nil, mockErr).
 					Once()
 			},
-			wantErr: true,
+			finalParam: nil,
+			wantErr:    true,
 		},
 		{
 			name: "Create import note failed because can not check supplier",
@@ -280,59 +271,9 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
-				mockRepo.
-					On("CheckIngredient", context.Background(), mock.Anything).
-					Return(nil).
-					Times(2)
-
 				mockGenerator.
 					On("IdProcess", importNoteCreate.Id).
-					Return(&validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckSupplier",
-						context.Background(),
-						importNoteCreate.SupplierId).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Create import note failed because can not check supplier",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &importNoteCreate,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.ImportNoteCreateFeatureCode).
-					Return(true).
-					Once()
-
-				mockRepo.
-					On("CheckIngredient", context.Background(), mock.Anything).
-					Return(nil).
-					Times(2)
-
-				mockGenerator.
-					On("IdProcess", importNoteCreate.Id).
-					Return(&validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckSupplier",
-						context.Background(),
-						importNoteCreate.SupplierId).
-					Return(nil).
+					Return(&importNoteId, nil).
 					Once()
 
 				mockRepo.
@@ -343,7 +284,8 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(mockErr).
 					Once()
 			},
-			wantErr: true,
+			finalParam: nil,
+			wantErr:    true,
 		},
 		{
 			name: "Create import note failed because can not update price of ingredient",
@@ -362,22 +304,9 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
-				mockRepo.
-					On("CheckIngredient", context.Background(), mock.Anything).
-					Return(nil).
-					Times(2)
-
 				mockGenerator.
 					On("IdProcess", importNoteCreate.Id).
-					Return(&validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckSupplier",
-						context.Background(),
-						importNoteCreate.SupplierId).
-					Return(nil).
+					Return(&importNoteId, nil).
 					Once()
 
 				mockRepo.
@@ -397,7 +326,8 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(mockErr).
 					Once()
 			},
-			wantErr: true,
+			finalParam: nil,
+			wantErr:    true,
 		},
 		{
 			name: "Create import note successfully",
@@ -416,22 +346,9 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(true).
 					Once()
 
-				mockRepo.
-					On("CheckIngredient", context.Background(), mock.Anything).
-					Return(nil).
-					Times(2)
-
 				mockGenerator.
 					On("IdProcess", importNoteCreate.Id).
-					Return(&validId, nil).
-					Once()
-
-				mockRepo.
-					On(
-						"CheckSupplier",
-						context.Background(),
-						importNoteCreate.SupplierId).
-					Return(nil).
+					Return(&importNoteId, nil).
 					Once()
 
 				mockRepo.
@@ -451,7 +368,8 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					Return(nil).
 					Once()
 			},
-			wantErr: false,
+			finalParam: &finalImportNoteCreate,
+			wantErr:    false,
 		},
 	}
 	for _, tt := range tests {
@@ -474,6 +392,15 @@ func Test_createImportNoteBiz_CreateImportNote(t *testing.T) {
 					err,
 					tt.wantErr)
 			} else {
+				if tt.finalParam != nil {
+					assert.Equal(
+						t,
+						tt.args.data,
+						tt.finalParam,
+						"data = %v, want %v",
+						tt.args.data,
+						tt.finalParam)
+				}
 				assert.Nil(
 					t,
 					err,

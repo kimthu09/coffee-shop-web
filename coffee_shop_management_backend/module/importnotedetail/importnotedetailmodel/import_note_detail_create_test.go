@@ -13,7 +13,8 @@ func TestImportNoteDetailCreate_TableName(t *testing.T) {
 		ExpiryDate     string
 		Price          float32
 		IsReplacePrice bool
-		AmountImport   float32
+		AmountImport   int
+		TotalUnit      float32
 	}
 	tests := []struct {
 		name   string
@@ -38,7 +39,6 @@ func TestImportNoteDetailCreate_TableName(t *testing.T) {
 			importNoteDetail := &ImportNoteDetailCreate{
 				ImportNoteId:   tt.fields.ImportNoteId,
 				IngredientId:   tt.fields.IngredientId,
-				ExpiryDate:     tt.fields.ExpiryDate,
 				Price:          tt.fields.Price,
 				IsReplacePrice: tt.fields.IsReplacePrice,
 				AmountImport:   tt.fields.AmountImport,
@@ -53,13 +53,12 @@ func TestImportNoteDetailCreate_Validate(t *testing.T) {
 	type fields struct {
 		ImportNoteId   string
 		IngredientId   string
-		ExpiryDate     string
 		Price          float32
 		IsReplacePrice bool
-		AmountImport   float32
+		AmountImport   int
+		TotalUnit      float32
 	}
 	validId := "012345678901"
-	validExpiryDate := "01/02/2023"
 	tests := []struct {
 		name    string
 		fields  fields
@@ -73,18 +72,9 @@ func TestImportNoteDetailCreate_Validate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "ImportNoteDetailCreate is invalid with invalid expiryDate",
-			fields: fields{
-				IngredientId: validId,
-				ExpiryDate:   "",
-			},
-			wantErr: true,
-		},
-		{
 			name: "ImportNoteDetailCreate is invalid with negative price",
 			fields: fields{
 				IngredientId: validId,
-				ExpiryDate:   validExpiryDate,
 				Price:        -1,
 			},
 			wantErr: true,
@@ -93,7 +83,6 @@ func TestImportNoteDetailCreate_Validate(t *testing.T) {
 			name: "ImportNoteDetailCreate is invalid with not positive amount import",
 			fields: fields{
 				IngredientId: validId,
-				ExpiryDate:   validExpiryDate,
 				Price:        0,
 				AmountImport: 0,
 			},
@@ -103,7 +92,6 @@ func TestImportNoteDetailCreate_Validate(t *testing.T) {
 			name: "ImportNoteDetailCreate is valid",
 			fields: fields{
 				IngredientId: validId,
-				ExpiryDate:   validExpiryDate,
 				Price:        0,
 				AmountImport: 1,
 			},
@@ -115,7 +103,6 @@ func TestImportNoteDetailCreate_Validate(t *testing.T) {
 			data := &ImportNoteDetailCreate{
 				ImportNoteId:   tt.fields.ImportNoteId,
 				IngredientId:   tt.fields.IngredientId,
-				ExpiryDate:     tt.fields.ExpiryDate,
 				Price:          tt.fields.Price,
 				IsReplacePrice: tt.fields.IsReplacePrice,
 				AmountImport:   tt.fields.AmountImport,

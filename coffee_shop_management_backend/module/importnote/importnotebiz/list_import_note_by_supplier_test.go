@@ -4,6 +4,7 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/supplier/suppliermodel/filter"
 	"context"
 	"errors"
 	"github.com/stretchr/testify/assert"
@@ -11,63 +12,43 @@ import (
 	"testing"
 )
 
-type mockListImportNoteRepo struct {
+type mockListImportNotBySupplierRepo struct {
 	mock.Mock
 }
 
-func (m *mockListImportNoteRepo) ListImportNote(
+func (m *mockListImportNotBySupplierRepo) ListImportNoteBySupplier(
 	ctx context.Context,
-	filter *importnotemodel.Filter,
+	supplierId string,
+	filter *filter.SupplierImportFilter,
 	paging *common.Paging) ([]importnotemodel.ImportNote, error) {
-	args := m.Called(ctx, filter, paging)
+	args := m.Called(ctx, supplierId, filter, paging)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).([]importnotemodel.ImportNote), args.Error(1)
 }
 
-type mockRequester struct {
-	mock.Mock
-}
-
-func (m *mockRequester) GetUserId() string {
-	args := m.Called()
-	return args.String(0)
-}
-func (m *mockRequester) GetEmail() string {
-	args := m.Called()
-	return args.String(0)
-}
-func (m *mockRequester) GetRoleId() string {
-	args := m.Called()
-	return args.Get(0).(string)
-}
-func (m *mockRequester) IsHasFeature(featureCode string) bool {
-	args := m.Called(featureCode)
-	return args.Bool(0)
-}
-
-func TestNewListImportNoteBiz(t *testing.T) {
+func TestNewListImportNoteBySupplierBiz(t *testing.T) {
 	type args struct {
-		repo      ListImportNoteRepo
+		repo      ListImportNoteBySupplierRepo
 		requester middleware.Requester
 	}
 
 	mockRequest := new(mockRequester)
-	mockRepo := new(mockListImportNoteRepo)
+	mockRepo := new(mockListImportNotBySupplierRepo)
 
 	tests := []struct {
 		name string
 		args args
-		want *listImportNoteBiz
+		want *listImportNoteBySupplierBiz
 	}{
 		{
-			name: "Create object has type ListImportNoteBiz",
+			name: "Create object has type ListImportNoteBySupplierBiz",
 			args: args{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
-			want: &listImportNoteBiz{
+			want: &listImportNoteBySupplierBiz{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
@@ -75,41 +56,44 @@ func TestNewListImportNoteBiz(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewListImportNoteBiz(tt.args.repo, tt.args.requester)
+			got := NewListImportNoteBySupplierBiz(tt.args.repo, tt.args.requester)
 
 			assert.Equal(
 				t,
 				tt.want,
 				got,
-				"NewListImportNoteBiz() = %v, want %v",
+				"NewListImportNoteBySupplierBiz() = %v, want %v",
 				got,
 				tt.want)
 		})
 	}
 }
 
-func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
+func Test_listImportNoteBySupplierBiz_ListImportNoteBySupplier(t *testing.T) {
 	type fields struct {
-		repo      ListImportNoteRepo
+		repo      ListImportNoteBySupplierRepo
 		requester middleware.Requester
 	}
 	type args struct {
-		ctx    context.Context
-		filter *importnotemodel.Filter
-		paging *common.Paging
+		ctx        context.Context
+		supplierId string
+		filter     *filter.SupplierImportFilter
+		paging     *common.Paging
 	}
-	mockRepo := new(mockListImportNoteRepo)
+
 	mockRequest := new(mockRequester)
-	filter := importnotemodel.Filter{
-		SearchKey: "",
-		MinPrice:  nil,
-		MaxPrice:  nil,
-		Status:    "",
+	mockRepo := new(mockListImportNotBySupplierRepo)
+
+	supplierId := mock.Anything
+	filterImport := filter.SupplierImportFilter{
+		DateFrom: nil,
+		DateTo:   nil,
 	}
 	paging := common.Paging{
-		Page: 1,
+		Page:  2,
+		Limit: 10,
 	}
-	listImportNote := make([]importnotemodel.ImportNote, 0)
+	importNotes := make([]importnotemodel.ImportNote, 0)
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -121,53 +105,56 @@ func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "List import note failed because user is not allowed",
+			name: "List import note by supplier failed because user is not allowed",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:        context.Background(),
+				supplierId: supplierId,
+				filter:     &filterImport,
+				paging:     &paging,
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", common.ImportNoteViewFeatureCode).
+					On("IsHasFeature", common.SupplierViewFeatureCode).
 					Return(false).
 					Once()
 			},
-			want:    listImportNote,
+			want:    importNotes,
 			wantErr: true,
 		},
 		{
-			name: "List import note failed because can not get data from database",
+			name: "List import note by supplier failed because can not get data from database",
 			fields: fields{
 				repo:      mockRepo,
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:        context.Background(),
+				supplierId: supplierId,
+				filter:     &filterImport,
+				paging:     &paging,
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", common.ImportNoteViewFeatureCode).
+					On("IsHasFeature", common.SupplierViewFeatureCode).
 					Return(true).
 					Once()
 
 				mockRepo.
 					On(
-						"ListImportNote",
+						"ListImportNoteBySupplier",
 						context.Background(),
-						&filter,
+						supplierId,
+						&filterImport,
 						&paging,
 					).
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listImportNote,
+			want:    importNotes,
 			wantErr: true,
 		},
 		{
@@ -177,41 +164,44 @@ func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
 				requester: mockRequest,
 			},
 			args: args{
-				ctx:    context.Background(),
-				filter: &filter,
-				paging: &paging,
+				ctx:        context.Background(),
+				supplierId: supplierId,
+				filter:     &filterImport,
+				paging:     &paging,
 			},
 			mock: func() {
 				mockRequest.
-					On("IsHasFeature", common.ImportNoteViewFeatureCode).
+					On("IsHasFeature", common.SupplierViewFeatureCode).
 					Return(true).
 					Once()
 
 				mockRepo.
 					On(
-						"ListImportNote",
+						"ListImportNoteBySupplier",
 						context.Background(),
-						&filter,
+						supplierId,
+						&filterImport,
 						&paging,
 					).
-					Return(listImportNote, nil).
+					Return(importNotes, nil).
 					Once()
 			},
-			want:    listImportNote,
+			want:    importNotes,
 			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			biz := &listImportNoteBiz{
+			biz := &listImportNoteBySupplierBiz{
 				repo:      tt.fields.repo,
 				requester: tt.fields.requester,
 			}
 
 			tt.mock()
 
-			got, err := biz.ListImportNote(
+			got, err := biz.ListImportNoteBySupplier(
 				tt.args.ctx,
+				tt.args.supplierId,
 				tt.args.filter,
 				tt.args.paging)
 
@@ -219,24 +209,25 @@ func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
 				assert.NotNil(
 					t,
 					err,
-					"ListImportNote() error = %v, wantErr %v",
+					"ListImportNoteBySupplier() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 			} else {
 				assert.Nil(
 					t,
 					err,
-					"ListImportNote() error = %v, wantErr %v",
+					"ListImportNoteBySupplier() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 				assert.Equal(
 					t,
 					tt.want,
 					got,
-					"ListImportNote() want = %v, got %v",
+					"ListImportNoteBySupplier() want = %v, got %v",
 					tt.want,
 					got)
 			}
+
 		})
 	}
 }
