@@ -31,10 +31,7 @@ type appConfig struct {
 	Port string
 	Env  string
 
-	DBUsername string
-	DBPassword string
-	DBHost     string
-	DBDatabase string
+	DBConnStr string
 
 	SecretKey string
 }
@@ -46,7 +43,7 @@ func main() {
 	}
 
 	fmt.Println("Connecting to database...")
-	db, err := connectDatabaseWithRetryIn30s(cfg)
+	db, err := connectDatabaseWithRetryIn60s(cfg)
 	if err != nil {
 		log.Fatalln("Error when connecting to database:", err)
 	}
@@ -60,12 +57,6 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 	r.Use(middleware.Recover(appCtx))
-
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(200, gin.H{
-			"message": "pong",
-		})
-	})
 
 	v1 := r.Group("/v1")
 	{
@@ -96,21 +87,17 @@ func loadConfig() (*appConfig, error) {
 	}
 
 	return &appConfig{
-		Port:       env["PORT"],
-		Env:        env["ENVIRONMENT"],
-		DBUsername: env["DB_USERNAME"],
-		DBPassword: env["DB_PASSWORD"],
-		DBHost:     env["DB_HOST"],
-		DBDatabase: env["DB_DATABASE"],
-		SecretKey:  env["SECRET_KEY"],
+		Port:      env["PORT"],
+		Env:       env["ENVIRONMENT"],
+		DBConnStr: env["DB_CONNECTION_STR"],
+		SecretKey: env["SECRET_KEY"],
 	}, nil
 }
 
-func connectDatabaseWithRetryIn30s(cfg *appConfig) (*gorm.DB, error) {
-	const timeRetry = 30 * time.Second
+func connectDatabaseWithRetryIn60s(cfg *appConfig) (*gorm.DB, error) {
+	const timeRetry = 60 * time.Second
 	var connectDatabase = func(cfg *appConfig) (*gorm.DB, error) {
-		dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", cfg.DBUsername, cfg.DBPassword, cfg.DBHost, cfg.DBDatabase)
-		db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		db, err := gorm.Open(mysql.Open(cfg.DBConnStr), &gorm.Config{})
 		if err != nil {
 			return nil, fmt.Errorf("failed to connect to database: %w", err)
 		}
