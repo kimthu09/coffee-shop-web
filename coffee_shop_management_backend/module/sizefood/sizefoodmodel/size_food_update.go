@@ -8,8 +8,8 @@ import (
 type SizeFoodUpdate struct {
 	SizeId   *string                   `json:"sizeId" gorm:"-"`
 	Name     *string                   `json:"name" gorm:"column:name"`
-	Cost     *float32                  `json:"cost" gorm:"column:cost"`
-	Price    *float32                  `json:"price" gorm:"column:price"`
+	Cost     *int                      `json:"cost" gorm:"column:cost"`
+	Price    *int                      `json:"price" gorm:"column:price"`
 	RecipeId *string                   `json:"-" gorm:"-"`
 	Recipe   *recipemodel.RecipeUpdate `json:"recipe" gorm:"-"`
 }
@@ -22,10 +22,10 @@ func (data *SizeFoodUpdate) Validate() *common.AppError {
 	if data.Name != nil && common.ValidateEmptyString(*data.Name) {
 		return ErrSizeFoodNameEmpty
 	}
-	if data.Cost != nil && common.ValidateNegativeNumber(data.Cost) {
+	if data.Cost != nil && common.ValidateNegativeNumber(*data.Cost) {
 		return ErrSizeFoodCostIsNegativeNumber
 	}
-	if data.Price != nil && common.ValidateNegativeNumber(data.Price) {
+	if data.Price != nil && common.ValidateNegativeNumber(*data.Price) {
 		return ErrSizeFoodPriceIsNegativeNumber
 	}
 	if data.Recipe != nil {
