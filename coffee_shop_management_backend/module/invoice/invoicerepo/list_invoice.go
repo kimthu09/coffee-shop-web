@@ -12,6 +12,7 @@ type ListInvoiceStore interface {
 		filter *invoicemodel.Filter,
 		propertiesContainSearchKey []string,
 		paging *common.Paging,
+		moreKeys ...string,
 	) ([]invoicemodel.Invoice, error)
 }
 
@@ -30,8 +31,9 @@ func (repo *listInvoiceRepo) ListInvoice(
 	result, err := repo.store.ListInvoice(
 		ctx,
 		filter,
-		[]string{"id", "customerId", "createBy"},
-		paging)
+		[]string{"Invoice.id"},
+		paging,
+		"Customer", "CreatedByUser")
 
 	if err != nil {
 		return nil, err

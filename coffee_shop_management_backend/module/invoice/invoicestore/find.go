@@ -1,17 +1,18 @@
-package ingredientdetailstore
+package invoicestore
 
 import (
 	"coffee_shop_management_backend/common"
-	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailmodel"
+	"coffee_shop_management_backend/module/invoice/invoicemodel"
 	"context"
 	"errors"
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) FindIngredientDetail(ctx context.Context,
+func (s *sqlStore) FindInvoice(
+	ctx context.Context,
 	conditions map[string]interface{},
-	moreKeys ...string) (*ingredientdetailmodel.IngredientDetail, error) {
-	var data ingredientdetailmodel.IngredientDetail
+	moreKeys ...string) (*invoicemodel.Invoice, error) {
+	var data invoicemodel.Invoice
 	db := s.db
 
 	for i := range moreKeys {

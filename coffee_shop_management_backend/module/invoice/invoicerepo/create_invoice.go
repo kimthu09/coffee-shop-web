@@ -1,12 +1,12 @@
 package invoicerepo
 
 import (
-	"coffee_shop_management_backend/common/enum"
 	"coffee_shop_management_backend/module/customer/customermodel"
-	"coffee_shop_management_backend/module/customerdebt/customerdebtmodel"
+	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
 	"coffee_shop_management_backend/module/invoice/invoicemodel"
 	"coffee_shop_management_backend/module/invoicedetail/invoicedetailmodel"
 	"coffee_shop_management_backend/module/product/productmodel"
+	"coffee_shop_management_backend/module/shopgeneral/shopgeneralmodel"
 	"coffee_shop_management_backend/module/sizefood/sizefoodmodel"
 	"context"
 )
@@ -31,21 +31,10 @@ type CustomerStore interface {
 		conditions map[string]interface{},
 		moreKeys ...string,
 	) (*customermodel.Customer, error)
-	GetDebtCustomer(
-		ctx context.Context,
-		customerId string,
-	) (*float32, error)
-	UpdateCustomerDebt(
+	UpdateCustomerPoint(
 		ctx context.Context,
 		id string,
-		data *customermodel.CustomerUpdateDebt,
-	) error
-}
-
-type CustomerDebtStore interface {
-	CreateCustomerDebt(
-		ctx context.Context,
-		data *customerdebtmodel.CustomerDebtCreate,
+		data *customermodel.CustomerUpdatePoint,
 	) error
 }
 
@@ -71,41 +60,73 @@ type ToppingStore interface {
 	) (*productmodel.Topping, error)
 }
 
+type IngredientStore interface {
+	FindIngredient(
+		ctx context.Context,
+		conditions map[string]interface{},
+		moreKeys ...string) (*ingredientmodel.Ingredient, error)
+	UpdateAmountIngredient(
+		ctx context.Context,
+		id string,
+		data *ingredientmodel.IngredientUpdateAmount,
+	) error
+}
+
+type ShopGeneralStore interface {
+	FindShopGeneral(
+		ctx context.Context,
+	) (*shopgeneralmodel.ShopGeneral, error)
+}
+
 type createInvoiceRepo struct {
 	invoiceStore       InvoiceStore
 	invoiceDetailStore InvoiceDetailStore
 	customerStore      CustomerStore
-	customerDebtStore  CustomerDebtStore
 	sizeFoodStore      SizeFoodStore
 	foodStore          FoodStore
 	toppingStore       ToppingStore
+	ingredientStore    IngredientStore
+	shopGeneralStore   ShopGeneralStore
 }
 
 func NewCreateInvoiceRepo(
 	invoiceStore InvoiceStore,
 	invoiceDetailStore InvoiceDetailStore,
 	customerStore CustomerStore,
-	customerDebtStore CustomerDebtStore,
 	sizeFoodStore SizeFoodStore,
 	foodStore FoodStore,
-	toppingStore ToppingStore) *createInvoiceRepo {
+	toppingStore ToppingStore,
+	ingredientStore IngredientStore,
+	shopGeneralStore ShopGeneralStore) *createInvoiceRepo {
 	return &createInvoiceRepo{
 		invoiceStore:       invoiceStore,
 		invoiceDetailStore: invoiceDetailStore,
 		customerStore:      customerStore,
-		customerDebtStore:  customerDebtStore,
 		sizeFoodStore:      sizeFoodStore,
 		foodStore:          foodStore,
 		toppingStore:       toppingStore,
+		ingredientStore:    ingredientStore,
+		shopGeneralStore:   shopGeneralStore,
+	}
+}
+
+func (repo *createInvoiceRepo) GetShopGeneral(
+	ctx context.Context) (*shopgeneralmodel.ShopGeneral, error) {
+	if data, err := repo.shopGeneralStore.FindShopGeneral(ctx); err != nil {
+		return nil, err
+	} else {
+		return data, nil
 	}
 }
 
 func (repo *createInvoiceRepo) HandleCheckPermissionStatus(
 	ctx context.Context,
 	data *invoicemodel.InvoiceCreate) error {
-	for _, invoiceDetail := range data.InvoiceDetails {
-		if err := repo.checkPermissionStatusFood(ctx, invoiceDetail.FoodId); err != nil {
+	for i, invoiceDetail := range data.InvoiceDetails {
+		if food, err := repo.getFood(ctx, invoiceDetail.FoodId); err != nil {
 			return err
+		} else {
+			data.InvoiceDetails[i].FoodName = food.Name
 		}
 
 		for _, topping := range *invoiceDetail.Toppings {
@@ -117,9 +138,9 @@ func (repo *createInvoiceRepo) HandleCheckPermissionStatus(
 	return nil
 }
 
-func (repo *createInvoiceRepo) checkPermissionStatusFood(
+func (repo *createInvoiceRepo) getFood(
 	ctx context.Context,
-	foodId string) error {
+	foodId string) (*productmodel.Food, error) {
 	food, err := repo.foodStore.FindFood(
 		ctx,
 		map[string]interface{}{
@@ -127,13 +148,14 @@ func (repo *createInvoiceRepo) checkPermissionStatusFood(
 		},
 	)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if !food.IsActive {
-		return invoicedetailmodel.ErrInvoiceDetailFoodIsInactive
+		return nil, invoicedetailmodel.ErrInvoiceDetailFoodIsInactive
 	}
-	return nil
+
+	return food, nil
 }
 
 func (repo *createInvoiceRepo) checkPermissionStatusTopping(
@@ -158,106 +180,125 @@ func (repo *createInvoiceRepo) checkPermissionStatusTopping(
 func (repo *createInvoiceRepo) HandleData(
 	ctx context.Context,
 	data *invoicemodel.InvoiceCreate) error {
-	totalPrice := float32(0)
-	for i, invoiceDetail := range data.InvoiceDetails {
-		sizeFood, errGetSizeFood := repo.sizeFoodStore.FindSizeFood(
-			ctx,
-			map[string]interface{}{
-				"foodId": invoiceDetail.FoodId,
-				"sizeId": invoiceDetail.SizeId,
-			},
-		)
-		if errGetSizeFood != nil {
-			return errGetSizeFood
-		}
-		data.InvoiceDetails[i].SizeName = sizeFood.Name
+	totalPrice := 0
 
-		priceToppings := float32(0)
-		var toppings invoicedetailmodel.InvoiceDetailToppings
-		for _, topping := range *invoiceDetail.Toppings {
-			toppingModel, err := repo.toppingStore.FindTopping(
+	mapTopping := make(map[string]int)
+	mapToppingName := make(map[string]string)
+	mapToppingPrice := make(map[string]int)
+	mapFood := make(map[string]map[string]int)
+	mapFoodSizeName := make(map[string]map[string]string)
+	mapFoodSizePrice := make(map[string]map[string]int)
+
+	for _, detail := range data.InvoiceDetails {
+		for _, topping := range *detail.Toppings {
+			mapTopping[topping.Id]++
+		}
+		if mapFood[detail.FoodId] == nil {
+			mapFood[detail.FoodId] = make(map[string]int)
+		}
+		mapFood[detail.FoodId][detail.SizeId]++
+	}
+
+	mapIngredient := make(map[string]int)
+
+	for keyFood, mapSize := range mapFood {
+		for keySize, value := range mapSize {
+			sizeFood, errGetSizeFood := repo.sizeFoodStore.FindSizeFood(
 				ctx,
 				map[string]interface{}{
-					"id": topping.Id,
+					"foodId": keyFood,
+					"sizeId": keySize,
 				},
+				"Recipe.Details.Ingredient",
 			)
-			if err != nil {
-				return err
+			if errGetSizeFood != nil {
+				return errGetSizeFood
 			}
 
-			priceToppings += toppingModel.Price
-
-			replaceTopping := invoicedetailmodel.InvoiceDetailTopping{
-				Id:    topping.Id,
-				Name:  toppingModel.Name,
-				Price: toppingModel.Price,
+			if mapFoodSizeName[keyFood] == nil {
+				mapFoodSizeName[keyFood] = make(map[string]string)
 			}
-			toppings = append(toppings, replaceTopping)
+			mapFoodSizeName[keyFood][keySize] = sizeFood.Name
+
+			if mapFoodSizePrice[keyFood] == nil {
+				mapFoodSizePrice[keyFood] = make(map[string]int)
+			}
+			mapFoodSizePrice[keyFood][keySize] += sizeFood.Cost
+
+			for _, recipeDetail := range sizeFood.Recipe.Details {
+				mapIngredient[recipeDetail.IngredientId] +=
+					recipeDetail.AmountNeed * value
+			}
 		}
+	}
+
+	for key, value := range mapTopping {
+		topping, errGetTopping := repo.toppingStore.FindTopping(
+			ctx,
+			map[string]interface{}{
+				"id": key,
+			},
+			"Recipe.Details.Ingredient",
+		)
+		if errGetTopping != nil {
+			return errGetTopping
+		}
+
+		mapToppingName[key] = topping.Name
+		mapToppingPrice[key] = topping.Cost
+
+		for _, recipeDetail := range topping.Recipe.Details {
+			mapIngredient[recipeDetail.IngredientId] += recipeDetail.AmountNeed * value
+		}
+	}
+
+	data.MapIngredient = mapIngredient
+	for i, invoiceDetail := range data.InvoiceDetails {
+		data.InvoiceDetails[i].SizeName = mapFoodSizeName[invoiceDetail.FoodId][invoiceDetail.SizeId]
+
+		priceToppings := 0
+		var toppings invoicedetailmodel.InvoiceDetailToppings
+
+		for _, topping := range *invoiceDetail.Toppings {
+			priceToppings += mapToppingPrice[topping.Id]
+
+			simpleTopping := invoicedetailmodel.InvoiceDetailTopping{
+				Id:    topping.Id,
+				Name:  mapToppingName[topping.Id],
+				Price: mapToppingPrice[topping.Id],
+			}
+			toppings = append(toppings, simpleTopping)
+		}
+
 		*invoiceDetail.Toppings = toppings
-		data.InvoiceDetails[i].UnitPrice = sizeFood.Price + priceToppings
+		data.InvoiceDetails[i].UnitPrice =
+			mapFoodSizePrice[invoiceDetail.FoodId][invoiceDetail.SizeId] + priceToppings
 		totalPrice += data.InvoiceDetails[i].UnitPrice * invoiceDetail.Amount
 	}
+
 	data.TotalPrice = totalPrice
+
 	return nil
 }
 
-func (repo *createInvoiceRepo) getPriceFromTopping(
+func (repo *createInvoiceRepo) FindCustomer(
 	ctx context.Context,
-	toppingId string,
-) (*float32, error) {
-	topping, err := repo.toppingStore.FindTopping(
-		ctx,
-		map[string]interface{}{
-			"id": toppingId,
-		},
+	customerId string) (*customermodel.Customer, error) {
+	customer, err := repo.customerStore.FindCustomer(
+		ctx, map[string]interface{}{"id": customerId},
 	)
 	if err != nil {
 		return nil, err
 	}
-	return &topping.Price, nil
+	return customer, nil
 }
 
-func (repo *createInvoiceRepo) CreateCustomerDebt(
+func (repo *createInvoiceRepo) UpdateCustomerPoint(
 	ctx context.Context,
-	supplierDebtId string,
-	data *invoicemodel.InvoiceCreate) error {
-	debtCurrent, err := repo.customerStore.GetDebtCustomer(
-		ctx,
-		*data.CustomerId)
-	if err != nil {
-		return err
-	}
-
-	amountBorrow := data.AmountDebt
-	amountLeft := *debtCurrent + amountBorrow
-
-	debtType := enum.Debt
-	customerDebtCreate := customerdebtmodel.CustomerDebtCreate{
-		Id:         supplierDebtId,
-		CustomerId: *data.CustomerId,
-		Amount:     amountBorrow,
-		AmountLeft: amountLeft,
-		DebtType:   &debtType,
-		CreateBy:   data.CreateBy,
-	}
-
-	if err := repo.customerDebtStore.CreateCustomerDebt(
-		ctx, &customerDebtCreate,
-	); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (repo *createInvoiceRepo) UpdateDebtCustomer(
-	ctx context.Context,
-	data *invoicemodel.InvoiceCreate) error {
-	customerUpdateDebt := customermodel.CustomerUpdateDebt{
-		Amount: &data.AmountDebt,
-	}
-	if err := repo.customerStore.UpdateCustomerDebt(
-		ctx, *data.CustomerId, &customerUpdateDebt,
+	customerId string,
+	data customermodel.CustomerUpdatePoint) error {
+	if err := repo.customerStore.UpdateCustomerPoint(
+		ctx, customerId, &data,
 	); err != nil {
 		return err
 	}
@@ -293,6 +334,32 @@ func (repo *createInvoiceRepo) createInvoiceDetails(
 		ctx, data,
 	); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (repo *createInvoiceRepo) HandleIngredientTotalAmount(
+	ctx context.Context,
+	invoiceId string,
+	ingredientTotalAmountNeedUpdate map[string]int) error {
+	for key, value := range ingredientTotalAmountNeedUpdate {
+		ingredient, errGetIngredient := repo.ingredientStore.FindIngredient(
+			ctx, map[string]interface{}{"id": key})
+		if errGetIngredient != nil {
+			return errGetIngredient
+		}
+
+		amountLeft := ingredient.Amount - value
+		if amountLeft < 0 {
+			return invoicemodel.ErrInvoiceIngredientIsNotEnough
+		}
+
+		ingredientUpdate := ingredientmodel.IngredientUpdateAmount{Amount: -value}
+		if err := repo.ingredientStore.UpdateAmountIngredient(
+			ctx, key, &ingredientUpdate,
+		); err != nil {
+			return err
+		}
 	}
 	return nil
 }

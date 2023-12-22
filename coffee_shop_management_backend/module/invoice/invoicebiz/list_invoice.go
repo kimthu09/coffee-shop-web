@@ -20,7 +20,7 @@ type listInvoiceBiz struct {
 	requester middleware.Requester
 }
 
-func NewListImportNoteBiz(
+func NewListInvoiceBiz(
 	repo ListInvoiceRepo,
 	requester middleware.Requester) *listInvoiceBiz {
 	return &listInvoiceBiz{repo: repo, requester: requester}

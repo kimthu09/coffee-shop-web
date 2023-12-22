@@ -9,8 +9,7 @@ import (
 
 func (s *sqlStore) ListInvoiceDetail(
 	ctx context.Context,
-	invoiceId string,
-	paging *common.Paging) ([]invoicedetailmodel.InvoiceDetail, error) {
+	invoiceId string) ([]invoicedetailmodel.InvoiceDetail, error) {
 	var result []invoicedetailmodel.InvoiceDetail
 	db := s.db
 
@@ -18,14 +17,7 @@ func (s *sqlStore) ListInvoiceDetail(
 
 	db = db.Where("invoiceId = ?", invoiceId)
 
-	dbTemp, errPaging := handlePaging(db, paging)
-	if errPaging != nil {
-		return nil, errPaging
-	}
-	db = dbTemp
-
 	if err := db.
-		Limit(int(paging.Limit)).
 		Preload("Food", func(db *gorm.DB) *gorm.DB {
 			return db.Order("Food.name desc")
 		}).
@@ -34,15 +26,4 @@ func (s *sqlStore) ListInvoiceDetail(
 	}
 
 	return result, nil
-}
-
-func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
-	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
-
-	return db, nil
 }

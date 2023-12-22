@@ -7,11 +7,12 @@ import (
 type InvoiceDetailCreate struct {
 	InvoiceId   string                 `json:"-" gorm:"column:invoiceId;"`
 	FoodId      string                 `json:"foodId" gorm:"column:foodId;"`
+	FoodName    string                 `json:"foodName" gorm:"column:foodName;"`
 	SizeId      string                 `json:"sizeId" gorm:"-"`
-	SizeName    string                 `json:"-" gorm:"column:sizeName"`
+	SizeName    string                 `json:"sizeName" gorm:"column:sizeName"`
 	Toppings    *InvoiceDetailToppings `json:"toppings" gorm:"column:toppings;"`
-	Amount      float32                `json:"amount" gorm:"column:amount;"`
-	UnitPrice   float32                `json:"-" gorm:"column:unitPrice"`
+	Amount      int                    `json:"amount" gorm:"column:amount;"`
+	UnitPrice   int                    `json:"-" gorm:"column:unitPrice"`
 	Description string                 `json:"description" gorm:"column:description;"`
 }
 
