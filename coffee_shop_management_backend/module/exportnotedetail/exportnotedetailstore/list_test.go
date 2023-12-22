@@ -6,13 +6,11 @@ import (
 	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
 	"context"
 	"errors"
-	"fmt"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"strconv"
 	"testing"
 )
 
@@ -48,7 +46,6 @@ func Test_sqlStore_ListExportNoteDetail(t *testing.T) {
 				Id:   "Ing001",
 				Name: "Nguyen vat lieu 001",
 			},
-			ExpiryDate:   "09/11/2023",
 			AmountExport: 100,
 		},
 		{
@@ -58,39 +55,24 @@ func Test_sqlStore_ListExportNoteDetail(t *testing.T) {
 				Id:   "Ing002",
 				Name: "Nguyen vat lieu 002",
 			},
-			ExpiryDate:   "10/11/2023",
 			AmountExport: 100,
 		},
-	}
-	paging := common.Paging{
-		Page:  1,
-		Limit: 10,
 	}
 	mockErr := errors.New(mock.Anything)
 
 	rows := sqlmock.NewRows([]string{
 		"exportNoteId",
 		"ingredientId",
-		"expiryDate",
 		"amountExport",
 	})
 	for _, detail := range exportNoteDetails {
 		rows.AddRow(
 			detail.ExportNoteId,
 			detail.IngredientId,
-			detail.ExpiryDate,
 			detail.AmountExport)
 	}
-	queryString := fmt.Sprintf(
-		"SELECT * FROM `ExportNoteDetail` WHERE exportNoteId = ? LIMIT %v",
-		strconv.FormatInt(paging.Limit, 10))
-
-	countRows := sqlmock.NewRows([]string{
-		"count",
-	})
-	countRows.AddRow(len(exportNoteDetails))
-	queryStringCount :=
-		"SELECT count(*) FROM `ExportNoteDetail` WHERE exportNoteId = ?"
+	queryString :=
+		"SELECT * FROM `ExportNoteDetail` WHERE exportNoteId = ?"
 
 	queryIngredient := "SELECT * FROM `Ingredient` WHERE `Ingredient`.`id` IN (?,?) ORDER BY Ingredient.name"
 	ingredientRow := sqlmock.NewRows([]string{
@@ -110,36 +92,13 @@ func Test_sqlStore_ListExportNoteDetail(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name:   "List export note detail failed because can not get number of rows from database",
-			fields: fields{db: gormDB},
-			args: args{
-				ctx:          context.Background(),
-				exportNoteId: exportNoteId,
-				paging:       &paging,
-			},
-			mock: func() {
-				mockSqlDB.
-					ExpectQuery(queryStringCount).
-					WithArgs(exportNoteId).
-					WillReturnError(mockErr)
-			},
-			want:    exportNoteDetails,
-			wantErr: true,
-		},
-		{
 			name:   "List export note detail failed because can not get list from database",
 			fields: fields{db: gormDB},
 			args: args{
 				ctx:          context.Background(),
 				exportNoteId: exportNoteId,
-				paging:       &paging,
 			},
 			mock: func() {
-				mockSqlDB.
-					ExpectQuery(queryStringCount).
-					WithArgs(exportNoteId).
-					WillReturnRows(countRows)
-
 				mockSqlDB.
 					ExpectQuery(queryString).
 					WithArgs(exportNoteId).
@@ -154,14 +113,8 @@ func Test_sqlStore_ListExportNoteDetail(t *testing.T) {
 			args: args{
 				ctx:          context.Background(),
 				exportNoteId: exportNoteId,
-				paging:       &paging,
 			},
 			mock: func() {
-				mockSqlDB.
-					ExpectQuery(queryStringCount).
-					WithArgs(exportNoteId).
-					WillReturnRows(countRows)
-
 				mockSqlDB.
 					ExpectQuery(queryString).
 					WithArgs(exportNoteId).
@@ -185,7 +138,7 @@ func Test_sqlStore_ListExportNoteDetail(t *testing.T) {
 
 			tt.mock()
 
-			got, err := s.ListExportNoteDetail(tt.args.ctx, tt.args.exportNoteId, tt.args.paging)
+			got, err := s.ListExportNoteDetail(tt.args.ctx, tt.args.exportNoteId)
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "ListExportNoteDetail() err = %v, wantErr = %v", err, tt.wantErr)

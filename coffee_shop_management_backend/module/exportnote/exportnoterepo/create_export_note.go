@@ -4,7 +4,6 @@ import (
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
 	"coffee_shop_management_backend/module/exportnotedetail/exportnotedetailmodel"
 	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
-	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailmodel"
 	"context"
 )
 
@@ -23,62 +22,33 @@ type CreateExportNoteDetailStore interface {
 }
 
 type UpdateIngredientStore interface {
-	GetPriceIngredient(
-		ctx context.Context,
-		conditions map[string]interface{},
-		moreKeys ...string,
-	) (*float32, error)
 	UpdateAmountIngredient(
 		ctx context.Context,
 		id string,
 		data *ingredientmodel.IngredientUpdateAmount,
 	) error
-}
-
-type UpdateIngredientDetailStore interface {
-	FindIngredientDetail(ctx context.Context,
+	FindIngredient(
+		ctx context.Context,
 		conditions map[string]interface{},
 		moreKeys ...string,
-	) (*ingredientdetailmodel.IngredientDetail, error)
-	UpdateIngredientDetail(
-		ctx context.Context,
-		ingredientId string,
-		expiryDate string,
-		data *ingredientdetailmodel.IngredientDetailUpdate,
-	) error
+	) (*ingredientmodel.Ingredient, error)
 }
 
 type createExportNoteRepo struct {
 	exportNoteStore       CreateExportNoteStore
 	exportNoteDetailStore CreateExportNoteDetailStore
 	ingredientStore       UpdateIngredientStore
-	ingredientDetailStore UpdateIngredientDetailStore
 }
 
 func NewCreateExportNoteRepo(
 	exportNoteStore CreateExportNoteStore,
 	exportNoteDetailStore CreateExportNoteDetailStore,
-	ingredientStore UpdateIngredientStore,
-	ingredientDetailStore UpdateIngredientDetailStore) *createExportNoteRepo {
+	ingredientStore UpdateIngredientStore) *createExportNoteRepo {
 	return &createExportNoteRepo{
 		exportNoteStore:       exportNoteStore,
 		exportNoteDetailStore: exportNoteDetailStore,
 		ingredientStore:       ingredientStore,
-		ingredientDetailStore: ingredientDetailStore,
 	}
-}
-
-func (repo *createExportNoteRepo) GetPriceIngredient(
-	ctx context.Context,
-	ingredientId string) (*float32, error) {
-	price, err := repo.ingredientStore.GetPriceIngredient(
-		ctx, map[string]interface{}{"id": ingredientId},
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return price, nil
 }
 
 func (repo *createExportNoteRepo) HandleExportNote(
@@ -96,66 +66,23 @@ func (repo *createExportNoteRepo) HandleExportNote(
 	return nil
 }
 
-func (repo *createExportNoteRepo) HandleIngredientDetail(
-	ctx context.Context,
-	data *exportnotemodel.ExportNoteCreate) error {
-	for _, exportNoteDetailCreate := range data.ExportNoteDetails {
-		if err := repo.checkIngredientDetail(ctx, &exportNoteDetailCreate); err != nil {
-			return err
-		}
-
-		if err := repo.updateIngredientDetail(ctx, &exportNoteDetailCreate); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (repo *createExportNoteRepo) checkIngredientDetail(
-	ctx context.Context,
-	data *exportnotedetailmodel.ExportNoteDetailCreate) error {
-	currentData, err := repo.ingredientDetailStore.FindIngredientDetail(
-		ctx,
-		map[string]interface{}{
-			"ingredientId": data.IngredientId,
-			"expiryDate":   data.ExpiryDate,
-		},
-	)
-	if err != nil {
-		return err
-	}
-
-	if currentData.Amount < data.AmountExport {
-		return exportnotemodel.ErrExportNoteAmountExportIsOverTheStock
-	}
-
-	return nil
-}
-
-func (repo *createExportNoteRepo) updateIngredientDetail(
-	ctx context.Context,
-	data *exportnotedetailmodel.ExportNoteDetailCreate) error {
-	dataUpdate := ingredientdetailmodel.IngredientDetailUpdate{
-		Amount: -data.AmountExport,
-	}
-
-	if err := repo.ingredientDetailStore.UpdateIngredientDetail(
-		ctx,
-		data.IngredientId,
-		data.ExpiryDate,
-		&dataUpdate,
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (repo *createExportNoteRepo) HandleIngredientTotalAmount(
 	ctx context.Context,
-	ingredientTotalAmountNeedUpdate map[string]float32) error {
+	exportNoteId string,
+	ingredientTotalAmountNeedUpdate map[string]int) error {
 	for key, value := range ingredientTotalAmountNeedUpdate {
+		ingredient, errGetIngredient := repo.ingredientStore.FindIngredient(
+			ctx, map[string]interface{}{"id": key})
+		if errGetIngredient != nil {
+			return errGetIngredient
+		}
+
 		ingredientUpdate := ingredientmodel.IngredientUpdateAmount{Amount: -value}
+
+		amountLeft := ingredient.Amount - value
+		if amountLeft < 0 {
+			return exportnotemodel.ErrExportNoteAmountExportIsOverTheStock
+		}
 
 		if err := repo.ingredientStore.UpdateAmountIngredient(
 			ctx, key, &ingredientUpdate,

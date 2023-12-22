@@ -10,8 +10,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"strconv"
 	"testing"
+	"time"
 )
 
 func Test_sqlStore_ListExportNote(t *testing.T) {
@@ -28,47 +28,62 @@ func Test_sqlStore_ListExportNote(t *testing.T) {
 		panic(err) // Error here
 	}
 
-	minPrice := float32(10)
-	maxPrice := float32(90)
+	dateInt := int64(123)
+	dateTime := time.Unix(dateInt, 0)
+	createdBy := "user001"
+	reason := exportnotemodel.OutOfDate
 	filter := exportnotemodel.Filter{
-		SearchKey: "mockSearchKey",
-		MinPrice:  &minPrice,
-		MaxPrice:  &maxPrice,
+		SearchKey:         "mockSearchKey",
+		DateFromCreatedAt: &dateInt,
+		DateToCreatedAt:   &dateInt,
+		CreatedBy:         &createdBy,
+		Reason:            &reason,
 	}
-	mockProperties := []string{"id", "createBy"}
+	mockProperties := []string{"id"}
 	paging := common.Paging{
 		Page:  1,
 		Limit: 10,
 	}
 	listExportNote := []exportnotemodel.ExportNote{
 		{
-			Id:         "123",
-			TotalPrice: 12000,
-			CreateAt:   nil,
-			CreateBy:   "123",
+			Id:        "123",
+			Reason:    &reason,
+			CreatedAt: &dateTime,
+			CreatedBy: createdBy,
 		},
 	}
 	rows := sqlmock.NewRows([]string{
 		"id",
-		"totalPrice",
-		"createAt",
-		"createBy",
+		"reason",
+		"createdAt",
+		"createdBy",
 	})
 	for _, exportNote := range listExportNote {
-		rows.AddRow(exportNote.Id, exportNote.TotalPrice, exportNote.CreateAt, exportNote.CreateBy)
+		rows.AddRow(exportNote.Id, exportNote.Reason, exportNote.CreatedAt, exportNote.CreatedBy)
 	}
-	queryString := "SELECT * FROM `ExportNote` WHERE " +
-		"(id LIKE ? OR createBy LIKE ?) AND" +
-		" totalPrice >= ? AND totalPrice <= ? " +
-		"ORDER BY createAt desc LIMIT " + strconv.FormatInt(paging.Limit, 10)
+
+	queryString :=
+		"SELECT `ExportNote`.`id`,`ExportNote`.`reason`,`ExportNote`.`createdAt`,`ExportNote`.`createdBy` FROM `ExportNote` " +
+			"JOIN MUser ON ExportNote.createdBy = MUser.id " +
+			"WHERE id LIKE ? " +
+			"AND reason = ? " +
+			"AND createdAt >= ? " +
+			"AND createdAt <= ? " +
+			"AND MUser.Id = ? " +
+			"ORDER BY createdAt desc LIMIT 10"
 
 	countRows := sqlmock.NewRows([]string{
 		"count",
 	})
 	countRows.AddRow(len(listExportNote))
-	queryStringCount := "SELECT count(*) FROM `ExportNote` WHERE " +
-		"(id LIKE ? OR createBy LIKE ?) AND " +
-		"totalPrice >= ? AND totalPrice <= ? "
+	queryStringCount :=
+		"SELECT count(*) FROM `ExportNote` " +
+			"JOIN MUser ON ExportNote.createdBy = MUser.id " +
+			"WHERE id LIKE ? " +
+			"AND reason = ? " +
+			"AND createdAt >= ? " +
+			"AND createdAt <= ? " +
+			"AND MUser.Id = ?"
 
 	mockErr := errors.New(mock.Anything)
 
@@ -103,9 +118,10 @@ func Test_sqlStore_ListExportNote(t *testing.T) {
 					ExpectQuery(queryStringCount).
 					WithArgs(
 						"%"+filter.SearchKey+"%",
-						"%"+filter.SearchKey+"%",
-						filter.MinPrice,
-						filter.MaxPrice).
+						reason,
+						dateTime,
+						dateTime,
+						createdBy).
 					WillReturnError(mockErr)
 			},
 			want:    listExportNote,
@@ -125,18 +141,20 @@ func Test_sqlStore_ListExportNote(t *testing.T) {
 					ExpectQuery(queryStringCount).
 					WithArgs(
 						"%"+filter.SearchKey+"%",
-						"%"+filter.SearchKey+"%",
-						filter.MinPrice,
-						filter.MaxPrice).
+						reason,
+						dateTime,
+						dateTime,
+						createdBy).
 					WillReturnRows(countRows)
 
 				mockSqlDB.
 					ExpectQuery(queryString).
 					WithArgs(
 						"%"+filter.SearchKey+"%",
-						"%"+filter.SearchKey+"%",
-						filter.MinPrice,
-						filter.MaxPrice).
+						reason,
+						dateTime,
+						dateTime,
+						createdBy).
 					WillReturnError(mockErr)
 			},
 			want:    listExportNote,
@@ -156,18 +174,20 @@ func Test_sqlStore_ListExportNote(t *testing.T) {
 					ExpectQuery(queryStringCount).
 					WithArgs(
 						"%"+filter.SearchKey+"%",
-						"%"+filter.SearchKey+"%",
-						filter.MinPrice,
-						filter.MaxPrice).
+						reason,
+						dateTime,
+						dateTime,
+						createdBy).
 					WillReturnRows(countRows)
 
 				mockSqlDB.
 					ExpectQuery(queryString).
 					WithArgs(
 						"%"+filter.SearchKey+"%",
-						"%"+filter.SearchKey+"%",
-						filter.MinPrice,
-						filter.MaxPrice).
+						reason,
+						dateTime,
+						dateTime,
+						createdBy).
 					WillReturnRows(rows)
 			},
 			want:    listExportNote,

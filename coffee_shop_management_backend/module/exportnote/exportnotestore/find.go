@@ -1,18 +1,18 @@
-package rolefeaturestore
+package exportnotestore
 
 import (
 	"coffee_shop_management_backend/common"
-	"coffee_shop_management_backend/module/rolefeature/rolefeaturemodel"
+	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
 	"context"
 	"errors"
 	"gorm.io/gorm"
 )
 
-func (s *sqlStore) FindRoleFeature(
+func (s *sqlStore) FindExportNote(
 	ctx context.Context,
 	conditions map[string]interface{},
-	moreKeys ...string) (*rolefeaturemodel.RoleFeature, error) {
-	var data rolefeaturemodel.RoleFeature
+	moreKeys ...string) (*exportnotemodel.ExportNote, error) {
+	var data exportnotemodel.ExportNote
 	db := s.db
 
 	for i := range moreKeys {

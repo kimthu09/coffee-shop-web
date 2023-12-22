@@ -9,21 +9,14 @@ import (
 )
 
 type CreateExportNoteRepo interface {
-	GetPriceIngredient(
-		ctx context.Context,
-		ingredientId string,
-	) (*float32, error)
 	HandleExportNote(
-		ctx context.Context,
-		data *exportnotemodel.ExportNoteCreate,
-	) error
-	HandleIngredientDetail(
 		ctx context.Context,
 		data *exportnotemodel.ExportNoteCreate,
 	) error
 	HandleIngredientTotalAmount(
 		ctx context.Context,
-		ingredientTotalAmountNeedUpdate map[string]float32,
+		exportNoteId string,
+		ingredientTotalAmountNeedUpdate map[string]int,
 	) error
 }
 
@@ -59,29 +52,13 @@ func (biz *createExportNoteBiz) CreateExportNote(
 		return err
 	}
 
-	mapIngredient := getMapIngredientExist(data)
-	var totalPrice float32 = 0
-	for ingredientId, totalAmountOfIngredientId := range mapIngredient {
-		price, err := biz.repo.GetPriceIngredient(
-			ctx, ingredientId,
-		)
-		if err != nil {
-			return err
-		}
-
-		totalPrice += *price * totalAmountOfIngredientId
-	}
-	data.TotalPrice = totalPrice
-
 	if err := biz.repo.HandleExportNote(ctx, data); err != nil {
 		return err
 	}
 
-	if err := biz.repo.HandleIngredientDetail(ctx, data); err != nil {
-		return err
-	}
-
-	if err := biz.repo.HandleIngredientTotalAmount(ctx, mapIngredient); err != nil {
+	mapIngredient := getMapIngredientExist(data)
+	if err := biz.repo.HandleIngredientTotalAmount(
+		ctx, *data.Id, mapIngredient); err != nil {
 		return err
 	}
 
@@ -104,8 +81,8 @@ func handleExportNoteId(
 	return nil
 }
 
-func getMapIngredientExist(data *exportnotemodel.ExportNoteCreate) map[string]float32 {
-	mapIngredientExist := make(map[string]float32)
+func getMapIngredientExist(data *exportnotemodel.ExportNoteCreate) map[string]int {
+	mapIngredientExist := make(map[string]int)
 	for _, v := range data.ExportNoteDetails {
 		mapIngredientExist[v.IngredientId] += v.AmountExport
 	}

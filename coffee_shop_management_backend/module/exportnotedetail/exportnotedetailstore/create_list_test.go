@@ -41,13 +41,11 @@ func Test_sqlStore_CreateListExportNoteDetail(t *testing.T) {
 		{
 			ExportNoteId: mockExportNoteId,
 			IngredientId: "Ing001",
-			ExpiryDate:   "12/12/2003",
 			AmountExport: 100,
 		},
 		{
 			ExportNoteId: mockExportNoteId,
 			IngredientId: "Ing002",
-			ExpiryDate:   "11/12/2003",
 			AmountExport: 100,
 		},
 	}
@@ -56,16 +54,15 @@ func Test_sqlStore_CreateListExportNoteDetail(t *testing.T) {
 	mockPlaceholders := make([]string, 0)
 	mockArgsForQuery := make([]driver.Value, 0)
 	for _, val := range mockDetails {
-		mockPlaceholders = append(mockPlaceholders, "(?,?,?,?)")
+		mockPlaceholders = append(mockPlaceholders, "(?,?,?)")
 		mockArgsForQuery = append(
 			mockArgsForQuery,
 			val.ExportNoteId,
 			val.IngredientId,
-			val.ExpiryDate,
 			val.AmountExport)
 	}
 	queryString := "INSERT INTO `ExportNoteDetail` " +
-		"(`exportNoteId`,`ingredientId`,`expiryDate`,`amountExport`)" +
+		"(`exportNoteId`,`ingredientId`,`amountExport`)" +
 		" VALUES " + strings.Join(mockPlaceholders, ",")
 
 	tests := []struct {
@@ -109,7 +106,7 @@ func Test_sqlStore_CreateListExportNoteDetail(t *testing.T) {
 					ExpectExec(queryString).
 					WithArgs(mockArgsForQuery...).
 					WillReturnError(mockErr)
-				sqlDBMock.ExpectCommit()
+				sqlDBMock.ExpectRollback()
 			},
 			wantErr: true,
 		},

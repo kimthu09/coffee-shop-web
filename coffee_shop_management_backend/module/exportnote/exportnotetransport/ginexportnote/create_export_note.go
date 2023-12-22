@@ -11,7 +11,6 @@ import (
 	"coffee_shop_management_backend/module/exportnote/exportnotestore"
 	"coffee_shop_management_backend/module/exportnotedetail/exportnotedetailstore"
 	"coffee_shop_management_backend/module/ingredient/ingredientstore"
-	"coffee_shop_management_backend/module/ingredientdetail/ingredientdetailstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -25,20 +24,18 @@ func CreateExportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 		}
 
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
-		data.CreateBy = requester.GetUserId()
+		data.CreatedBy = requester.GetUserId()
 
 		db := appCtx.GetMainDBConnection().Begin()
 
 		exportNoteStore := exportnotestore.NewSQLStore(db)
 		exportNoteDetailStore := exportnotedetailstore.NewSQLStore(db)
 		ingredientStore := ingredientstore.NewSQLStore(db)
-		ingredientDetailStore := ingredientdetailstore.NewSQLStore(db)
 
 		repo := exportnoterepo.NewCreateExportNoteRepo(
 			exportNoteStore,
 			exportNoteDetailStore,
 			ingredientStore,
-			ingredientDetailStore,
 		)
 
 		gen := generator.NewShortIdGenerator()
@@ -55,6 +52,6 @@ func CreateExportNote(appCtx appctx.AppContext) gin.HandlerFunc {
 			panic(err)
 		}
 
-		c.JSON(http.StatusOK, common.SimpleSucessResponse(data.Id))
+		c.JSON(http.StatusOK, common.SimpleSuccessResponse(data.Id))
 	}
 }

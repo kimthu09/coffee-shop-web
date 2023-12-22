@@ -62,9 +62,9 @@ func (m *mockCreateExportNoteRepo) HandleIngredientDetail(
 
 func (m *mockCreateExportNoteRepo) HandleIngredientTotalAmount(
 	ctx context.Context,
-	ingredientTotalAmountNeedUpdate map[string]float32,
-) error {
-	args := m.Called(ctx, ingredientTotalAmountNeedUpdate)
+	exportNoteId string,
+	ingredientTotalAmountNeedUpdate map[string]int) error {
+	args := m.Called(ctx, exportNoteId, ingredientTotalAmountNeedUpdate)
 	return args.Error(0)
 }
 
@@ -129,25 +129,27 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 	invalidExportNoteCreate := exportnotemodel.ExportNoteCreate{
 		Id: nil,
 	}
+	reason := exportnotemodel.OutOfDate
 	mockExportNoteCreate := exportnotemodel.ExportNoteCreate{
-		Id: nil,
+		Id:     nil,
+		Reason: &reason,
 		ExportNoteDetails: []exportnotedetailmodel.ExportNoteDetailCreate{
 			{
 				IngredientId: "Ing001",
-				ExpiryDate:   "08/11/2023",
 				AmountExport: 20,
 			},
 			{
-				IngredientId: "Ing001",
-				ExpiryDate:   "09/11/2023",
+				IngredientId: "Ing002",
 				AmountExport: 10,
 			},
 		},
 	}
 	mockId := "123456789"
 	mockErr := errors.New(mock.Anything)
-	mockPrice := float32(10000)
-
+	mapExist := map[string]int{
+		"Ing001": 20,
+		"Ing002": 10,
+	}
 	tests := []struct {
 		name    string
 		fields  fields
@@ -218,35 +220,6 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Create export note failed because can not get price ingredient",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &mockExportNoteCreate,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
-					Return(true).
-					Once()
-
-				mockGenerator.
-					On("IdProcess", mock.Anything).
-					Return(&mockId, nil).
-					Once()
-
-				mockRepo.
-					On("GetPriceIngredient", context.Background(), mock.Anything).
-					Return(nil, mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
 			name: "Create export note failed because can not handle export note successfully",
 			fields: fields{
 				gen:       mockGenerator,
@@ -269,12 +242,8 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 					Once()
 
 				mockRepo.
-					On("GetPriceIngredient", context.Background(), mock.Anything).
-					Return(&mockPrice, nil).
-					Times(len(mockExportNoteCreate.ExportNoteDetails))
-
-				mockRepo.
-					On("HandleExportNote", context.Background(), mock.Anything).
+					On("HandleExportNote",
+						context.Background(), &mockExportNoteCreate).
 					Return(mockErr).
 					Once()
 			},
@@ -303,61 +272,16 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 					Once()
 
 				mockRepo.
-					On("GetPriceIngredient", context.Background(), mock.Anything).
-					Return(&mockPrice, nil).
-					Times(len(mockExportNoteCreate.ExportNoteDetails))
-
-				mockRepo.
-					On("HandleExportNote", context.Background(), mock.Anything).
+					On("HandleExportNote",
+						context.Background(), &mockExportNoteCreate).
 					Return(nil).
 					Once()
 
 				mockRepo.
-					On("HandleIngredientDetail", context.Background(), mock.Anything).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
-			name: "Create export note failed because can not update ingredient total amount successfully",
-			fields: fields{
-				gen:       mockGenerator,
-				repo:      mockRepo,
-				requester: mockRequest,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &mockExportNoteCreate,
-			},
-			mock: func() {
-				mockRequest.
-					On("IsHasFeature", common.ExportNoteCreateFeatureCode).
-					Return(true).
-					Once()
-
-				mockGenerator.
-					On("IdProcess", mock.Anything).
-					Return(&mockId, nil).
-					Once()
-
-				mockRepo.
-					On("GetPriceIngredient", context.Background(), mock.Anything).
-					Return(&mockPrice, nil).
-					Times(len(mockExportNoteCreate.ExportNoteDetails))
-
-				mockRepo.
-					On("HandleExportNote", context.Background(), mock.Anything).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On("HandleIngredientDetail", context.Background(), mock.Anything).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On("HandleIngredientTotalAmount", context.Background(), mock.Anything).
+					On("HandleIngredientTotalAmount",
+						context.Background(),
+						mockId,
+						mapExist).
 					Return(mockErr).
 					Once()
 			},
@@ -386,22 +310,16 @@ func Test_createExportNoteBiz_CreateExportNote(t *testing.T) {
 					Once()
 
 				mockRepo.
-					On("GetPriceIngredient", context.Background(), mock.Anything).
-					Return(&mockPrice, nil).
-					Times(len(mockExportNoteCreate.ExportNoteDetails))
-
-				mockRepo.
-					On("HandleExportNote", context.Background(), mock.Anything).
+					On("HandleExportNote",
+						context.Background(), &mockExportNoteCreate).
 					Return(nil).
 					Once()
 
 				mockRepo.
-					On("HandleIngredientDetail", context.Background(), mock.Anything).
-					Return(nil).
-					Once()
-
-				mockRepo.
-					On("HandleIngredientTotalAmount", context.Background(), mock.Anything).
+					On("HandleIngredientTotalAmount",
+						context.Background(),
+						mockId,
+						mapExist).
 					Return(nil).
 					Once()
 			},

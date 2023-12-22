@@ -5,13 +5,15 @@ import (
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
 	"context"
 	"gorm.io/gorm"
+	"time"
 )
 
 func (s *sqlStore) ListExportNote(
 	ctx context.Context,
 	filter *exportnotemodel.Filter,
 	propertiesContainSearchKey []string,
-	paging *common.Paging) ([]exportnotemodel.ExportNote, error) {
+	paging *common.Paging,
+	moreKeys ...string) ([]exportnotemodel.ExportNote, error) {
 	var result []exportnotemodel.ExportNote
 	db := s.db
 
@@ -19,15 +21,18 @@ func (s *sqlStore) ListExportNote(
 
 	handleFilter(db, filter, propertiesContainSearchKey)
 
-	dbTemp, errPaging := handlePaging(db, paging)
+	dbTemp, errPaging := common.HandlePaging(db, paging)
 	if errPaging != nil {
 		return nil, errPaging
 	}
 	db = dbTemp
 
+	for i := range moreKeys {
+		db = db.Preload(moreKeys[i])
+	}
+
 	if err := db.
-		Limit(int(paging.Limit)).
-		Order("createAt desc").
+		Order("createdAt desc").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
@@ -43,22 +48,21 @@ func handleFilter(
 		if filter.SearchKey != "" {
 			db = common.GetWhereClause(db, filter.SearchKey, propertiesContainSearchKey)
 		}
-		if filter.MinPrice != nil {
-			db = db.Where("totalPrice >= ?", filter.MinPrice)
+		if filter.Reason != nil {
+			db = db.Where("reason = ?", *filter.Reason)
 		}
-		if filter.MaxPrice != nil {
-			db = db.Where("totalPrice <= ?", filter.MaxPrice)
+		if filter.DateFromCreatedAt != nil {
+			timeFrom := time.Unix(*filter.DateFromCreatedAt, 0)
+			db = db.Where("createdAt >= ?", timeFrom)
+		}
+		if filter.DateToCreatedAt != nil {
+			timeTo := time.Unix(*filter.DateToCreatedAt, 0)
+			db = db.Where("createdAt <= ?", timeTo)
+		}
+		if filter.CreatedBy != nil {
+			db = db.
+				Joins("JOIN MUser ON ExportNote.createdBy = MUser.id").
+				Where("MUser.Id = ?", filter.CreatedBy)
 		}
 	}
-}
-
-func handlePaging(db *gorm.DB, paging *common.Paging) (*gorm.DB, error) {
-	if err := db.Count(&paging.Total).Error; err != nil {
-		return nil, common.ErrDB(err)
-	}
-
-	offset := (paging.Page - 1) * paging.Limit
-	db = db.Offset(int(offset))
-
-	return db, nil
 }
