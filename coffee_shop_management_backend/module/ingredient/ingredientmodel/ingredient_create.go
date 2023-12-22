@@ -31,3 +31,7 @@ func (data *IngredientCreate) Validate() *common.AppError {
 	}
 	return nil
 }
+
+func (data *IngredientCreate) Round() {
+	common.CustomRound(&data.Price)
+}

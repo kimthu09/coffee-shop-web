@@ -6,19 +6,10 @@ import (
 	"errors"
 )
 
-type SimpleIngredient struct {
-	Id   string `json:"id" gorm:"column:id;"`
-	Name string `json:"name" gorm:"column:name;"`
-}
-
-func (*SimpleIngredient) TableName() string {
-	return common.TableIngredient
-}
-
 type Ingredient struct {
 	Id          string            `json:"id" gorm:"column:id;"`
 	Name        string            `json:"name" gorm:"column:name;"`
-	TotalAmount float32           `json:"totalAmount" gorm:"column:totalAmount;"`
+	Amount      int               `json:"amount" gorm:"column:amount;"`
 	MeasureType *enum.MeasureType `json:"measureType" gorm:"column:measureType;"`
 	Price       float32           `json:"price" gorm:"column:price;"`
 }

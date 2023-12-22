@@ -15,7 +15,7 @@ func (s *sqlStore) UpdateAmountIngredient(
 
 	if err := db.Table(common.TableIngredient).
 		Where("id = ?", id).
-		Update("totalAmount", gorm.Expr("totalAmount + ?", data.Amount)).
+		Update("amount", gorm.Expr("amount + ?", data.Amount)).
 		Error; err != nil {
 		return common.ErrDB(err)
 	}
