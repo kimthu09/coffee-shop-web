@@ -3,8 +3,7 @@ package middleware
 import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/component/appctx"
-	"coffee_shop_management_backend/component/token_provider/jwt"
-	"coffee_shop_management_backend/module/role/rolemodel"
+	"coffee_shop_management_backend/component/tokenprovider/jwt"
 	userstorage "coffee_shop_management_backend/module/user/userstore"
 	"errors"
 	"fmt"
@@ -15,7 +14,7 @@ import (
 type Requester interface {
 	GetUserId() string
 	GetEmail() string
-	GetRole() rolemodel.Role
+	GetRoleId() string
 	IsHasFeature(featureCode string) bool
 }
 
@@ -29,7 +28,7 @@ func ErrWrongAuthHeader(err error) *common.AppError {
 
 func extractTokenFromHeaderString(s string) (string, error) {
 	parts := strings.Split(s, " ")
-	//Authorization : Bearn{token}
+	//Authorization : Bearer {token}
 	if parts[0] != "Bearer" || len(parts) < 2 || strings.TrimSpace(parts[1]) == "" {
 		return "", ErrWrongAuthHeader(nil)
 	}

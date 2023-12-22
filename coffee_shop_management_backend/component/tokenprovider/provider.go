@@ -1,4 +1,4 @@
-package token_provider
+package tokenprovider
 
 type Provider interface {
 	Generate(data TokenPayload, expiry int) (*Token, error)

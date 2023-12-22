@@ -1,7 +1,7 @@
 package jwt
 
 import (
-	"coffee_shop_management_backend/component/token_provider"
+	"coffee_shop_management_backend/component/tokenprovider"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -15,11 +15,11 @@ func NewTokenJWTProvider(secret string) *jwtProvider {
 }
 
 type myClaims struct {
-	Payload token_provider.TokenPayload `json:"payload"`
+	Payload tokenprovider.TokenPayload `json:"payload"`
 	jwt.RegisteredClaims
 }
 
-func (j *jwtProvider) Generate(data token_provider.TokenPayload, expiry int) (*token_provider.Token, error) {
+func (j *jwtProvider) Generate(data tokenprovider.TokenPayload, expiry int) (*tokenprovider.Token, error) {
 	// generate the JWT
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, myClaims{
 		data,
@@ -35,30 +35,30 @@ func (j *jwtProvider) Generate(data token_provider.TokenPayload, expiry int) (*t
 	}
 
 	// return the token
-	return &token_provider.Token{
+	return &tokenprovider.Token{
 		Token:   myToken,
 		Expiry:  expiry,
 		Created: time.Now(),
 	}, nil
 }
 
-func (j *jwtProvider) Validate(myToken string) (*token_provider.TokenPayload, error) {
+func (j *jwtProvider) Validate(myToken string) (*tokenprovider.TokenPayload, error) {
 	token, err := jwt.ParseWithClaims(myToken, &myClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(j.secret), nil
 	})
 
 	if err != nil {
-		return nil, token_provider.ErrInvalidToken
+		return nil, tokenprovider.ErrInvalidToken
 	}
 
 	// validate the token
 	if !token.Valid {
-		return nil, token_provider.ErrInvalidToken
+		return nil, tokenprovider.ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(*myClaims)
 	if !ok {
-		return nil, token_provider.ErrInvalidToken
+		return nil, tokenprovider.ErrInvalidToken
 	}
 
 	// return the token
