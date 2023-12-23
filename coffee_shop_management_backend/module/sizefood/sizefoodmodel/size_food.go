@@ -23,22 +23,22 @@ func (*SizeFood) TableName() string {
 var (
 	ErrSizeFoodNameEmpty = common.NewCustomError(
 		errors.New("name of size is empty"),
-		"name of size is empty",
+		"Tên của kích cỡ không hợp lệ",
 		"ErrSizeFoodNameEmpty",
 	)
 	ErrSizeFoodCostIsNegativeNumber = common.NewCustomError(
 		errors.New("cost is negative number"),
-		"cost is negative number",
+		"Giá bán đang là số âm",
 		"ErrSizeFoodCostIsNegativeNumber",
 	)
 	ErrSizeFoodPriceIsNegativeNumber = common.NewCustomError(
 		errors.New("price is negative number"),
-		"price is negative number",
+		"Giá gốc đang là số âm",
 		"ErrSizeFoodPriceIsNegativeNumber",
 	)
 	ErrSizeFoodRecipeEmpty = common.NewCustomError(
 		errors.New("recipe is empty"),
-		"recipe is empty",
+		"Công thức nấu ăn đang trống",
 		"ErrSizeFoodRecipeEmpty",
 	)
 )

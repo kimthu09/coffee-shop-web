@@ -89,7 +89,7 @@ func validateSupplierUpdateDebt(data *suppliermodel.SupplierUpdateDebt) error {
 	}
 
 	if *data.Amount <= 0 {
-		return suppliermodel.ErrDebtPayIsInvalid
+		return suppliermodel.ErrSupplierDebtPayIsInvalid
 	}
 
 	return nil

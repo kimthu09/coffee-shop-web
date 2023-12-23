@@ -16,22 +16,22 @@ type Product struct {
 var (
 	ErrProductIdInvalid = common.NewCustomError(
 		errors.New("id of product is invalid"),
-		"id of product is invalid",
+		"Mã không hợp lệ",
 		"ErrProductIdInvalid",
 	)
 	ErrProductNameEmpty = common.NewCustomError(
 		errors.New("name of product is empty"),
-		"name of product is empty",
+		"Tên đang trống",
 		"ErrProductNameEmpty",
 	)
 	ErrProductIsActiveEmpty = common.NewCustomError(
 		errors.New("status of product is empty"),
-		"status of product is invalid",
+		"Trạng thái đang trống",
 		"ErrProductIsActiveEmpty",
 	)
 	ErrProductInactive = common.NewCustomError(
 		errors.New("product has been inactive"),
-		"product has been inactive",
+		"Đã ngừng bán",
 		"ErrProductInactive",
 	)
 )

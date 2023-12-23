@@ -4,7 +4,6 @@ import (
 	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/middleware"
 	"coffee_shop_management_backend/module/exportnote/exportnotemodel"
-	"coffee_shop_management_backend/module/exportnotedetail/exportnotedetailmodel"
 	"context"
 )
 
@@ -33,7 +32,7 @@ func (biz *seeExportNoteDetailBiz) SeeExportNoteDetail(
 	ctx context.Context,
 	exportNoteId string) (*exportnotemodel.ExportNote, error) {
 	if !biz.requester.IsHasFeature(common.ExportNoteViewFeatureCode) {
-		return nil, exportnotedetailmodel.ErrExportDetailViewNoPermission
+		return nil, exportnotemodel.ErrExportNoteViewNoPermission
 	}
 
 	exportNote, errExportNote := biz.repo.SeeExportNoteDetail(

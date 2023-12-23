@@ -30,7 +30,7 @@ func (repo *listImportNoteRepo) ListImportNote(
 	result, err := repo.store.ListImportNote(
 		ctx,
 		filter,
-		[]string{"id", "supplierId", "createdBy", "closedBy"},
+		[]string{"ImportNote.id"},
 		paging,
 		"Supplier", "CreatedByUser", "ClosedByUser")
 

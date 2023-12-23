@@ -94,10 +94,10 @@ func Test_sqlStore_GetAllUser(t *testing.T) {
 			got, err := s.GetAllUser(context.Background())
 
 			if tt.wantErr {
-				assert.NotNil(t, err, "GetAllUser() error = %v, wantErr %v", err, tt.wantErr)
+				assert.NotNil(t, err, "GetAllSupplier() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
-				assert.Nil(t, err, "GetAllUser() error = %v, wantErr %v", err, tt.wantErr)
-				assert.Equal(t, tt.want, got, "GetAllUser() got = %v, want %v", got, tt.want)
+				assert.Nil(t, err, "GetAllSupplier() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, tt.want, got, "GetAllSupplier() got = %v, want %v", got, tt.want)
 			}
 		})
 	}

@@ -29,19 +29,19 @@ var (
 		"ErrInventoryCheckNoteIdInvalid",
 	)
 	ErrInventoryCheckNoteDetailEmpty = common.NewCustomError(
-		errors.New("exist duplicate book"),
-		"Danh sách nguyên vật lệu kiểm kho đang trống",
-		"ErrInventoryCheckNoteExistDuplicateBook",
+		errors.New("exist duplicate ingrdient"),
+		"Danh nguyên vật liệu nguyên vật lệu kiểm kho đang trống",
+		"ErrInventoryCheckNoteExistDuplicateIngredient",
 	)
-	ErrInventoryCheckNoteExistDuplicateBook = common.NewCustomError(
-		errors.New("exist duplicate book"),
-		"Trong phiếu nhập đang có 2 sách giống nhau",
-		"ErrInventoryCheckNoteExistDuplicateBook",
+	ErrInventoryCheckNoteExistDuplicateIngredient = common.NewCustomError(
+		errors.New("exist duplicate ingredient"),
+		"Trong phiếu nhập đang có 2 nguyên vật liệu giống nhau",
+		"ErrInventoryCheckNoteExistDuplicateIngredient",
 	)
-	ErrInventoryCheckNoteModifyQuantityIsInvalid = common.NewCustomError(
-		errors.New("the qty after modification is invalid"),
-		"Số lượng sau khi điều chỉnh không hợp lệ",
-		"ErrInventoryCheckNoteModifyQuantityIsInvalid",
+	ErrInventoryCheckNoteModifyAmountIsInvalid = common.NewCustomError(
+		errors.New("the amount after modification is invalid"),
+		"Lượng sau khi điều chỉnh không hợp lệ",
+		"ErrInventoryCheckNoteModifyAmountIsInvalid",
 	)
 	ErrInventoryCheckNoteCreateNoPermission = common.ErrNoPermission(
 		errors.New("Bạn không có quyền tạo phiếu kiểm kho mới"),

@@ -10,6 +10,7 @@ func SetupRoutes(router *gin.RouterGroup, appCtx appctx.AppContext) {
 	ingredients := router.Group("/ingredients", middleware.RequireAuth(appCtx))
 	{
 		ingredients.GET("", ListIngredient(appCtx))
+		ingredients.GET("/all", GetAllIngredient(appCtx))
 		ingredients.POST("", CreateIngredient(appCtx))
 	}
 }

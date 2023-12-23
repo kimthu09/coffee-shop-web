@@ -20,7 +20,7 @@ func (*Supplier) TableName() string {
 var (
 	ErrSupplierIdInvalid = common.NewCustomError(
 		errors.New("id of supplier is invalid"),
-		"Id của nhà cung cấp không hợp lệ",
+		"Mã của nhà cung cấp không hợp lệ",
 		"ErrSupplierIdInvalid",
 	)
 	ErrSupplierNameEmpty = common.NewCustomError(
@@ -30,7 +30,7 @@ var (
 	)
 	ErrSupplierPhoneInvalid = common.NewCustomError(
 		errors.New("phone of supplier is invalid"),
-		"Số điện thoại của nhà cung cấp không hợp lệ",
+		"Số điện thọai của nhà cung cấp không hợp lệ",
 		"ErrSupplierPhoneInvalid",
 	)
 	ErrSupplierEmailInvalid = common.NewCustomError(
@@ -48,30 +48,30 @@ var (
 		"Mã phiếu chi không hợp lệ",
 		"ErrSupplierDebtIdInvalid",
 	)
-	ErrDebtPayNotExist = common.NewCustomError(
+	ErrSupplierDebtPayNotExist = common.NewCustomError(
 		errors.New("debt pay is not exist"),
-		"Số tiền trả nợ cho nhà cung cấp đang trống",
-		"ErrDebtPayNotExist",
+		"Số tiền chi đang trống",
+		"ErrSupplierDebtPayNotExist",
 	)
-	ErrDebtPayIsInvalid = common.NewCustomError(
+	ErrSupplierDebtPayIsInvalid = common.NewCustomError(
 		errors.New("debt pay is invalid"),
-		"Số tiền trả nợ cho nhà cung cấp không hợp lệ",
-		"ErrDebtPayIsInvalid",
+		"Số tiền chi không hợp lệ",
+		"ErrSupplierDebtPayIsInvalid",
 	)
 	ErrSupplierIdDuplicate = common.ErrDuplicateKey(
-		errors.New("Đã tồn tại nhà cung cấp trong hệ thống"),
+		errors.New("Nhà cung cấp đã tồn tại"),
 	)
 	ErrSupplierPhoneDuplicate = common.ErrDuplicateKey(
-		errors.New("Đã tồn tại nhà cung cấp có số điện thoại này trong hệ thống"),
+		errors.New("Số điện thoại nhà cung cấp đã tồn tại"),
 	)
 	ErrSupplierCreateNoPermission = common.ErrNoPermission(
 		errors.New("Bạn không có quyền tạo nhà cung cấp mới"),
 	)
 	ErrSupplierPayNoPermission = common.ErrNoPermission(
-		errors.New("Bạn không có quyền trả nợ nhà cung cấp"),
+		errors.New("Bạn không có quyền tạo phiếu chi mới"),
 	)
 	ErrSupplierUpdateInfoNoPermission = common.ErrNoPermission(
-		errors.New("Bạn không có quyền thay đổi thông tin nhà cung cấp"),
+		errors.New("Bạn không có quyền chỉnh sửa thông tin nhà cung cấp"),
 	)
 	ErrSupplierViewNoPermission = common.ErrNoPermission(
 		errors.New("Bạn không có quyền xem nhà cung cấp"),

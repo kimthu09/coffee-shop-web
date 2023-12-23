@@ -7,8 +7,8 @@ import (
 )
 
 func (s *sqlStore) GetAllIngredient(
-	ctx context.Context) ([]ingredientmodel.SimpleIngredient, error) {
-	var result []ingredientmodel.SimpleIngredient
+	ctx context.Context) ([]ingredientmodel.Ingredient, error) {
+	var result []ingredientmodel.Ingredient
 	db := s.db
 
 	db = db.Table(common.TableIngredient)

@@ -24,33 +24,33 @@ func (*ExportNote) TableName() string {
 var (
 	ErrExportNoteIdInvalid = common.NewCustomError(
 		errors.New("id of export note is invalid"),
-		"id of export note is invalid",
+		"Mã của phiếu hủy không hợp lệ",
 		"ErrExportNoteIdInvalid",
 	)
 	ErrExportNoteReasonEmpty = common.NewCustomError(
 		errors.New("export reason is empty"),
-		"export reason is empty",
+		"Lý do hủy không hợp lệ",
 		"ErrExportNoteReasonEmpty",
 	)
 	ErrExportNoteDetailsEmpty = common.NewCustomError(
 		errors.New("list export note details are empty"),
-		"list export note details are empty",
+		"Danh sách các nguyên vật liệu muốn hủy đang trống",
 		"ErrExportNoteDetailsEmpty",
 	)
 	ErrExportNoteExistDuplicateIngredient = common.NewCustomError(
 		errors.New("exist duplicate ingredient"),
-		"exist duplicate ingredient",
+		"Tồn tại 2 nguyên vật liệu trùng nhau",
 		"ErrExportNoteExistDuplicateIngredient",
 	)
 	ErrExportNoteAmountExportIsOverTheStock = common.NewCustomError(
 		errors.New("amount export is over stock"),
-		"amount export is over stock",
+		"Lượng muốn xuất vượt quá lượng trong kho",
 		"ErrExportNoteAmountExportIsOverTheStock",
 	)
 	ErrExportNoteCreateNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to create export note"),
+		errors.New("Bạn không có quyền tạo phiếu xuất"),
 	)
 	ErrExportNoteViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view export note"),
+		errors.New("Bạn không có quyền xem phiếu xuất"),
 	)
 )

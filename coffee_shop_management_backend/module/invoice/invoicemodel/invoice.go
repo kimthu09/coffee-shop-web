@@ -28,28 +28,28 @@ func (*Invoice) TableName() string {
 var (
 	ErrInvoiceCustomerIdInvalid = common.NewCustomError(
 		errors.New("id of customer is invalid"),
-		"id of customer is invalid",
+		"Khách hàng không hợp lệ",
 		"ErrInvoiceCustomerIdInvalid",
 	)
 	ErrInvoiceNotHaveCustomerToUsePoint = common.NewCustomError(
 		errors.New("customer is required for this invoice"),
-		"customer is required for this invoice",
+		"Khách hàng bắt buộc phải có cho hóa đơn này",
 		"ErrInvoiceNotHaveCustomerToUsePoint",
 	)
 	ErrInvoiceDetailsEmpty = common.NewCustomError(
-		errors.New("list import note details are empty"),
-		"list import note details are empty",
+		errors.New("list invoice details are empty"),
+		"Danh sách sản phẩm cần thanh toán đang trống",
 		"ErrInvoiceDetailsEmpty",
 	)
 	ErrInvoiceIngredientIsNotEnough = common.NewCustomError(
 		errors.New("exist ingredient in the stock is not enough for the invoice"),
-		"exist ingredient in the stock is not enough for the invoice",
+		"Tồn tại 1 nguyên vật liệu có số lượng trong kho đủ để bán",
 		"ErrInvoiceIngredientIsNotEnough",
 	)
 	ErrInvoiceCreateNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to create invoice"),
+		errors.New("Bạn không có quyền tạo hóa đơn"),
 	)
 	ErrInvoiceViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view invoice"),
+		errors.New("Bạn không có quyền xem hóa đơn"),
 	)
 )

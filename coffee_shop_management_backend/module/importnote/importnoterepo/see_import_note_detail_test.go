@@ -2,6 +2,7 @@ package importnoterepo
 
 import (
 	"coffee_shop_management_backend/module/importnote/importnotemodel"
+	"coffee_shop_management_backend/module/importnotedetail/importnotedetailmodel"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 	"errors"
@@ -25,12 +26,28 @@ func (m *mockFindImportNoteStore) FindImportNote(
 	return args.Get(0).(*importnotemodel.ImportNote), args.Error(1)
 }
 
+type mockSeeDetailImportNoteStore struct {
+	mock.Mock
+}
+
+func (m *mockSeeDetailImportNoteStore) ListImportNoteDetail(
+	ctx context.Context,
+	importNoteId string) ([]importnotedetailmodel.ImportNoteDetail, error) {
+	args := m.Called(ctx, importNoteId)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).([]importnotedetailmodel.ImportNoteDetail), args.Error(1)
+}
+
 func TestNewSeeImportNoteDetailRepo(t *testing.T) {
 	type args struct {
-		importNoteStore FindImportNoteStore
+		importNoteStore       FindImportNoteStore
+		importNoteDetailStore SeeDetailImportNoteStore
 	}
 
 	importNoteStore := new(mockFindImportNoteStore)
+	importNoteDetailStore := new(mockSeeDetailImportNoteStore)
 
 	tests := []struct {
 		name string
@@ -40,16 +57,21 @@ func TestNewSeeImportNoteDetailRepo(t *testing.T) {
 		{
 			name: "Create object has type NewSeeImportNoteDetailRepo",
 			args: args{
-				importNoteStore: importNoteStore,
+				importNoteStore:       importNoteStore,
+				importNoteDetailStore: importNoteDetailStore,
 			},
 			want: &seeImportNoteDetailRepo{
-				importNoteStore: importNoteStore,
+				importNoteStore:       importNoteStore,
+				importNoteDetailStore: importNoteDetailStore,
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewSeeImportNoteDetailRepo(tt.args.importNoteStore)
+			got := NewSeeImportNoteDetailRepo(
+				tt.args.importNoteStore,
+				tt.args.importNoteDetailStore,
+			)
 
 			assert.Equal(
 				t,
@@ -64,7 +86,8 @@ func TestNewSeeImportNoteDetailRepo(t *testing.T) {
 
 func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 	type fields struct {
-		importNoteStore FindImportNoteStore
+		importNoteStore       FindImportNoteStore
+		importNoteDetailStore SeeDetailImportNoteStore
 	}
 	type args struct {
 		ctx          context.Context
@@ -72,6 +95,7 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 	}
 
 	importNoteStore := new(mockFindImportNoteStore)
+	importNoteDetailStore := new(mockSeeDetailImportNoteStore)
 
 	importNoteId := mock.Anything
 	importNote := importnotemodel.ImportNote{
@@ -79,6 +103,12 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 		Supplier: suppliermodel.SimpleSupplier{
 			Id:   mock.Anything,
 			Name: mock.Anything,
+		},
+	}
+	importNoteDetail := []importnotedetailmodel.ImportNoteDetail{
+		{
+			ImportNoteId: importNoteId,
+			IngredientId: mock.Anything,
 		},
 	}
 
@@ -93,9 +123,10 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "See import note detail failed because can not get data from database",
+			name: "See import note detail failed because can not get import note from database",
 			fields: fields{
-				importNoteStore: importNoteStore,
+				importNoteStore:       importNoteStore,
+				importNoteDetailStore: importNoteDetailStore,
 			},
 			args: args{
 				ctx:          context.Background(),
@@ -106,7 +137,36 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 					On("FindImportNote",
 						context.Background(),
 						map[string]interface{}{"id": importNoteId},
-						[]string{"Supplier"}).
+						[]string{"Supplier", "CreatedByUser", "ClosedByUser"}).
+					Return(nil, mockErr).
+					Once()
+			},
+			want:    &importNote,
+			wantErr: true,
+		},
+		{
+			name: "See import note detail failed because can not get import note details from database",
+			fields: fields{
+				importNoteStore:       importNoteStore,
+				importNoteDetailStore: importNoteDetailStore,
+			},
+			args: args{
+				ctx:          context.Background(),
+				importNoteId: importNoteId,
+			},
+			mock: func() {
+				importNoteStore.
+					On("FindImportNote",
+						context.Background(),
+						map[string]interface{}{"id": importNoteId},
+						[]string{"Supplier", "CreatedByUser", "ClosedByUser"}).
+					Return(&importNote, nil).
+					Once()
+
+				importNoteDetailStore.
+					On("ListImportNoteDetail",
+						context.Background(),
+						importNoteId).
 					Return(nil, mockErr).
 					Once()
 			},
@@ -116,7 +176,8 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 		{
 			name: "See import note detail successfully",
 			fields: fields{
-				importNoteStore: importNoteStore,
+				importNoteStore:       importNoteStore,
+				importNoteDetailStore: importNoteDetailStore,
 			},
 			args: args{
 				ctx:          context.Background(),
@@ -127,8 +188,15 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 					On("FindImportNote",
 						context.Background(),
 						map[string]interface{}{"id": importNoteId},
-						[]string{"Supplier"}).
+						[]string{"Supplier", "CreatedByUser", "ClosedByUser"}).
 					Return(&importNote, nil).
+					Once()
+
+				importNoteDetailStore.
+					On("ListImportNoteDetail",
+						context.Background(),
+						importNoteId).
+					Return(importNoteDetail, nil).
 					Once()
 			},
 			want:    &importNote,
@@ -138,7 +206,8 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			repo := &seeImportNoteDetailRepo{
-				importNoteStore: tt.fields.importNoteStore,
+				importNoteStore:       tt.fields.importNoteStore,
+				importNoteDetailStore: tt.fields.importNoteDetailStore,
 			}
 
 			tt.mock()

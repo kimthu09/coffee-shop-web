@@ -22,7 +22,7 @@ func (*InvoiceDetailCreate) TableName() string {
 
 func (data *InvoiceDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.FoodId) {
-		return ErrInvoiceDetailIngredientIdInvalid
+		return ErrInvoiceDetailFoodIdInvalid
 	}
 	if !common.ValidateNotNilId(&data.SizeId) {
 		return ErrInvoiceDetailSizeIdInvalid

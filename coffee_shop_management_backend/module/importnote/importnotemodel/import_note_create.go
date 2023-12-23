@@ -36,7 +36,7 @@ func (data *ImportNoteCreate) Validate() *common.AppError {
 		if importNoteDetail.IsReplacePrice {
 			mapIngredientUpdatePriceTimes[importNoteDetail.IngredientId]++
 			if mapIngredientUpdatePriceTimes[importNoteDetail.IngredientId] > 1 {
-				return ErrImportNoteHasSameIngredientBothUpdatePrice
+				return ErrImportNoteExistDuplicateIngredient
 			}
 		}
 	}

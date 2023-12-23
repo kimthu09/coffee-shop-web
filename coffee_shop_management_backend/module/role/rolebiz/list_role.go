@@ -10,7 +10,7 @@ import (
 type ListRoleRepo interface {
 	ListRole(
 		ctx context.Context,
-	) ([]rolemodel.Role, error)
+	) ([]rolemodel.SimpleRole, error)
 }
 
 type listRoleBiz struct {
@@ -25,7 +25,7 @@ func NewListRoleBiz(
 }
 
 func (biz *listRoleBiz) ListRole(
-	ctx context.Context) ([]rolemodel.Role, error) {
+	ctx context.Context) ([]rolemodel.SimpleRole, error) {
 	if biz.requester.GetRoleId() != common.RoleAdminId {
 		return nil, rolemodel.ErrRoleViewNoPermission
 	}

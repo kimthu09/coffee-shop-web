@@ -83,7 +83,7 @@ func (repo *createInventoryCheckNoteRepo) HandleIngredientAmount(
 		amountAfter += data.Details[i].Final
 
 		if data.Details[i].Final < 0 {
-			return inventorychecknotemodel.ErrInventoryCheckNoteModifyQuantityIsInvalid
+			return inventorychecknotemodel.ErrInventoryCheckNoteModifyAmountIsInvalid
 		}
 
 		ingredientUpdate := ingredientmodel.IngredientUpdateAmount{Amount: value.Difference}

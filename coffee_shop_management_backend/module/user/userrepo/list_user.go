@@ -34,7 +34,7 @@ func (repo *listUserRepo) ListUser(
 		ctx,
 		userSearch,
 		filter,
-		[]string{"id", "name", "email", "phone", "address"},
+		[]string{"id", "name", "email"},
 		paging,
 		"Role")
 

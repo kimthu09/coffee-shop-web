@@ -86,7 +86,7 @@ func Test_seeCustomerDetailBiz_SeeCustomerDetail(t *testing.T) {
 		Email:    mock.Anything,
 		Phone:    mock.Anything,
 		Point:    0,
-		Invoices: nil, // Fill with appropriate data
+		Invoices: nil,
 	}
 	mockErr := errors.New(mock.Anything)
 
