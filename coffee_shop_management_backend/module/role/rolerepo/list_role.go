@@ -8,7 +8,7 @@ import (
 type ListRoleStore interface {
 	ListRole(
 		ctx context.Context,
-	) ([]rolemodel.Role, error)
+	) ([]rolemodel.SimpleRole, error)
 }
 
 type listRoleRepo struct {
@@ -21,7 +21,7 @@ func NewListRoleRepo(
 }
 
 func (biz *listRoleRepo) ListRole(
-	ctx context.Context) ([]rolemodel.Role, error) {
+	ctx context.Context) ([]rolemodel.SimpleRole, error) {
 	result, err := biz.store.ListRole(ctx)
 	if err != nil {
 		return nil, err

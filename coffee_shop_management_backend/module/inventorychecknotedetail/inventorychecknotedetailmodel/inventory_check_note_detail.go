@@ -12,7 +12,7 @@ type InventoryCheckNoteDetail struct {
 	Ingredient           ingredientmodel.SimpleIngredient `json:"ingredient"`
 	Initial              int                              `json:"initial" gorm:"column:initial;"`
 	Difference           int                              `json:"difference" gorm:"column:difference;"`
-	Final                int                              `json:"final" gorm:"column:final;"`
+	Final                int                              `json:"difference" gorm:"column:final;"`
 }
 
 func (*InventoryCheckNoteDetail) TableName() string {
@@ -20,10 +20,10 @@ func (*InventoryCheckNoteDetail) TableName() string {
 }
 
 var (
-	ErrInventoryCheckDetailBookIdInvalid = common.NewCustomError(
-		errors.New("id of book is invalid"),
-		"Mã của sách không hợp lệ",
-		"ErrInventoryCheckDetailBookIdInvalid",
+	ErrInventoryCheckDetailIngredientIdInvalid = common.NewCustomError(
+		errors.New("id of ingredient is invalid"),
+		"Mã của nguyên vật liệu không hợp lệ",
+		"ErrInventoryCheckDetailIngredientIdInvalid",
 	)
 	ErrInventoryCheckDifferenceIsInvalid = common.NewCustomError(
 		errors.New("difference is invalid"),

@@ -19,7 +19,7 @@ func NewGetAllSupplierBiz(
 	return &getAllSupplierBiz{repo: repo}
 }
 
-func (biz *getAllSupplierBiz) GetAllUser(
+func (biz *getAllSupplierBiz) GetAllSupplier(
 	ctx context.Context) ([]suppliermodel.SimpleSupplier, error) {
 	result, err := biz.repo.GetAllSupplier(ctx)
 	if err != nil {

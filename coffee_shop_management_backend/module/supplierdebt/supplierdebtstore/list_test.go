@@ -95,15 +95,15 @@ func Test_sqlStore_ListSupplierDebtBySupplier(t *testing.T) {
 							[]string{"id", "supplierId", "amount",
 								"amountLeft", "type", "createdBy", "createdAt"},
 						).AddRow(
-							"1", supplierId, 100.50,
-							200.0, pay, "admin", nil))
+							"1", supplierId, 100,
+							200, pay, "admin", nil))
 			},
 			want: []supplierdebtmodel.SupplierDebt{
 				{
 					Id:         "1",
 					SupplierId: supplierId,
-					Amount:     100.50,
-					AmountLeft: 200.0,
+					Amount:     100,
+					AmountLeft: 200,
 					DebtType:   &pay,
 					CreatedBy:  "admin"},
 			},
@@ -133,8 +133,8 @@ func Test_sqlStore_ListSupplierDebtBySupplier(t *testing.T) {
 				{
 					Id:         "1",
 					SupplierId: supplierId,
-					Amount:     100.50,
-					AmountLeft: 200.0,
+					Amount:     100,
+					AmountLeft: 200,
 					DebtType:   &pay,
 					CreatedBy:  "admin"},
 			},
@@ -171,8 +171,8 @@ func Test_sqlStore_ListSupplierDebtBySupplier(t *testing.T) {
 				{
 					Id:         "1",
 					SupplierId: supplierId,
-					Amount:     100.50,
-					AmountLeft: 200.0,
+					Amount:     100,
+					AmountLeft: 200,
 					DebtType:   &pay,
 					CreatedBy:  "admin"},
 			},

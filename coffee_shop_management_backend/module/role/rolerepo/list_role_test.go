@@ -14,12 +14,12 @@ type mockListRoleStore struct {
 }
 
 func (m *mockListRoleStore) ListRole(
-	ctx context.Context) ([]rolemodel.Role, error) {
+	ctx context.Context) ([]rolemodel.SimpleRole, error) {
 	args := m.Called(ctx)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]rolemodel.Role), args.Error(1)
+	return args.Get(0).([]rolemodel.SimpleRole), args.Error(1)
 }
 
 func TestNewListRoleRepo(t *testing.T) {
@@ -69,7 +69,7 @@ func Test_listRoleRepo_ListRole(t *testing.T) {
 
 	mockRole := new(mockListRoleStore)
 
-	roles := []rolemodel.Role{
+	roles := []rolemodel.SimpleRole{
 		{
 			Id:   mock.Anything,
 			Name: mock.Anything,
@@ -82,7 +82,7 @@ func Test_listRoleRepo_ListRole(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
-		want    []rolemodel.Role
+		want    []rolemodel.SimpleRole
 		wantErr bool
 	}{
 		{

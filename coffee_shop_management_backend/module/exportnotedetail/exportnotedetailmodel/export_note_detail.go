@@ -20,15 +20,12 @@ func (*ExportNoteDetail) TableName() string {
 var (
 	ErrExportDetailIngredientIdInvalid = common.NewCustomError(
 		errors.New("id of ingredient is invalid"),
-		"id of ingredient is invalid",
+		"Mã của nguyên vật liệu không hợp lệ",
 		"ErrExportDetailIngredientIdInvalid",
 	)
 	ErrExportDetailAmountExportIsNotPositiveNumber = common.NewCustomError(
 		errors.New("amount export is not positive number"),
-		"amount export is not positive number",
+		"Lượng muốn hủy đang không phải số dương",
 		"ErrExportDetailAmountExportIsNotPositiveNumber",
-	)
-	ErrExportDetailViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view export note"),
 	)
 )

@@ -22,28 +22,28 @@ func (*ShopGeneral) TableName() string {
 var (
 	ErrEmailInvalid = common.NewCustomError(
 		errors.New("email of shop is invalid"),
-		"email of shop is invalid",
+		"Email cửa hàng không hợp lệ",
 		"ErrEmailInvalid",
 	)
 	ErrPhoneInvalid = common.NewCustomError(
 		errors.New("phone of shop is invalid"),
-		"phone of shop is invalid",
+		"Số điện thoại cửa hàng không hợp lệ",
 		"ErrPhoneInvalid",
 	)
 	ErrAccumulatePointPercentInvalid = common.NewCustomError(
 		errors.New("accumulate point percent of shop is invalid"),
-		"accumulate point percent of shop is invalid",
+		"Tỷ lệ tích điểm không hợp lệ",
 		"ErrAccumulatePointPercentInvalid",
 	)
 	ErrUsePointPercentInvalid = common.NewCustomError(
 		errors.New("use point percent of shop is invalid"),
-		"use point percent of shop is invalid",
+		"Tỷ lệ dùng điểm không hợp lệ",
 		"ErrUsePointPercentInvalid",
 	)
 	ErrGeneralShopViewNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to view shop general"),
+		errors.New("Bạn có quyền xem thông tin cửa hàng"),
 	)
 	ErrGeneralShopUpdateNoPermission = common.ErrNoPermission(
-		errors.New("you have no permission to update shop general"),
+		errors.New("Bạn không có quyền chỉnh sửa thông tin cửa hàng"),
 	)
 )

@@ -31,7 +31,7 @@ func (data *InventoryCheckNoteCreate) Validate() *common.AppError {
 		}
 		mapExits[detail.IngredientId]++
 		if mapExits[detail.IngredientId] >= 2 {
-			return ErrInventoryCheckNoteExistDuplicateBook
+			return ErrInventoryCheckNoteExistDuplicateIngredient
 		}
 	}
 	return nil

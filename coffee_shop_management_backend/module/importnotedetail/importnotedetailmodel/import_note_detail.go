@@ -22,22 +22,17 @@ func (*ImportNoteDetail) TableName() string {
 var (
 	ErrImportDetailIngredientIdInvalid = common.NewCustomError(
 		errors.New("id of ingredient is invalid"),
-		"id of ingredient is invalid",
+		"Mã của nguyên vật liệu không hợp lệ",
 		"ErrImportDetailIngredientIdInvalid",
 	)
 	ErrImportDetailPriceIsNegativeNumber = common.NewCustomError(
 		errors.New("price of ingredient is negative number"),
-		"price of ingredient is negative number",
+		"Giá của nguyên vật liệu đang là số âm",
 		"ErrImportDetailPriceIsNegativeNumber",
-	)
-	ErrImportDetailExpiryDateInvalid = common.NewCustomError(
-		errors.New("expiry date is invalid"),
-		"expiry date is invalid",
-		"ErrImportDetailExpiryDateInvalid",
 	)
 	ErrImportDetailAmountImportIsNotPositiveNumber = common.NewCustomError(
 		errors.New("amount import is not positive number"),
-		"amount import is not positive number",
+		"Lượng muốn nhập đang không phải số dương",
 		"ErrImportDetailAmountImportIsNotPositiveNumber",
 	)
 )

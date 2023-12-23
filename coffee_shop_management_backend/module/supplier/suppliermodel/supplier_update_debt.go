@@ -17,10 +17,10 @@ func (data *SupplierUpdateDebt) Validate() *common.AppError {
 		return ErrSupplierDebtIdInvalid
 	}
 	if data.Amount == nil {
-		return ErrDebtPayNotExist
+		return ErrSupplierDebtPayNotExist
 	}
 	if *data.Amount == 0 {
-		return ErrDebtPayIsInvalid
+		return ErrSupplierDebtPayIsInvalid
 	}
 	return nil
 }

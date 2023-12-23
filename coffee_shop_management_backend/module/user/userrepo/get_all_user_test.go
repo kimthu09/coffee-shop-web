@@ -76,7 +76,7 @@ func Test_getAllUserRepo_GetAllUser(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "GetAllUser failed",
+			name: "Get all user failed",
 			fields: fields{
 				store: mockUserStore,
 			},
@@ -97,7 +97,7 @@ func Test_getAllUserRepo_GetAllUser(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "GetAllUser successfully",
+			name: "Get all user successfully",
 			fields: fields{
 				store: mockUserStore,
 			},
@@ -128,10 +128,10 @@ func Test_getAllUserRepo_GetAllUser(t *testing.T) {
 
 			got, err := repo.GetAllUser(tt.args.ctx)
 			if tt.wantErr {
-				assert.NotNil(t, err, "GetAllUser() error = %v, wantErr %v", err, tt.wantErr)
+				assert.NotNil(t, err, "GetAllSupplier() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
-				assert.Nil(t, err, "GetAllUser() error = %v, wantErr %v", err, tt.wantErr)
-				assert.Equal(t, tt.want, got, "GetAllUser() got = %v, want %v", got, tt.want)
+				assert.Nil(t, err, "GetAllSupplier() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, tt.want, got, "GetAllSupplier() got = %v, want %v", got, tt.want)
 
 			}
 		})

@@ -73,7 +73,7 @@ func ErrInternal(err error) *AppError {
 func ErrNoPermission(err error) *AppError {
 	return NewCustomError(
 		err,
-		fmt.Sprintf("you have no permission"),
+		err.Error(),
 		fmt.Sprintf("ERR_NO_PERMISSION"),
 	)
 }
@@ -81,7 +81,7 @@ func ErrNoPermission(err error) *AppError {
 func ErrIdIsTooLong() *AppError {
 	return NewCustomError(
 		errIdIsTooLong,
-		fmt.Sprintf("maximum length of key is 9"),
+		errIdIsTooLong.Error(),
 		fmt.Sprintf("ERR_ID_IS_TOO_LONG"),
 	)
 }
@@ -89,7 +89,7 @@ func ErrIdIsTooLong() *AppError {
 func ErrDuplicateKey(err error) *AppError {
 	return NewCustomError(
 		err,
-		fmt.Sprintf("the key has been existed"),
+		err.Error(),
 		fmt.Sprintf("ERR_DUPLICATE_KEY"),
 	)
 }
@@ -97,7 +97,7 @@ func ErrDuplicateKey(err error) *AppError {
 func ErrRecordNotFound() *AppError {
 	return NewCustomError(
 		errRecordNotFound,
-		fmt.Sprintf(errRecordNotFound.Error()),
+		errRecordNotFound.Error(),
 		fmt.Sprintf("ERR_RECORD_NOT_FOUND"),
 	)
 }

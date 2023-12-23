@@ -7,6 +7,7 @@ import (
 	"coffee_shop_management_backend/module/importnote/importnotebiz"
 	"coffee_shop_management_backend/module/importnote/importnoterepo"
 	"coffee_shop_management_backend/module/importnote/importnotestore"
+	"coffee_shop_management_backend/module/importnotedetail/importnotedetailstore"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -16,8 +17,9 @@ func SeeImportNoteDetail(appCtx appctx.AppContext) gin.HandlerFunc {
 		id := c.Param("id")
 
 		importNoteStore := importnotestore.NewSQLStore(appCtx.GetMainDBConnection())
+		importNoteDetailStore := importnotedetailstore.NewSQLStore(appCtx.GetMainDBConnection())
 
-		repo := importnoterepo.NewSeeImportNoteDetailRepo(importNoteStore)
+		repo := importnoterepo.NewSeeImportNoteDetailRepo(importNoteStore, importNoteDetailStore)
 		requester := c.MustGet(common.CurrentUserStr).(middleware.Requester)
 
 		biz := importnotebiz.NewSeeImportNoteDetailBiz(

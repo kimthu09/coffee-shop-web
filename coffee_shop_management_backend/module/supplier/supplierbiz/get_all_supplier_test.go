@@ -127,27 +127,27 @@ func Test_getAllSupplierBiz_GetAllUser(t *testing.T) {
 
 			tt.mock()
 
-			got, err := biz.GetAllUser(tt.args.ctx)
+			got, err := biz.GetAllSupplier(tt.args.ctx)
 
 			if tt.wantErr {
 				assert.NotNil(
 					t,
 					err,
-					"GetAllUser() error = %v, wantErr %v",
+					"GetAllSupplier() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 			} else {
 				assert.Nil(
 					t,
 					err,
-					"GetAllUser() error = %v, wantErr %v",
+					"GetAllSupplier() error = %v, wantErr %v",
 					err,
 					tt.wantErr)
 				assert.Equal(
 					t,
 					tt.want,
 					got,
-					"GetAllUser() = %v, want %v",
+					"GetAllSupplier() = %v, want %v",
 					got,
 					tt.want)
 			}

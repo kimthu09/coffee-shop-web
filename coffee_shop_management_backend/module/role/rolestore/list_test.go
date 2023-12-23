@@ -2,7 +2,6 @@ package rolestore
 
 import (
 	"coffee_shop_management_backend/module/role/rolemodel"
-	"coffee_shop_management_backend/module/rolefeature/rolefeaturemodel"
 	"context"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -31,46 +30,25 @@ func Test_sqlStore_ListRole(t *testing.T) {
 		db *gorm.DB
 	}
 
-	mockData := []rolemodel.Role{
+	mockData := []rolemodel.SimpleRole{
 		{
 			Id:   "Role001",
 			Name: "Admin",
-			RoleFeatures: []rolefeaturemodel.RoleFeature{
-				{
-					RoleId:    "Role001",
-					FeatureId: "Feature001",
-				},
-				{
-					RoleId:    "Role001",
-					FeatureId: "Feature002",
-				},
-			},
 		},
 		{
 			Id:   "Role002",
 			Name: "User",
-			RoleFeatures: []rolefeaturemodel.RoleFeature{
-				{
-					RoleId:    "Role002",
-					FeatureId: "Feature003",
-				},
-				{
-					RoleId:    "Role002",
-					FeatureId: "Feature004",
-				},
-			},
 		},
 	}
 
 	expectedRoleQuery := "SELECT * FROM `Role`"
-	expectedRoleFeatureQuery := "SELECT * FROM `RoleFeature` WHERE `RoleFeature`.`roleId` IN (?,?)"
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
 		name    string
 		fields  fields
 		mock    func()
-		want    []rolemodel.Role
+		want    []rolemodel.SimpleRole
 		wantErr bool
 	}{
 		{
@@ -85,31 +63,6 @@ func Test_sqlStore_ListRole(t *testing.T) {
 
 				sqlDBMock.ExpectQuery(expectedRoleQuery).
 					WillReturnRows(rows)
-
-				roleFeaturesRows := sqlmock.NewRows([]string{"roleId", "featureId"}).
-					AddRow(
-						mockData[0].RoleFeatures[0].RoleId,
-						mockData[0].RoleFeatures[0].FeatureId,
-					).
-					AddRow(
-						mockData[0].RoleFeatures[1].RoleId,
-						mockData[0].RoleFeatures[1].FeatureId,
-					).
-					AddRow(
-						mockData[1].RoleFeatures[0].RoleId,
-						mockData[1].RoleFeatures[0].FeatureId,
-					).
-					AddRow(
-						mockData[1].RoleFeatures[1].RoleId,
-						mockData[1].RoleFeatures[1].FeatureId,
-					)
-
-				sqlDBMock.ExpectQuery(expectedRoleFeatureQuery).
-					WithArgs(
-						mockData[0].RoleFeatures[1].RoleId,
-						mockData[1].RoleFeatures[1].RoleId,
-					).
-					WillReturnRows(roleFeaturesRows)
 			},
 			want:    mockData,
 			wantErr: false,

@@ -7,9 +7,9 @@ import (
 )
 
 func SetupRoutes(router *gin.RouterGroup, appCtx appctx.AppContext) {
-	shopGenerals := router.Group("/shopGenerals", middleware.RequireAuth(appCtx))
+	shopGenerals := router.Group("/shop", middleware.RequireAuth(appCtx))
 	{
 		shopGenerals.GET("", SeeShopGeneral(appCtx))
-		shopGenerals.POST("", UpdateShopGeneral(appCtx))
+		shopGenerals.PATCH("", UpdateShopGeneral(appCtx))
 	}
 }

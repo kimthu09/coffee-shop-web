@@ -24,12 +24,12 @@ func (*RecipeDetails) TableName() string {
 var (
 	ErrRecipeIngredientDuplicate = common.NewCustomError(
 		errors.New("ingredient for recipe is duplicate"),
-		"ingredient for recipe is duplicate",
+		"Tồn tại 2 nguyên vật liệu trùng nhau trong công thức",
 		"ErrRecipeIngredientDuplicate",
 	)
 	ErrRecipeDetailsEmpty = common.NewCustomError(
 		errors.New("ingredient for recipe is empty"),
-		"ingredient for recipe is empty",
+		"Công thức đang không có nguyên vật liệu",
 		"ErrRecipeDetailsEmpty",
 	)
 )

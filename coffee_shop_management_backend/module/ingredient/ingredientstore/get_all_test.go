@@ -32,16 +32,20 @@ func Test_sqlStore_GetAllIngredient(t *testing.T) {
 	}
 
 	measureType := enum.Volume
-	mockData := []ingredientmodel.SimpleIngredient{
+	mockData := []ingredientmodel.Ingredient{
 		{
 			Id:          "Ingredient001",
 			Name:        "IngredientName001",
+			Amount:      1000,
 			MeasureType: &measureType,
+			Price:       2000,
 		},
 		{
 			Id:          "Ingredient002",
 			Name:        "IngredientName002",
+			Amount:      3000,
 			MeasureType: &measureType,
+			Price:       100.5,
 		},
 	}
 
@@ -52,7 +56,7 @@ func Test_sqlStore_GetAllIngredient(t *testing.T) {
 		name    string
 		fields  fields
 		mock    func()
-		want    []ingredientmodel.SimpleIngredient
+		want    []ingredientmodel.Ingredient
 		wantErr bool
 	}{
 		{
@@ -61,10 +65,10 @@ func Test_sqlStore_GetAllIngredient(t *testing.T) {
 				db: gormDB,
 			},
 			mock: func() {
-				rows := sqlmock.NewRows([]string{"id", "name", "measureType"})
+				rows := sqlmock.NewRows([]string{"id", "name", "amount", "measureType", "price"})
 
 				for _, data := range mockData {
-					rows.AddRow(data.Id, data.Name, data.MeasureType)
+					rows.AddRow(data.Id, data.Name, data.Amount, data.MeasureType, data.Price)
 				}
 
 				sqlDBMock.ExpectQuery(expectedQuery).WillReturnRows(rows)

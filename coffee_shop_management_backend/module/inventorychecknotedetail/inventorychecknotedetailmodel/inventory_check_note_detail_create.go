@@ -16,7 +16,7 @@ func (*InventoryCheckNoteDetailCreate) TableName() string {
 
 func (data *InventoryCheckNoteDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
-		return ErrInventoryCheckDetailBookIdInvalid
+		return ErrInventoryCheckDetailIngredientIdInvalid
 	}
 	if data.Difference == 0 {
 		return ErrInventoryCheckDifferenceIsInvalid

@@ -105,7 +105,7 @@ func Test_listUserRepo_ListUser(t *testing.T) {
 						context.Background(),
 						"User001",
 						&filter,
-						[]string{"id", "name", "email", "phone", "address"},
+						[]string{"id", "name", "email"},
 						&common.Paging{},
 						moreKeys).
 					Return(nil, mockErr).
@@ -132,7 +132,7 @@ func Test_listUserRepo_ListUser(t *testing.T) {
 						context.Background(),
 						"User001",
 						&filter,
-						[]string{"id", "name", "email", "phone", "address"},
+						[]string{"id", "name", "email"},
 						&common.Paging{},
 						moreKeys).
 					Return(userData, nil).

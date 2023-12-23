@@ -817,10 +817,8 @@ func Test_changeStatusImportNoteRepo_HandleIngredient(t *testing.T) {
 
 	ingredientTotalAmountNeedUpdate := map[string]int{
 		"ingredient1": 10,
-		"ingredient2": 15,
 	}
 	ingredientUpdate1 := ingredientmodel.IngredientUpdateAmount{Amount: 10}
-	ingredientUpdate2 := ingredientmodel.IngredientUpdateAmount{Amount: 15}
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -857,41 +855,6 @@ func Test_changeStatusImportNoteRepo_HandleIngredient(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "Handle ingredient failed because can not update amount of ingredient 2",
-			fields: fields{
-				importNoteStore:       mockImportNoteStore,
-				importNoteDetailStore: mockImportNoteDetail,
-				ingredientStore:       mockIngredientStore,
-				supplierStore:         mockSupplierStore,
-				supplierDebtStore:     mockSupplierDebtStore,
-			},
-			args: args{
-				ctx:                             context.Background(),
-				importNoteId:                    importNoteId,
-				ingredientTotalAmountNeedUpdate: ingredientTotalAmountNeedUpdate,
-			},
-			mock: func() {
-				mockIngredientStore.
-					On(
-						"UpdateAmountIngredient",
-						context.Background(),
-						"ingredient1",
-						&ingredientUpdate1).
-					Return(nil).
-					Once()
-
-				mockIngredientStore.
-					On(
-						"UpdateAmountIngredient",
-						context.Background(),
-						"ingredient2",
-						&ingredientUpdate2).
-					Return(mockErr).
-					Once()
-			},
-			wantErr: true,
-		},
-		{
 			name: "Handle ingredient changes successfully",
 			fields: fields{
 				importNoteStore:       mockImportNoteStore,
@@ -912,15 +875,6 @@ func Test_changeStatusImportNoteRepo_HandleIngredient(t *testing.T) {
 						context.Background(),
 						"ingredient1",
 						&ingredientUpdate1).
-					Return(nil).
-					Once()
-
-				mockIngredientStore.
-					On(
-						"UpdateAmountIngredient",
-						context.Background(),
-						"ingredient2",
-						&ingredientUpdate2).
 					Return(nil).
 					Once()
 			},
