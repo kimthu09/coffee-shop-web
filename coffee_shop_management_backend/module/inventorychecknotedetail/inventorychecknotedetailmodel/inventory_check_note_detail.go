@@ -12,7 +12,7 @@ type InventoryCheckNoteDetail struct {
 	Ingredient           ingredientmodel.SimpleIngredient `json:"ingredient"`
 	Initial              int                              `json:"initial" gorm:"column:initial;"`
 	Difference           int                              `json:"difference" gorm:"column:difference;"`
-	Final                int                              `json:"final" gorm:"column:final;"`
+	Final                int                              `json:"difference" gorm:"column:final;"`
 }
 
 func (*InventoryCheckNoteDetail) TableName() string {

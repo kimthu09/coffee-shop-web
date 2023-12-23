@@ -9,8 +9,8 @@ import (
 type SupplierDebt struct {
 	Id         string         `json:"id" gorm:"column:id;"`
 	SupplierId string         `json:"supplierId" gorm:"column:supplierId;"`
-	Amount     float32        `json:"amount" gorm:"column:amount;"`
-	AmountLeft float32        `json:"amountLeft" gorm:"column:amountLeft;"`
+	Amount     int            `json:"amount" gorm:"column:amount;"`
+	AmountLeft int            `json:"amountLeft" gorm:"column:amountLeft;"`
 	DebtType   *enum.DebtType `json:"type" gorm:"column:type;"`
 	CreatedBy  string         `json:"createdBy" gorm:"column:createdBy;"`
 	CreatedAt  *time.Time     `json:"createdAt" gorm:"column:createdAt;"`

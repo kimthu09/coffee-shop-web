@@ -38,6 +38,9 @@ var (
 		"features of role is invalid",
 		"ErrRoleFeatureInvalid",
 	)
+	ErrRoleNameDuplicate = common.ErrDuplicateKey(
+		errors.New("name of role is duplicate"),
+	)
 	ErrRoleCreateNoPermission = common.ErrNoPermission(
 		errors.New("you have no permission to create role"),
 	)
