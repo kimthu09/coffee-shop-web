@@ -27,8 +27,9 @@ const OrderScreen = () => {
     control: control,
     name: "invoiceDetails",
   });
+
   return (
-    <div className="flex gap-4 md:pb-0 pb-16">
+    <div className="flex gap-4 md:pb-0 pb-16 ">
       <div className="2xl:basis-3/5 xl:basis-1/2 md:basis-2/5  flex-1 ">
         <ProductTab append={append} />
       </div>

@@ -26,10 +26,6 @@ export type Category = {
 export type MeasureUnit = {
   id: string;
   name: "g" | "kg" | "l" | "ml" | "đơn vị";
-  covertDetails?: {
-    measureUnit: MeasureUnit;
-    times: number;
-  };
 };
 
 export type IngredientForChoose = {
@@ -41,9 +37,9 @@ export type IngredientForChoose = {
 export type Ingredient = {
   id: string;
   name: string;
-  total: number;
-  unit: MeasureUnit;
+  amount: number;
   price: number;
+  measureType: string;
 };
 export type IngredientDetail = {
   idIngre: string;
@@ -54,7 +50,7 @@ export type IngredientDetail = {
 export type Staff = {
   id: string;
   name: string;
-  role: string;
+  email: string;
 };
 export type Role = {
   id: string;
@@ -66,20 +62,35 @@ export type RoleFunction = {
   name: string;
 };
 
-export enum StatusString {
-  Inprogress = "Đang xử lý",
-  Done = "Đã nhập",
-  Cancel = "Đã huỷ",
-}
 export type ImportNote = {
   id: string;
   supplierId: string;
   totalPrice: number;
-  status: StatusString;
-  createBy: string;
-  closeBy?: string;
-  createAt: Date;
-  closeAt?: Date;
+  status: StatusNote;
+  closedAt?: Date;
+  closedBy?: {
+    id: string;
+    name: string;
+  };
+  createdAt: Date;
+  createdBy: {
+    id: string;
+    name: string;
+  };
+  supplier: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+};
+export type ImportNoteDetail = {
+  ingredient: {
+    id: string;
+    name: string;
+    measureType: string;
+  };
+  price: number;
+  amountImport: number;
 };
 export type ExportNote = {
   id: string;
@@ -87,7 +98,11 @@ export type ExportNote = {
   createAt: Date;
   reason: string;
 };
-
+export enum StatusNote {
+  Inprogress = "InProgress",
+  Done = "Done",
+  Cancel = "Cancel",
+}
 export type Customer = {
   id: string;
   name: string;
@@ -96,6 +111,13 @@ export type Customer = {
   point: number;
 };
 
+export type Supplier = {
+  id: string;
+  name: string;
+  email?: string;
+  phone: string;
+  debt: number;
+};
 export interface UnitListProps {
   unit: string;
   setUnit: (unit: string) => void;
@@ -104,9 +126,23 @@ export interface RoleListProps {
   role: string;
   setRole: (role: string) => void;
 }
-
+export type FilterValue = {
+  filters: {
+    type: string;
+    value: string;
+  }[];
+};
+export interface StaffListProps {
+  staff: string;
+  setStaff: (role: string) => void;
+}
 export interface CategoryListProps {
-  category: string;
-  setCategory: (category: string) => void;
+  checkedCategory: Array<string>;
+  onCheckChanged: (idCate: string) => void;
   canAdd?: boolean;
 }
+export type PagingProps = {
+  page: number;
+  limit: number;
+  total: number;
+};

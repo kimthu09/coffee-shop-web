@@ -263,10 +263,10 @@ export function ProductTable() {
                     <div className="flex flex-col border-y-[1px] p-6">
                       <p>Chọn 1 danh mục muốn chuyển tới</p>
                       <div className="mt-4 flex-1 ">
-                        <CategoryList
+                        {/* <CategoryList
                           category={category}
                           setCategory={setCategory}
-                        />
+                        /> */}
                       </div>
                     </div>
 

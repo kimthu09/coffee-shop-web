@@ -4,6 +4,7 @@ import "./globals.css";
 import Header from "@/components/header";
 import HeaderMobile from "@/components/header-mobile";
 import { SidebarProvider, SidebarNav } from "@/components/sidebar";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,10 +26,11 @@ export default function RootLayout({
         </SidebarProvider>
 
         <main className="flex flex-1">
-          <div className="flex w-full flex-col overflow-y-hidden">
+          <div className="flex flex-1 flex-col overflow-y-hidden">
             <Header />
             <HeaderMobile />
-            <div className="md:p-10 p-4 overflow-auto">{children}</div>
+            <div className="md:p-8 p-4 overflow-auto min-w-0 ">{children}</div>
+            <Toaster />
           </div>
         </main>
       </body>

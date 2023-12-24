@@ -11,16 +11,20 @@ import {
   CommandInput,
   CommandItem,
 } from "./ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from "./ui/button";
 import { AiFillPlusCircle } from "react-icons/ai";
-import { cn } from "@/lib/utils";
 import { CategoryListProps } from "@/types";
 import { categories } from "@/constants";
+import { Checkbox } from "./ui/checkbox";
 
-const CategoryList = ({ category, setCategory, canAdd }: CategoryListProps) => {
+const CategoryList = ({
+  checkedCategory,
+  onCheckChanged,
+  canAdd,
+}: CategoryListProps) => {
   const [openCategory, setOpenCategory] = useState(false);
-  const [newCategory, setNewCategory] = useState("");
+  // const [newCategory, setNewCategory] = useState("");
   return (
     <DropdownMenu open={openCategory} onOpenChange={setOpenCategory}>
       <DropdownMenuTrigger asChild>
@@ -31,9 +35,7 @@ const CategoryList = ({ category, setCategory, canAdd }: CategoryListProps) => {
           aria-expanded={openCategory}
           className="justify-between w-full"
         >
-          {category
-            ? categories.find((item) => item.name === category)?.name
-            : "Chọn danh mục"}
+          Chọn danh mục
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
@@ -41,7 +43,7 @@ const CategoryList = ({ category, setCategory, canAdd }: CategoryListProps) => {
         <Command>
           <CommandInput
             placeholder="Tìm điều kiện lọc"
-            onValueChange={(str) => setNewCategory(str)}
+            // onValueChange={(str) => setNewCategory(str)}
           />
           <CommandEmpty className="py-2">
             {canAdd ? (
@@ -50,7 +52,7 @@ const CategoryList = ({ category, setCategory, canAdd }: CategoryListProps) => {
                   <div className="text-left flex-1 text-primary flex items-center gap-2">
                     <AiFillPlusCircle size={20} />
                     Thêm
-                    {" " + newCategory}
+                    {/* {" " + newCategory} */}
                   </div>
                 </Button>
               </div>
@@ -64,34 +66,18 @@ const CategoryList = ({ category, setCategory, canAdd }: CategoryListProps) => {
                 value={item.name}
                 key={item.id}
                 onSelect={() => {
-                  setCategory(item.name);
-                  setOpenCategory(false);
+                  onCheckChanged(item.id);
+                  // setOpenCategory(false);
                 }}
               >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    item.name === category ? "opacity-100" : "opacity-0"
-                  )}
-                />
+                <Checkbox
+                  className="mr-2"
+                  id={item.name}
+                  checked={checkedCategory.includes(item.id)}
+                ></Checkbox>
                 {item.name}
               </CommandItem>
             ))}
-            <CommandItem
-              key={""}
-              onSelect={() => {
-                setCategory("");
-                setOpenCategory(false);
-              }}
-            >
-              <Check
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  "" === category ? "opacity-100" : "opacity-0"
-                )}
-              />
-              {"Chọn danh mục"}
-            </CommandItem>
           </CommandGroup>
         </Command>
       </DropdownMenuContent>

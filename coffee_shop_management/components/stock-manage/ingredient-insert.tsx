@@ -1,218 +1,209 @@
 import { useState } from "react";
 import { Input } from "../ui/input";
-import {
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-} from "../ui/command";
-import { ingredients } from "@/constants";
-import { Label } from "../ui/label";
+
 import { Button } from "../ui/button";
-import { Checkbox } from "../ui/checkbox";
 import {
   Control,
   UseFormReturn,
   useFieldArray,
   useWatch,
 } from "react-hook-form";
-import { FormValues } from "@/app/stock-manage/import/add-note/page";
-import { AiOutlineClose } from "react-icons/ai";
 
-const Total = ({ control }: { control: Control<FormValues> }) => {
+import { AiOutlineClose } from "react-icons/ai";
+import { CiBoxes } from "react-icons/ci";
+import { IoMdInformationCircleOutline } from "react-icons/io";
+import { z } from "zod";
+import { FormSchema } from "@/app/stock-manage/import/add-note/page";
+import { AutoComplete } from "../autocomplete";
+import { Ingredient } from "@/types";
+import { toVND } from "@/lib/utils";
+import { toast } from "../ui/use-toast";
+import getAllIngredient from "@/lib/getAllIngredient";
+import Loading from "../loading";
+const Total = ({
+  control,
+}: {
+  control: Control<z.infer<typeof FormSchema>>;
+}) => {
   const formValues = useWatch({
-    name: "ingredients",
+    name: "details",
     control,
   });
   const total = formValues.reduce(
-    (acc, current) => acc + (current.price || 0) * (current.quantity || 0),
+    (acc, current) => acc + (current.price || 0) * (current.amountImport || 0),
     0
   );
-  return <p>{total}</p>;
+  return <p>{toVND(total)}</p>;
 };
 
 const AddUp = ({
   control,
   index,
 }: {
-  control: Control<FormValues>;
+  control: Control<z.infer<typeof FormSchema>>;
   index: number;
 }) => {
   const formValues = useWatch({
-    name: `ingredients.${index}`,
+    name: `details.${index}`,
     control,
   });
-  const addUp = formValues.price * formValues.quantity;
-  console.log(addUp);
-  return <p>{addUp}</p>;
+  const addUp = formValues.price * formValues.amountImport;
+  return <p>{toVND(addUp)}</p>;
 };
 
 const IngredientInsert = ({
   form,
 }: {
-  form: UseFormReturn<FormValues, any, undefined>;
+  form: UseFormReturn<z.infer<typeof FormSchema>, any, undefined>;
 }) => {
-  const { register, handleSubmit, control, watch, getValues } = form;
+  const {
+    register,
+    handleSubmit,
+    control,
+    watch,
+    getValues,
+    reset,
+    formState: { errors },
+  } = form;
   const {
     fields: fieldsIngre,
     append: appendIngre,
     remove: removeIngre,
+    replace,
   } = useFieldArray({
     control: control,
-    name: "ingredients",
+    name: "details",
   });
-
-  const [openIngre, setOpenIngre] = useState(false);
-  const [checkedIngre, setCheckedIngre] = useState(
-    new Array(ingredients.length).fill(false)
-  );
-  const handleOnChecked = (position: number) => {
-    const updateCheckedState = checkedIngre.map((item, index) =>
-      index === position ? !item : item
-    );
-
-    setCheckedIngre(updateCheckedState);
+  const { data, isLoading, isError, mutate } = getAllIngredient();
+  const [value, setValue] = useState<Ingredient>();
+  const handleOnValueChange = (item: Ingredient) => {
+    if (!fieldsIngre.find((ingre) => ingre.ingredientId === item.id)) {
+      appendIngre({
+        ingredientId: item.id,
+        amountImport: 0,
+        price: item.price,
+        oldPrice: item.price,
+        isReplacePrice: false,
+      });
+    }
   };
-
-  const resetCheckedIngre = () => {
-    setCheckedIngre(new Array(ingredients.length).fill(false));
-  };
-
-  const handleIngreConfirm = () => {
-    setOpenIngre(false);
-    checkedIngre.forEach((element, index) => {
-      const id = ingredients.at(index)?.id!;
-      if (element === true) {
-        if (!fieldsIngre.find((item) => item.idIngre === id)) {
-          appendIngre({
-            idIngre: id,
-            quantity: 0,
-            price: 0,
-            expirationDate: new Date(),
-          });
-        }
-      }
-    });
-  };
-  return (
-    <div className="flex flex-col">
-      <Input
-        className="mb-4"
-        placeholder="Tìm nguyên liệu"
-        onClick={() => {
-          setOpenIngre((open) => !open);
-          resetCheckedIngre();
-        }}
-      />
-      <div className="flex pr-12 font-medium py-2 mb-2 bg-orange-100">
-        <h2 className="basis-1/4">Tên nguyên liệu</h2>
-        <h2 className="basis-1/4 text-center">Đơn vị</h2>
-
-        <h2 className="basis-1/4 text-center">Đơn giá</h2>
-        <h2 className="basis-1/4 text-center">Số lượng</h2>
-        <h2 className="basis-1/4 text-right">Thành tiền</h2>
-      </div>
-      <div>
-        {fieldsIngre.length < 1 ? (
-          <div className="text-center py-4">Chọn sản phẩm nhập kho</div>
-        ) : null}
-        {fieldsIngre.map((ingre, index) => {
-          const value = ingredients.find((item) => item.id === ingre.idIngre);
-
-          return (
-            <div key={ingre.id} className="flex items-center py-2 gap-4 ">
-              <h2 className="basis-1/4">{value?.name}</h2>
-              <h2 className="basis-1/4 text-center">{value?.unit.name}</h2>
-              <Input
-                className="basis-1/4"
-                type="number"
-                min={1}
-                max={1000}
-                placeholder="Nhập đơn giá"
-                defaultValue={ingre.quantity}
-                {...register(`ingredients.${index}.price` as const)}
-              ></Input>
-              <Input
-                className="basis-1/4 "
-                type="number"
-                min={1}
-                max={1000}
-                placeholder="Nhập số lượng"
-                defaultValue={ingre.quantity}
-                {...register(`ingredients.${index}.quantity` as const)}
-              ></Input>
-
-              <div className="basis-1/4 text-right">
-                <AddUp control={control} index={index} />
+  if (isError) {
+    return "Failed to fetch";
+  } else if (isLoading || !data) {
+    return <Loading />;
+  } else {
+    return (
+      <div className="flex flex-col">
+        <AutoComplete
+          options={data.data}
+          emptyMessage="Không có nguyên liệu khớp với từ khóa"
+          placeholder="Tìm nguyên liệu"
+          onValueChange={handleOnValueChange}
+          value={value}
+        />
+        <div>
+          <div className="grid grid-cols-4 lg:gap-3 gap-2 font-medium py-2 px-2 mt-2 rounded-t-md bg-[#ffe9db]">
+            <h2 className="">Tên nguyên liệu</h2>
+            <h2 className=" text-left">Đơn giá</h2>
+            <h2 className=" text-left">Số lượng</h2>
+            <h2 className=" text-right pr-12 ">Thành tiền</h2>
+          </div>
+          <div className="border border-t-0 py-2 rounded-b-md">
+            {fieldsIngre.length < 1 ? (
+              <div className="flex flex-col items-center gap-4 py-8 text-muted-foreground font-medium">
+                <CiBoxes className="h-24 w-24 text-muted-foreground/40" />
+                {errors.details?.root ? (
+                  <span className="error___message">
+                    {errors.details.root?.message}
+                  </span>
+                ) : (
+                  "Chọn sản phẩm nhập kho"
+                )}
               </div>
-              <Button
-                variant={"ghost"}
-                className={`px-3 `}
-                onClick={() => {
-                  removeIngre(index);
-                }}
-              >
-                <AiOutlineClose />
-              </Button>
-            </div>
-          );
-        })}
-      </div>
-      <div className="flex justify-end py-2 pr-12 font-medium ">
-        <h2 className="w-1/4">Tổng cộng</h2>
-        <div className="flex">
-          <span>
-            <Total control={control} />
-          </span>
-          đ
+            ) : null}
+            {fieldsIngre.map((ingre, index) => {
+              const value = data.data.find(
+                (item) => item.id === ingre.ingredientId
+              );
+              if (value) {
+                return (
+                  <div
+                    key={ingre.id}
+                    className="grid md:grid-cols-4 grid-cols-3 items-center p-2 lg:gap-3 gap-2"
+                  >
+                    <div className="flex">
+                      <h2 className="font-medium">{value?.name}</h2>
+                      <h2 className="ml-1 text-muted-foreground">
+                        ({value?.measureType})
+                      </h2>
+                    </div>
+                    <div className="relative p-1">
+                      <Input
+                        type="number"
+                        defaultValue={ingre.price}
+                        {...register(`details.${index}.price` as const)}
+                        min={1}
+                      ></Input>
+                      <div className="absolute top-0 right-0 cursor-pointer group">
+                        <IoMdInformationCircleOutline
+                          className={`h-5 w-5 text-teal-700`}
+                        />
+
+                        <span
+                          className="absolute bottom-5 right-3 w-fit whitespace-nowrap scale-0 transition-all rounded bg-teal-100 p-2 text-xs font-medium text-teal-800 group-hover:scale-100
+                      group-active:scale-100"
+                        >
+                          Giá ban đầu: {toVND(ingre.oldPrice)}
+                        </span>
+                      </div>
+                      {/* <div className="absolute top-0 right-0 cursor-pointer">
+                      <IoMdInformationCircleOutline
+                        className={`h-5 w-5 text-teal-700`}
+                      />
+                    </div> */}
+                    </div>
+
+                    <Input
+                      type="number"
+                      className="lg:w-full w-4/5"
+                      defaultValue={ingre.amountImport}
+                      {...register(`details.${index}.amountImport` as const)}
+                      min={1}
+                    ></Input>
+
+                    <div className="text-right flex justify-end gap-2 items-center">
+                      <AddUp control={control} index={index} />
+                      <Button
+                        type="button"
+                        variant={"ghost"}
+                        className={`px-3`}
+                        onClick={() => {
+                          removeIngre(index);
+                        }}
+                      >
+                        <AiOutlineClose />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              } else {
+                //TODO
+              }
+            })}
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-6 pr-14 font-medium ">
+          <h2 className="w-1/4">Tổng cộng</h2>
+          <div className="flex">
+            <span>
+              <Total control={control} />
+            </span>
+          </div>
         </div>
       </div>
-      <CommandDialog open={openIngre} onOpenChange={setOpenIngre}>
-        <CommandInput placeholder="Tìm nguyên liệu" />
-        <CommandList className="h-80">
-          <CommandEmpty>No results found.</CommandEmpty>
-          <CommandGroup heading="Nguyên liệu" className="h-56 overflow-y-auto">
-            {ingredients.map((item, index) => (
-              <CommandItem
-                value={item.name}
-                key={item.id}
-                onSelect={() => {
-                  handleOnChecked(index);
-                }}
-              >
-                <div className="px-4 blur-none flex items-center gap-2 flex-1">
-                  <Checkbox
-                    id={item.name}
-                    checked={checkedIngre[index]}
-                    onCheckedChange={() => handleOnChecked(index)}
-                  ></Checkbox>
-                  <Label onClick={() => handleOnChecked(index)}>
-                    {item.name}
-                  </Label>
-                  <Label
-                    onClick={() => handleOnChecked(index)}
-                    className="ml-auto"
-                  >
-                    {item.unit.name}
-                  </Label>
-                </div>
-              </CommandItem>
-            ))}
-          </CommandGroup>
-
-          <CommandSeparator />
-          <CommandGroup>
-            <div className="pt-4 pr-4 flex justify-end">
-              <Button onClick={handleIngreConfirm}>Thêm</Button>
-            </div>
-          </CommandGroup>
-        </CommandList>
-      </CommandDialog>
-    </div>
-  );
+    );
+  }
 };
 
 export default IngredientInsert;

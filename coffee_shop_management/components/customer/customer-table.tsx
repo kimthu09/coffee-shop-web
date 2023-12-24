@@ -113,14 +113,7 @@ export const columns: ColumnDef<Customer>[] = [
       const product = row.original;
 
       return (
-        <Link
-          href={{
-            pathname: "customer/detail",
-            query: {
-              id: row.getValue("id"),
-            },
-          }}
-        >
+        <Link href={`/customer/${row.getValue("id")}`}>
           <Button variant="ghost" className="h-7 w-7 p-0">
             <DotsHorizontalIcon className="h-4 w-4" />
           </Button>

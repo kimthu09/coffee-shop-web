@@ -25,7 +25,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Ingredient } from "@/types";
-import { ingredients } from "@/constants";
 
 import { useState } from "react";
 import { Input } from "../ui/input";
@@ -38,7 +37,7 @@ import {
 } from "../ui/dropdown-menu";
 import Link from "next/link";
 
-const data: Ingredient[] = ingredients;
+const data: Ingredient[] = [];
 
 export const columns: ColumnDef<Ingredient>[] = [
   {
@@ -78,29 +77,6 @@ export const columns: ColumnDef<Ingredient>[] = [
     cell: ({ row }) => (
       <div className="capitalize pl-2 leading-6">{row.getValue("name")}</div>
     ),
-  },
-  {
-    accessorKey: "unit",
-    accessorFn: (row) => row.unit.name,
-    header: ({ column }) => (
-      <div className="flex justify-end">
-        <Button
-          variant={"ghost"}
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          <span className="font-semibold">Đơn vị</span>
-
-          <CaretSortIcon className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    ),
-    cell: ({ row }) => {
-      return (
-        <div className="text-right font-medium pr-8">
-          {row.getValue("unit")}
-        </div>
-      );
-    },
   },
   {
     accessorKey: "total",
@@ -162,6 +138,17 @@ export const columns: ColumnDef<Ingredient>[] = [
     },
   },
 ];
+const getRowStyles = ({ row, index }: { row: any; index: number }) => {
+  if (index % 2 === 0) {
+    return {
+      background: "primary",
+    };
+  } else {
+    return {
+      background: "rgb(255 247 237 / var(--tw-bg-opacity))",
+    };
+  }
+};
 export function StockTable() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -197,11 +184,11 @@ export function StockTable() {
           }
         />
       </div>
-      <div className="rounded-md border">
+      <div className="rounded-md border max-w-[100%] overflow-x-auto">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
+              <TableRow key={headerGroup.id} className="bg-orange-200">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead key={header.id}>
@@ -219,10 +206,15 @@ export function StockTable() {
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
+              table.getRowModel().rows.map((row, index) => (
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  style={
+                    typeof getRowStyles === "function"
+                      ? getRowStyles({ row: row, index: index })
+                      : {}
+                  }
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

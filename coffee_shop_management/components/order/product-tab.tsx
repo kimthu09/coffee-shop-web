@@ -1,60 +1,131 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Input } from "../ui/input";
 import { categories, products } from "@/constants";
 import { Product } from "@/types";
 import { UseFieldArrayAppend, useFieldArray } from "react-hook-form";
 import { FormValues } from "@/app/order/page";
-import { toVND } from "@/lib/utils";
+import { removeAccents, toVND } from "@/lib/utils";
 import { AspectRatio } from "@radix-ui/react-aspect-ratio";
+import { useCallback } from "react";
 const ProductTab = ({
   append,
 }: {
   append: UseFieldArrayAppend<FormValues, "invoiceDetails">;
 }) => {
-  const [cateList, setCateList] = useState<Array<Boolean>>(
-    new Array(categories.length).fill(false)
-  );
+  const [cateList, setCateList] = useState<
+    {
+      id: string;
+      name: string;
+      isSelected: boolean;
+    }[]
+  >();
   const [all, setAll] = useState(true);
   const [prodList, setProdList] = useState<Array<Product>>(products);
   const handleAllSelected = () => {
     if (!all) {
       setAll((prev) => !prev);
-      setCateList(new Array(categories.length).fill(false));
-      setProdList(products);
+      setCateList(
+        categories?.map((item: any) => {
+          return { id: item.id, name: item.name, isSelected: false };
+        })
+      );
+      setProdList(
+        products?.filter((item: Product) => item.status === "active")
+      );
     }
   };
 
-  const handleCateSelected = (index: number) => {
+  const handleCateSelected = (id: string) => {
     if (all) {
       setAll(false);
       setProdList(new Array());
     }
-    const newCateList = cateList.map((item, idx) =>
-      idx === index ? !item : item
-    );
+    const newCateList = cateList?.map((item: any) => {
+      return {
+        id: item.id,
+        name: item.name,
+        isSelected: item.id === id ? !item.isSelected : item.isSelected,
+      };
+    });
     setCateList(newCateList);
 
-    if (newCateList.every((item) => !item)) {
+    if (newCateList?.every((item) => !item.isSelected)) {
       handleAllSelected();
     } else {
-      const newProdList = products.filter((prod) =>
-        categories
-          .filter((item, idx) => newCateList[idx] === true)
-          .find((cate) => cate.id === prod.idCate)
+      const categorySet = new Set(
+        newCateList
+          ?.filter((item: any) => item.isSelected === true)
+          .map((value) => value.id)
       );
-
+      const newProdList = new Array<Product>();
+      products.forEach((prod: Product) => {
+        // for (let element of prod.idCate) {
+        //   if (categorySet.has(element.id)) {
+        //     if (book.quantity > 0) {
+        //       newProdList.push(book);
+        //       break;
+        //     }
+        //   }
+        // }
+      });
       setProdList(newProdList);
     }
+  };
+
+  const [inputValue, setInputValue] = useState<string>("");
+  const [filteredList, setFilteredList] = useState<Array<Product>>(products);
+
+  // Search Handler
+  const searchHandler = useCallback(() => {
+    const filteredData = products?.filter((prod) => {
+      return removeAccents(prod.name)
+        .toLowerCase()
+        .includes(removeAccents(inputValue).toLowerCase().normalize());
+    });
+    setFilteredList(filteredData);
+  }, [prodList, inputValue]);
+
+  // EFFECT: Search Handler
+  useEffect(() => {
+    // Debounce search handler
+    const timer = setTimeout(() => {
+      searchHandler();
+    }, 500);
+
+    // Cleanup
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [searchHandler]);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    document.addEventListener("keydown", detectKeyDown, true);
+  }, []);
+  const detectKeyDown = (e: any) => {
+    if (e.key === "F2") {
+      inputRef.current?.focus();
+      setInputValue("");
+    }
+    return () => {
+      document.removeEventListener("keydown", detectKeyDown);
+    };
   };
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-end">
         <Input
+          ref={inputRef}
           className=" bg-white rounded-xl"
           placeholder="Tìm kiếm sản phẩm"
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+          }}
         ></Input>
       </div>
 
@@ -74,12 +145,9 @@ const ProductTab = ({
           <div
             key={item.id}
             className={`rounded-xl flex self-start px-3 py-1 border-gray-200 border text-sm  cursor-pointer
-            ${
-              cateList[index]
-                ? "bg-orange-50 border-primary text-brown font-medium"
-                : "bg-white text-muted-foreground"
-            }`}
-            onClick={() => handleCateSelected(index)}
+
+            `}
+            // onClick={() => handleCateSelected(index)}
           >
             {item.name}
           </div>
@@ -89,7 +157,7 @@ const ProductTab = ({
 
       {/* Product list */}
       <div className="grid 2xl:grid-cols-5 xl:grid-cols-4 lgr:grid-cols-3 md:grid-cols-2 sm:grid-cols-4 grid-cols-3 gap-4">
-        {prodList.map((prod) => {
+        {filteredList?.map((prod) => {
           return (
             <div
               key={prod.id}
@@ -109,6 +177,7 @@ const ProductTab = ({
                   src={prod.image!}
                   alt="image"
                   fill
+                  sizes="(max-width: 768px) 33vw, 20vw"
                 ></Image>
               </AspectRatio>
               <div className="px-1">
