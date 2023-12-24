@@ -54,7 +54,10 @@ CREATE TABLE `ExportNoteDetail` (
   `exportNoteId` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `ingredientId` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
   `amountExport` int DEFAULT '0',
-  PRIMARY KEY (`exportNoteId`,`ingredientId`)
+  PRIMARY KEY (`exportNoteId`,`ingredientId`),
+  KEY `ingredientId` (`ingredientId`),
+  CONSTRAINT `ExportNoteDetail_ibfk_1` FOREIGN KEY (`exportNoteId`) REFERENCES `ExportNote` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `ExportNoteDetail_ibfk_2` FOREIGN KEY (`ingredientId`) REFERENCES `Ingredient` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `Feature`;
@@ -296,54 +299,11 @@ CREATE TABLE `Topping` (
 
 
 
-INSERT INTO `Customer` (`id`, `name`, `email`, `phone`, `point`) VALUES
-('cs1', '123', 'a@gmail.com', '01234567892', 1444430);
-INSERT INTO `Customer` (`id`, `name`, `email`, `phone`, `point`) VALUES
-('cs2', '123', 'a@gmail.com', '01234567891', 722214);
 
 
-INSERT INTO `ExportNote` (`id`, `reason`, `createdBy`, `createdAt`) VALUES
-('118xALVIR', NULL, 'za1u8m4Sg', '2023-11-06 16:44:14');
-INSERT INTO `ExportNote` (`id`, `reason`, `createdBy`, `createdAt`) VALUES
-('7SubAL4Ig', NULL, 'za1u8m4Sg', '2023-11-06 16:44:17');
-INSERT INTO `ExportNote` (`id`, `reason`, `createdBy`, `createdAt`) VALUES
-('9dPbAL4Ig', NULL, 'za1u8m4Sg', '2023-11-06 16:44:12');
-INSERT INTO `ExportNote` (`id`, `reason`, `createdBy`, `createdAt`) VALUES
-('dadasdasdsad', NULL, 'za1u8m4Sg', '2023-11-05 03:03:17'),
-('DRlxAYVSg', NULL, 'za1u8m4Sg', '2023-11-06 16:44:16'),
-('jp9xAL4Ig', NULL, 'za1u8m4Sg', '2023-11-06 16:44:18'),
-('Muux0YVSR', NULL, 'za1u8m4Sg', '2023-11-06 16:44:18'),
-('oC9x0LVIg', NULL, 'za1u8m4Sg', '2023-11-06 16:44:19'),
-('yTjb0L4Sg', NULL, 'za1u8m4Sg', '2023-11-06 16:44:19'),
-('YYlbAY4SR', NULL, 'za1u8m4Sg', '2023-11-06 16:44:16'),
-('ZcQb0L4IR', NULL, 'za1u8m4Sg', '2023-11-06 16:44:15');
 
-INSERT INTO `ExportNoteDetail` (`exportNoteId`, `ingredientId`, `amountExport`) VALUES
-('118xALVIR', 'nvl1', 1);
-INSERT INTO `ExportNoteDetail` (`exportNoteId`, `ingredientId`, `amountExport`) VALUES
-('118xALVIR', 'nvl2', 1);
-INSERT INTO `ExportNoteDetail` (`exportNoteId`, `ingredientId`, `amountExport`) VALUES
-('7SubAL4Ig', 'nvl1', 1);
-INSERT INTO `ExportNoteDetail` (`exportNoteId`, `ingredientId`, `amountExport`) VALUES
-('7SubAL4Ig', 'nvl2', 1),
-('9dPbAL4Ig', 'nvl1', 1),
-('9dPbAL4Ig', 'nvl2', 1),
-('dadasdasdsad', 'nvl1', 10),
-('dadasdasdsad', 'nvl2', 100),
-('DRlxAYVSg', 'nvl1', 1),
-('DRlxAYVSg', 'nvl2', 1),
-('jp9xAL4Ig', 'nvl1', 1),
-('jp9xAL4Ig', 'nvl2', 1),
-('Muux0YVSR', 'nvl1', 1),
-('Muux0YVSR', 'nvl2', 1),
-('oC9x0LVIg', 'nvl1', 1),
-('oC9x0LVIg', 'nvl2', 1),
-('yTjb0L4Sg', 'nvl1', 1),
-('yTjb0L4Sg', 'nvl2', 1),
-('YYlbAY4SR', 'nvl1', 1),
-('YYlbAY4SR', 'nvl2', 1),
-('ZcQb0L4IR', 'nvl1', 1),
-('ZcQb0L4IR', 'nvl2', 1);
+
+
 
 INSERT INTO `Feature` (`id`, `description`, `groupName`) VALUES
 ('CAT_CREATE', 'Tạo danh mục', 'Danh mục');
@@ -382,32 +342,39 @@ INSERT INTO `Feature` (`id`, `description`, `groupName`) VALUES
 ('USE_UP_STATE', 'Chỉnh sửa trạng thái người dùng', 'Người dùng'),
 ('USE_VIEW', 'Xem người dùng', 'Người dùng');
 
-INSERT INTO `Food` (`id`, `name`, `description`, `cookingGuide`, `isActive`) VALUES
-('foodtest', 'foodtest', '123', '', 1);
-INSERT INTO `Food` (`id`, `name`, `description`, `cookingGuide`, `isActive`) VALUES
-('J1F4ZEVIg', 'foodtest1', '123', '', 1);
 
 
 
 
 
 
+INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
+('Ing0001', 'Đường', 500, 'Weight', 5000);
+INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
+('Ing0002', 'Hạt Cà Phê', 1000, 'Weight', 15000);
+INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
+('Ing0003', 'Sữa', 200, 'Volume', 10000);
+INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
+('Ing0004', 'Bột Bánh', 300, 'Weight', 9000),
+('Ing0005', 'Trứng', 50, 'Unit', 2500),
+('Ing0006', 'Sô Cô La', 200, 'Weight', 12000),
+('Ing0007', 'Tinh Dầu Vanilla', 10, 'Volume', 30000),
+('Ing0008', 'Nước Dừa', 500, 'Volume', 8000),
+('Ing0009', 'Bột Matcha', 50, 'Weight', 25000),
+('Ing0010', 'Đường Nâu', 300, 'Weight', 7000),
+('Ing0011', 'Dầu Olive', 150, 'Volume', 15000),
+('Ing0012', 'Nước Cốt Dừa', 300, 'Volume', 10000),
+('Ing0013', 'Hạt Hạnh Nhân', 120, 'Weight', 22000),
+('Ing0014', 'Bơ', 80, 'Weight', 18000),
+('Ing0016', 'Bột Baking Soda', 10, 'Weight', 5000),
+('Ing0017', 'Dầu Hạt Dẻ Cười', 30, 'Volume', 30000),
+('Ing0018', 'Hạt Hồ Lô', 50, 'Weight', 15000);
 
 
 
 
 
 
-INSERT INTO `Invoice` (`id`, `customerId`, `totalPrice`, `amountReceived`, `amountPriceUsePoint`, `createdAt`, `createdBy`) VALUES
-('4ahGrPVSg', 'cs2', 401230, 40123, 361107, '2023-11-07 05:25:23', 'za1u8m4Sg');
-INSERT INTO `Invoice` (`id`, `customerId`, `totalPrice`, `amountReceived`, `amountPriceUsePoint`, `createdAt`, `createdBy`) VALUES
-('7qFW9PVSR', 'cs1', 401230, 40123, 361107, '2023-11-07 05:24:47', 'za1u8m4Sg');
-INSERT INTO `Invoice` (`id`, `customerId`, `totalPrice`, `amountReceived`, `amountPriceUsePoint`, `createdAt`, `createdBy`) VALUES
-('CkdWrE4Sg', 'cs1', 401230, 40123, 361107, '2023-11-07 05:24:45', 'za1u8m4Sg');
-INSERT INTO `Invoice` (`id`, `customerId`, `totalPrice`, `amountReceived`, `amountPriceUsePoint`, `createdAt`, `createdBy`) VALUES
-('GL0GrE4Ig', 'cs2', 401230, 40123, 361107, '2023-11-07 05:25:25', 'za1u8m4Sg'),
-('HvFWrP4Sg', 'cs1', 401230, 40123, 361107, '2023-11-07 05:24:47', 'za1u8m4Sg'),
-('nf5WrEVSR', 'cs1', 401230, 40123, 361107, '2023-11-07 05:24:48', 'za1u8m4Sg');
 
 
 
@@ -476,39 +443,22 @@ INSERT INTO `ShopGeneral` (`id`, `name`, `email`, `phone`, `address`, `wifiPass`
 ('shop', 'Coffee shop', '', '', '', 'coffeeshop123', 0.001, 1);
 
 
-INSERT INTO `SizeFood` (`foodId`, `sizeId`, `name`, `cost`, `price`, `recipeId`) VALUES
-('foodtest', 'evzZ1o4SR', 'size M', 16000, 20000, '6vkZJTVIRz');
-INSERT INTO `SizeFood` (`foodId`, `sizeId`, `name`, `cost`, `price`, `recipeId`) VALUES
-('foodtest', 'MGxpATVSR', 'size SSS', 123, 123, 'GMbtAo4IRz');
-INSERT INTO `SizeFood` (`foodId`, `sizeId`, `name`, `cost`, `price`, `recipeId`) VALUES
-('J1F4ZEVIg', 'J1K4WEVIgz', 'size S', 12000, 16000, '1JKVZPVSRm');
-INSERT INTO `SizeFood` (`foodId`, `sizeId`, `name`, `cost`, `price`, `recipeId`) VALUES
-('J1F4ZEVIg', 'J1KVWPVIRZ', 'size M', 16000, 20000, 'J1F4WPVIRM');
+
 
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
-('babc', 'bug ơi là bug', 'd@gmail.com', '1111111112', 100048);
+('SupCacao0001', 'NCC Cacao', 'cacao@gmail.com', '0905555555', -50000);
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
-('gAoHFtVIR', '123', '', '1234567890', 0);
+('SupCake0001', 'NCC Bánh', 'banh@gmail.com', '0943334445', 0);
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
-('KxFFFt4Sg', '123', 'a@gmail.com', '12345678901', 0);
+('SupCoffe0001', 'NCC Cà Phê', 'caphe@gmail.com', '0901234567', -80000);
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
-('rs2_QiVIg', 'tên đã sửa', 'a@gmail.com', '1111111111', 1114910),
-('tjRaQEVSR', 'oos hoos hoos', 'a@gmail.com', '12345678902', 0);
-
-INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
-('1O-zf04IR', 'rs2_QiVIg', 5300, 1114910, 'Debt', '2023-11-04 19:08:34', 'za1u8m4Sg');
-INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
-('a5OraA4Ig', 'rs2_QiVIg', 4300, 1108610, 'Debt', '2023-11-04 19:05:41', 'za1u8m4Sg');
-INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
-('Fd35FpVSg', 'babc', 10, 100028, 'Pay', '2023-11-03 12:39:45', 'za1u8m4Sg');
-INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
-('Gi6yFnVSg', 'rs2_QiVIg', 1100010, 1100010, 'Debt', '2023-10-31 10:11:51', 'za1u8m4Sg'),
-('u_JfK7VSR', 'babc', 100010, 100010, 'Debt', '2023-10-31 10:09:59', 'za1u8m4Sg'),
-('vHH2FpVIR', 'babc', 10, 100048, 'Pay', '2023-11-03 12:40:28', 'za1u8m4Sg'),
-('vVf2fAVIg', 'rs2_QiVIg', 5300, 1120210, 'Debt', '2023-11-04 19:15:41', 'za1u8m4Sg'),
-('x8WlFnVIR', 'babc', -1, 100009, 'Pay', '2023-10-31 10:13:01', 'za1u8m4Sg'),
-('XBH5Kt4Ig', 'babc', 9, 100018, 'Pay', '2023-11-03 12:39:23', 'za1u8m4Sg'),
-('z8FpKt4IR', 'babc', 10, 100038, 'Pay', '2023-11-03 12:39:59', 'za1u8m4Sg');
+('SupHoney0001', 'NCC Mật Ong', 'matong@gmail.com', '0927777777', -2000),
+('SupIceCr0001', 'NCC Kem', 'kem@gmail.com', '0999999999', -60000),
+('SupMilk0001', 'NCC Sữa Tuyệt trùng', 'suatuyettrung@gmail.com', '0919876543', -5000),
+('SupOTea0001', 'NCC Trà Ôlong', 'olong@gmail.com', '0922333445', -30000),
+('SupPearl0001', 'NCC Trân Châu', 'tranchau@gmail.com', '0911122334', -3500),
+('SupSugar0001', 'NCC Đường', 'duong@gmail.com', '0921112223', -30000),
+('SupTea0001', 'NCC Trà', 'tra@gmail.com', '0922233445', -20000);
 
 
 DELIMITER //
