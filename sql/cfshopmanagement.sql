@@ -91,10 +91,8 @@ CREATE TABLE `ImportNote` (
   KEY `supplierId` (`supplierId`),
   KEY `createdBy` (`createdBy`),
   CONSTRAINT `ImportNote_ibfk_1` FOREIGN KEY (`closedBy`) REFERENCES `MUser` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `ImportNote_ibfk_2` FOREIGN KEY (`closedBy`) REFERENCES `MUser` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `ImportNote_ibfk_3` FOREIGN KEY (`closedBy`) REFERENCES `MUser` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `ImportNote_ibfk_4` FOREIGN KEY (`supplierId`) REFERENCES `Supplier` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `ImportNote_ibfk_5` FOREIGN KEY (`createdBy`) REFERENCES `MUser` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `ImportNote_ibfk_2` FOREIGN KEY (`supplierId`) REFERENCES `Supplier` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
+  CONSTRAINT `ImportNote_ibfk_3` FOREIGN KEY (`createdBy`) REFERENCES `MUser` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `ImportNoteDetail`;
@@ -106,8 +104,7 @@ CREATE TABLE `ImportNoteDetail` (
   `totalUnit` float NOT NULL,
   PRIMARY KEY (`importNoteId`,`ingredientId`),
   KEY `ingredientId` (`ingredientId`),
-  CONSTRAINT `ImportNoteDetail_ibfk_1` FOREIGN KEY (`importNoteId`) REFERENCES `ImportNote` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT,
-  CONSTRAINT `ImportNoteDetail_ibfk_2` FOREIGN KEY (`ingredientId`) REFERENCES `Ingredient` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
+  CONSTRAINT `ImportNoteDetail_ibfk_1` FOREIGN KEY (`ingredientId`) REFERENCES `Ingredient` (`id`) ON DELETE RESTRICT ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `Ingredient`;
@@ -415,9 +412,9 @@ INSERT INTO `Invoice` (`id`, `customerId`, `totalPrice`, `amountReceived`, `amou
 
 
 INSERT INTO `MUser` (`id`, `name`, `email`, `password`, `salt`, `roleId`, `isActive`) VALUES
-('g3W21A7SR', 'Tên admin', 'admin@gmail.com', '5e107317df151f6e8e0015c4f2ee7936', 'mVMxRDAHpAJfyzuiXWRELghNpynUqBKueSboGBcrwHUuzEWsms', 'user', 1);
+('g3W21A7SR', 'Nguyễn Văn A', 'admin@gmail.com', '5e107317df151f6e8e0015c4f2ee7936', 'mVMxRDAHpAJfyzuiXWRELghNpynUqBKueSboGBcrwHUuzEWsms', 'admin', 1);
 INSERT INTO `MUser` (`id`, `name`, `email`, `password`, `salt`, `roleId`, `isActive`) VALUES
-('za1u8m4Sg', 'Tên user', 'user@gmail.com', 'cb58ac5a2272517d1960565444bde187', 'QYlnGKRgYBxIXzMnnQSVcglbtjPsAhVlxMRMDaqnaquxwADSur', 'admin', 1);
+('za1u8m4Sg', 'Nguyễn Văn U', 'user@gmail.com', 'cb58ac5a2272517d1960565444bde187', 'QYlnGKRgYBxIXzMnnQSVcglbtjPsAhVlxMRMDaqnaquxwADSur', 'user', 1);
 
 
 INSERT INTO `Recipe` (`id`) VALUES
