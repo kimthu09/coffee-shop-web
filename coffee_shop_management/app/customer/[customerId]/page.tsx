@@ -4,8 +4,8 @@ import { Label } from "@/components/ui/label";
 import { customers } from "@/constants";
 import React from "react";
 
-const CustomerDetail = ({ searchParams }: { searchParams: { id: string } }) => {
-  const customer = customers.find((item) => item.id === searchParams.id);
+const CustomerDetail = ({ params }: { params: { customerId: string } }) => {
+  const customer = customers.find((item) => item.id === params.customerId);
   return (
     <div className="col items-center">
       <div className="col xl:w-4/5 w-full xl:px-0 md:px-8 px-0">
@@ -32,10 +32,7 @@ const CustomerDetail = ({ searchParams }: { searchParams: { id: string } }) => {
               <div className="flex flex-row gap-4">
                 <div className="flex-1">
                   <Label htmlFor="soHoaDon">Hoá đơn</Label>
-                  <Input
-                    id="soHoaDon"
-                    defaultValue={customer?.invoiceCount}
-                  ></Input>
+                  <Input id="soHoaDon" defaultValue={0}></Input>
                 </div>
                 <div className="flex-1">
                   <Label htmlFor="diem">Điểm tích luỹ</Label>
