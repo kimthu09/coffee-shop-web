@@ -21,7 +21,7 @@ const IngredientTabs = ({
   priceId,
   form,
 }: {
-  priceId: number;
+  priceId: string;
   form: UseFormReturn<FormValues, any, undefined>;
 }) => {
   const [openIngre, setOpenIngre] = useState(false);
@@ -48,18 +48,20 @@ const IngredientTabs = ({
   };
 
   const resetCheckedIngre = () => {
-    setCheckedIngre(new Array(ingredientForChoose.length).fill(false));
-    // const updated = checkedIngre.map((item, index) => {
-    //   if (
-    //     fieldsIngre.find(
-    //       (ingre) => ingre.idIngre === ingredientForChoose.at(index)!.id
-    //     )
-    //   ) {
-    //     return true;
-    //   }
-    //   return false;
-    // });
-    // setCheckedIngre(updated);
+    // setCheckedIngre(new Array(ingredientForChoose.length).fill(false));
+    const updated = checkedIngre.map((item, index) => {
+      if (
+        fieldsIngre.find(
+          (ingre) =>
+            ingre.idIngre === ingredientForChoose.at(index)!.id &&
+            ingre.priceId === priceId
+        )
+      ) {
+        return true;
+      }
+      return false;
+    });
+    setCheckedIngre(updated);
   };
 
   const handleIngreConfirm = () => {
@@ -74,16 +76,17 @@ const IngredientTabs = ({
         ) {
           appendIngre({
             idIngre: id,
-            amount: 100,
+            amount: 0,
             priceId: priceId,
           });
         }
+      } else {
+        //TODO: fix the remove
+        const index = fieldsIngre.findIndex(
+          (item) => item.idIngre === id && item.priceId === priceId
+        );
+        removeIngre(index);
       }
-      // } else {
-      //   //TODO: fix the remove
-      //   const index = fieldsIngre.findIndex((item) => item.idIngre === id);
-      //   remove(index);
-      // }
     });
   };
 
@@ -174,7 +177,10 @@ const IngredientTabs = ({
 
           <CommandSeparator />
           <CommandGroup>
-            <div className="pt-4 pr-4 flex justify-end">
+            <div className="pt-4 pr-4 flex justify-between">
+              <span className="text-sm">
+                {checkedIngre.filter(Boolean).length} trong 10 dòng đã được chọn
+              </span>
               <Button onClick={() => handleIngreConfirm()}>Thêm</Button>
             </div>
           </CommandGroup>

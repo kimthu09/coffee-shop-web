@@ -13,6 +13,7 @@ import { Card, CardContent } from "../ui/card";
 import { FiTrash2 } from "react-icons/fi";
 import { HiPlus, HiMinus } from "react-icons/hi";
 import { FaPen } from "react-icons/fa";
+import { PiClipboardTextLight } from "react-icons/pi";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { toVND } from "@/lib/utils";
@@ -86,92 +87,123 @@ const BillTab = ({
           </div>
         </div>
         <div className="flex flex-col gap-2  overflow-auto pt-4 flex-1">
+          {fields.length < 1 ? (
+            <div className="flex flex-col items-center gap-4 py-8 text-muted-foreground font-medium pt-[20%]">
+              <PiClipboardTextLight className="h-24 w-24 text-muted-foreground/40" />
+              <span>Chọn sản phẩm</span>
+            </div>
+          ) : null}
           {fields.map((item, index) => {
             return (
               <div
                 key={item.id}
                 className={`flex ${
                   index === fields.length - 1 ? "" : "border-b"
-                }  xl:px-4 px-2 pb-2 group flex-col`}
+                }  xl:px-4 px-2 pb-2 group gap-2`}
               >
-                {/* Name price row */}
-                <div className="flex">
-                  <div className="flex basis-[35%]">
-                    <div className="flex xl:gap-3 gap-2 items-center">
-                      <Button
-                        variant={"ghost"}
-                        className="h-8 p-0 px-2 rounded-lg"
-                        onClick={() => remove(index)}
-                      >
-                        <FiTrash2 className="opacity-50" />
-                      </Button>
-
-                      <span className="text-sm">{index + 1}</span>
+                <span className="text-sm leading-6">{index + 1}</span>
+                <div className="flex flex-col flex-1">
+                  {/* Name size price row */}
+                  <div className="flex">
+                    <div className="flex basis-[35%]">
                       <h1 className="text-base font-medium">{item.foodName}</h1>
                     </div>
-                  </div>
 
-                  <div className="flex flex-wrap basis-[65%] items-center justify-between gap-2">
-                    {/* Quantity */}
-                    <div className="flex xl:gap-2 gap-1 items-center">
-                      <Button
-                        className="p-[2px] bg-primary hover:bg-primary/90 rounded-full cursor-pointer text-white invisible  group-hover:visible h-5 w-5"
-                        onClick={() => {
-                          const quantity = +invoices.at(index)?.quantity!;
-                          if (quantity === 1) {
-                            //TODO: remove
-                          } else {
+                    <div className="flex flex-wrap basis-[65%] items-center justify-between xl:gap-3 gap-2">
+                      {/* Quantity */}
+                      <div className="flex gap-2 items-center">
+                        <Button
+                          className="p-[2px] bg-primary hover:bg-primary/90 rounded-full cursor-pointer text-white invisible  group-hover:visible h-5 w-5"
+                          onClick={() => {
+                            const quantity = +invoices.at(index)?.quantity!;
+                            if (quantity === 1) {
+                              //TODO: remove
+                            } else {
+                              setValue(
+                                `invoiceDetails.${index}.quantity`,
+                                quantity - 1
+                              );
+                            }
+                          }}
+                        >
+                          <HiMinus />
+                        </Button>
+                        <Input
+                          type="number"
+                          className="px-1 w-10 text-center [&::-webkit-inner-spin-button]:appearance-none"
+                          {...register(
+                            `invoiceDetails.${index}.quantity` as const
+                          )}
+                        ></Input>
+
+                        <Button
+                          className="p-[2px] bg-primary hover:bg-primary/90 rounded-full cursor-pointer text-white invisible group-hover:visible h-5 w-5"
+                          onClick={() => {
                             setValue(
                               `invoiceDetails.${index}.quantity`,
-                              quantity - 1
+                              +invoices.at(index)?.quantity! + 1
                             );
-                          }
-                        }}
-                      >
-                        <HiMinus />
-                      </Button>
-                      <Input
-                        type="number"
-                        className="px-1 w-10 text-center [&::-webkit-inner-spin-button]:appearance-none"
-                        {...register(
-                          `invoiceDetails.${index}.quantity` as const
-                        )}
-                      ></Input>
-
-                      <Button
-                        className="p-[2px] bg-primary hover:bg-primary/90 rounded-full cursor-pointer text-white invisible group-hover:visible h-5 w-5"
-                        onClick={() => {
-                          setValue(
-                            `invoiceDetails.${index}.quantity`,
-                            +invoices.at(index)?.quantity! + 1
-                          );
-                        }}
-                      >
-                        <HiPlus />
-                      </Button>
-                    </div>
-                    <div className="flex-1 grid grid-cols-2 items-center xl:gap-3 gap-2">
+                          }}
+                        >
+                          <HiPlus />
+                        </Button>
+                      </div>
+                      <span className="font-semibold text-sm text-center">
+                        M
+                      </span>
                       <span className="text-sm text-right">
                         {toVND(item.price)}
                       </span>
-
-                      <div className="text-right ml-auto">
-                        <AddUp control={control} index={index} />
-                      </div>
                     </div>
                   </div>
-                </div>
+                  {/* topping list */}
+                  <div className="flex flex-col">
+                    <span className="font-medium text-sm">Topping:</span>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground text-sm">
+                        Hat sen
+                      </span>
+                      <span className="text-muted-foreground text-sm">
+                        5.000 d
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground text-sm">
+                        Hat sen
+                      </span>
+                      <span className="text-muted-foreground text-sm">
+                        5.000 d
+                      </span>
+                    </div>
+                  </div>
 
-                <div className="flex">
-                  <div className="relative pl-2">
-                    <input
-                      id={`note${index}`}
-                      className="outline-none border-0  w-auto max-w-full text-sm ml-5"
-                      placeholder="Ghi chú..."
-                    ></input>
-                    <Label htmlFor={`note${index}`}>
-                      <FaPen className="text-muted-foreground h-3 absolute top-2 cursor-pointer" />
-                    </Label>
+                  <div className="flex">
+                    <span className="text-sm font-semibold">Tổng</span>
+                    <div className="text-right ml-auto">
+                      <AddUp control={control} index={index} />
+                    </div>
+                  </div>
+                  <div className="flex justify-between">
+                    <div className="relative flex-1 items-center">
+                      <span className="w-full">
+                        <input
+                          id={`note${index}`}
+                          className="outline-none border-0 text-sm ml-5 w-4/5"
+                          placeholder="Ghi chú..."
+                        ></input>
+                      </span>
+
+                      <Label htmlFor={`note${index}`}>
+                        <FaPen className="text-muted-foreground h-3 absolute top-2 cursor-pointer" />
+                      </Label>
+                    </div>
+                    <Button
+                      variant={"ghost"}
+                      className="h-8 p-0 px-2 rounded-lg"
+                      onClick={() => remove(index)}
+                    >
+                      <FiTrash2 className="opacity-50" />
+                    </Button>
                   </div>
                 </div>
               </div>
