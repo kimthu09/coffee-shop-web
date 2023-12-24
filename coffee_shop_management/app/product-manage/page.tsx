@@ -26,10 +26,10 @@ export default function ProductManage() {
           </div>
         </Button>
 
-        <ImportSheet></ImportSheet>
+        {/* <ImportSheet></ImportSheet> */}
       </div>
 
-      <div className="mb-4 p-3 sha bg-white shadow-[0_1px_3px_0_rgba(0,0,0,0.2)]">
+      <div className="mb-4 p-3 min-w-0 bg-white shadow-[0_1px_3px_0_rgba(0,0,0,0.2)]">
         <ProductTable></ProductTable>
       </div>
     </div>
