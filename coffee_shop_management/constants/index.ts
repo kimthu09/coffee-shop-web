@@ -3,6 +3,7 @@ import {
   Customer,
   ExportNote,
   ImportNote,
+  ImportNoteDetail,
   Ingredient,
   IngredientDetail,
   IngredientForChoose,
@@ -12,11 +13,19 @@ import {
   RoleFunction,
   SidebarItem,
   Staff,
-  StatusString,
+  StatusNote,
 } from "@/types";
 import { LuHome } from "react-icons/lu";
 import { MdOutlineWarehouse } from "react-icons/md";
 import { GoPeople, GoPerson } from "react-icons/go";
+import { z } from "zod";
+
+export const apiKey =
+  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJfaWQiOiJnM1cyMUE3U1IiLCJyb2xlIjoiIn0sImV4cCI6MTcwMzQwNjQ2MCwiaWF0IjoxNzAzMzIwMDYwfQ.dnPSknjtgTN7QFZONhZq6z2o8tvGBY1BvgykIA_LIgE";
+export const endPoint = "http://localhost:8080/v1";
+
+export const required = z.string().min(1, "Không để trống trường này");
+
 export const products: Product[] = [
   {
     id: "ABC123",
@@ -224,44 +233,6 @@ export const ingredientForChoose: IngredientForChoose[] = [
   },
 ];
 
-export const ingredients: Ingredient[] = [
-  {
-    id: "1",
-    name: "Sua",
-    price: 28000,
-    unit: measureUnits[3],
-    total: 20,
-  },
-  {
-    id: "2",
-    name: "Ca phe hat",
-    price: 98000,
-    unit: measureUnits[2],
-    total: 50,
-  },
-  {
-    id: "3",
-    name: "Duong",
-    price: 32000,
-    unit: measureUnits[2],
-    total: 5,
-  },
-  {
-    id: "4",
-    name: "Sua dac",
-    price: 112000,
-    unit: measureUnits[3],
-    total: 15,
-  },
-  {
-    id: "5",
-    name: "Coca",
-    price: 112000,
-    unit: measureUnits[4],
-    total: 50,
-  },
-];
-
 export const ingredientDetails: IngredientDetail[] = [
   {
     idIngre: "1",
@@ -280,27 +251,196 @@ export const importNotes: ImportNote[] = [
     id: "NGAY1",
     supplierId: "DT01",
     totalPrice: 5060000,
-    status: StatusString.Inprogress,
-    createAt: new Date(),
-    createBy: "NV002",
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
   },
   {
     id: "NGAY2",
     supplierId: "DT01",
     totalPrice: 3720000,
-    status: StatusString.Done,
-    createAt: new Date(2023, 9, 8),
-    createBy: "NV002",
+    status: StatusNote.Done,
+    createdAt: new Date(2023, 9, 8),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
   },
   {
     id: "NGAY3",
     supplierId: "DT01",
     totalPrice: 4660000,
-    status: StatusString.Cancel,
-    createAt: new Date(2023, 10, 1),
-    createBy: "NV002",
+    status: StatusNote.Cancel,
+    createdAt: new Date(2023, 10, 1),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
+  },
+  {
+    id: "NGAY1",
+    supplierId: "DT01",
+    totalPrice: 5060000,
+    status: StatusNote.Inprogress,
+    createdAt: new Date(),
+    createdBy: {
+      id: "NV002",
+      name: "Nguyễn Thị Huệ",
+    },
+    supplier: {
+      id: "NV002",
+      name: "MilkFarm HT",
+      phone: "0987654321",
+    },
   },
 ];
+
 export const exportNotes: ExportNote[] = [
   {
     id: "PX001",
