@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -10,15 +11,56 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ImportNote } from "@/types";
+import { Span } from "next/dist/trace";
+import { useState } from "react";
 import { FiUpload } from "react-icons/fi";
 
-const ImportSheet = () => {
+const ImportSheet = ({
+  handleFile,
+}: {
+  handleFile: (reader: FileReader) => void;
+}) => {
+  const [file, setFile] = useState<any>();
+  const [errorMessage, setErrorMessage] = useState(false);
+  const fileType = [
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+  ];
+  const handleChange = (e: any) => {
+    let selectedFile = e.target.files[0];
+    if (selectedFile) {
+      if (selectedFile && fileType.includes(selectedFile.type)) {
+        if (selectedFile.size > 2000000) {
+          console.log(e.target.files[0].size);
+          console.log("Dung lượng file không hợp lệ");
+        } else {
+          setFile(null);
+          setFile(e.target.files[0]);
+        }
+      } else {
+        setFile(null);
+        console.log(selectedFile.type);
+
+        console.log("file không hợp lệ");
+      }
+    }
+  };
+  const handleImport = () => {
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+
+    reader.readAsArrayBuffer(file);
+    handleFile(reader);
+  };
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button className="hover:bg-orange-100 p-2" variant={"ghost"}>
-          <div className="flex flex-wrap gap-1 items-center">
-            <FiUpload />
+        <Button variant={"outline"} className="bg-white">
+          <div className="flex flex-nowrap gap-1 items-center">
+            <FiUpload className="w-4 h-4 text-green-700" />
             Nhập danh sách
           </div>
         </Button>
@@ -26,29 +68,36 @@ const ImportSheet = () => {
       <SheetContent side={"top"} className="w-[480px] sm:w-[540px] m-auto">
         <SheetHeader>
           <SheetTitle>Nhập danh sách</SheetTitle>
-          <SheetDescription>
-            <div>
-              <p>- Chuyển đổi file nhập dưới dạng .XLS trước khi tải dữ liệu</p>
-              <p>
-                <span>
-                  - Tải file mẫu sản phẩm
-                  <Button variant={"link"} className="px-1">
-                    tại đây
-                  </Button>
-                </span>
-              </p>
-              <p>- File nhập có dung lượng tối đa là 3MB và 5000 bản ghi.</p>
-            </div>
-          </SheetDescription>
         </SheetHeader>
+        <div className="text-sm text-muted-foreground mt-4">
+          <p>- Chuyển đổi file nhập dưới dạng .XLSX trước khi tải dữ liệu</p>
+          <span>
+            - Tải file mẫu sản phẩm
+            <Button variant={"link"} className="px-1">
+              tại đây
+            </Button>
+          </span>
+          <p>- File nhập có dung lượng tối đa là 2MB.</p>
+        </div>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
-            <Input id="file" type="file" className="col-span-3" />
+            <Input
+              id="file"
+              type="file"
+              onChange={handleChange}
+              className="col-span-3"
+            />
+            {errorMessage ? <span>File không hợp lệ</span> : null}
           </div>
         </div>
         <SheetFooter>
           <SheetClose asChild>
-            <Button type="submit">Nhập file</Button>
+            <div className="gap-3 flex">
+              <Button variant={"outline"}>Hủy</Button>
+              <Button type="button" onClick={handleImport}>
+                Nhập file
+              </Button>
+            </div>
           </SheetClose>
         </SheetFooter>
       </SheetContent>
