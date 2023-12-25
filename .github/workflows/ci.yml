@@ -81,16 +81,20 @@ jobs:
           cd frontend
           NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
 
-  gremlins:
+  mutation-test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: "1.20"
-      - name: Run Gremlins Action - Mutation testing
-        uses: go-gremlins/gremlins-action@v1
-        with:
-          version: latest
-          args: --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
-          workdir: ./backend/
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Environment
+        uses: docker/setup-buildx-action@v1
+
+      - name: Run Mutation Testing
+        run: |
+          docker build --pull --file - . <<EOF
+          FROM gogremlins/gremlins:0.5.0 AS mutation-testing
+          WORKDIR /backend
+          RUN gremlins unleash --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
+          EOF
