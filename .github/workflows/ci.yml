@@ -60,10 +60,11 @@ jobs:
           cd backend
           go build -v ./...
 
-      - name: Test Go backend
+      - name: Run Coverage Go backend
         run: |
           cd backend
-          go test -v ./...
+          go test ./... -coverprofile cover.out
+          go tool cover -func cover.out | grep total | awk '{print "Total Coverage: " $3}'
 
       - name: Install dependencies for Next.js frontend
         run: |
