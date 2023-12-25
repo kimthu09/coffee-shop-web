@@ -1,6 +1,7 @@
 package productstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"context"
 	"errors"
@@ -42,6 +43,10 @@ func Test_sqlStore_UpdateTopping(t *testing.T) {
 		Price: &price,
 	}
 	mockErr := errors.New(mock.Anything)
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
 
 	queryString :=
 		"UPDATE `Topping` SET `name`=?,`description`=?,`cookingGuide`=?,`cost`=?,`price`=? WHERE id = ?"
@@ -59,6 +64,7 @@ func Test_sqlStore_UpdateTopping(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -83,10 +89,11 @@ func Test_sqlStore_UpdateTopping(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mockSqlDB.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name:   "Update topping failed",
+			name:   "Update topping failed because of db error",
 			fields: fields{db: gormDB},
 			args: args{
 				ctx:  context.Background(),
@@ -107,6 +114,32 @@ func Test_sqlStore_UpdateTopping(t *testing.T) {
 					WillReturnError(mockErr)
 				mockSqlDB.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name:   "Update topping failed because of duplicate name",
+			fields: fields{db: gormDB},
+			args: args{
+				ctx:  context.Background(),
+				id:   id,
+				data: updateData,
+			},
+			mock: func() {
+				mockSqlDB.ExpectBegin()
+				mockSqlDB.
+					ExpectExec(queryString).
+					WithArgs(
+						*updateData.Name,
+						*updateData.Description,
+						*updateData.CookingGuide,
+						*updateData.Cost,
+						*updateData.Price,
+						id).
+					WillReturnError(mockErrName)
+				mockSqlDB.ExpectRollback()
+			},
+			want:    productmodel.ErrToppingNameDuplicate,
 			wantErr: true,
 		},
 	}
@@ -122,6 +155,7 @@ func Test_sqlStore_UpdateTopping(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "UpdateTopping() err = %v, wantErr = %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "UpdateFood() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "UpdateTopping() err = %v, wantErr = %v", err, tt.wantErr)
 			}

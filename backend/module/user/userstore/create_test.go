@@ -1,6 +1,7 @@
 package userstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/user/usermodel"
 	"context"
 	"errors"
@@ -41,6 +42,10 @@ func Test_sqlStore_CreateUser(t *testing.T) {
 		RoleId:   userRoleId,
 	}
 	mockErr := errors.New("something went wrong with the database")
+	mockErrEmail := &common.GormErr{
+		Number:  1062,
+		Message: "email",
+	}
 
 	expectedSql := "INSERT INTO `MUser` (`id`,`name`,`email`,`password`,`salt`,`roleId`) VALUES (?,?,?,?,?,?)"
 
@@ -56,6 +61,7 @@ func Test_sqlStore_CreateUser(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -82,10 +88,11 @@ func Test_sqlStore_CreateUser(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name: "Create user in database failed because something wrong happens to database",
+			name: "Create user in database failed because of database error",
 			fields: fields{
 				db: gormDB,
 			},
@@ -108,6 +115,34 @@ func Test_sqlStore_CreateUser(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Create user in database failed because of duplicate email",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &userCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(
+						userCreate.Id,
+						userCreate.Name,
+						userCreate.Email,
+						userCreate.Password,
+						userCreate.Salt,
+						userCreate.RoleId,
+					).
+					WillReturnError(mockErrEmail)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    usermodel.ErrUserEmailDuplicated,
 			wantErr: true,
 		},
 	}
@@ -123,6 +158,7 @@ func Test_sqlStore_CreateUser(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "CreateUser() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "CreateUser() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "CreateUser() error = %v, wantErr %v", err, tt.wantErr)
 			}

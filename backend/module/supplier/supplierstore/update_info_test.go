@@ -1,6 +1,7 @@
 package supplierstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 	"errors"
@@ -39,6 +40,10 @@ func Test_sqlStore_UpdateSupplierInfo(t *testing.T) {
 	expectedSql := "UPDATE `Supplier` SET `name`=?,`email`=?,`phone`=? WHERE id = ?"
 
 	mockErr := errors.New(mock.Anything)
+	mockErrPhone := &common.GormErr{
+		Number:  1062,
+		Message: "phone",
+	}
 
 	type fields struct {
 		db *gorm.DB
@@ -53,6 +58,7 @@ func Test_sqlStore_UpdateSupplierInfo(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -72,10 +78,11 @@ func Test_sqlStore_UpdateSupplierInfo(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name: "Update supplier info failed because can not save to database",
+			name: "Update supplier info failed because of database error",
 			fields: fields{
 				db: gormDB,
 			},
@@ -91,6 +98,27 @@ func Test_sqlStore_UpdateSupplierInfo(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Update supplier info failed because of duplicate phone",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				id:   supplierID,
+				data: updateData,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.ExpectExec(expectedSql).
+					WithArgs(updateData.Name, updateData.Email, updateData.Phone, supplierID).
+					WillReturnError(mockErrPhone)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    suppliermodel.ErrSupplierPhoneDuplicate,
 			wantErr: true,
 		},
 	}
@@ -106,6 +134,7 @@ func Test_sqlStore_UpdateSupplierInfo(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "UpdateSupplierInfo() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "UpdateSupplierInfo() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "UpdateSupplierInfo() error = %v, wantErr %v", err, tt.wantErr)
 			}

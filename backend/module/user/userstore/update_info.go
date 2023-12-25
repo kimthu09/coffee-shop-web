@@ -13,12 +13,6 @@ func (s *sqlStore) UpdateInfoUser(
 	db := s.db
 
 	if err := db.Where("id = ?", id).Updates(data).Error; err != nil {
-		if gormErr := common.GetGormErr(err); gormErr != nil {
-			switch key := gormErr.GetDuplicateErrorKey("email"); key {
-			case "email":
-				return usermodel.ErrUserEmailDuplicated
-			}
-		}
 		return common.ErrDB(err)
 	}
 
