@@ -80,3 +80,17 @@ jobs:
         run: |
           cd frontend
           NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
+
+  gremlins:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.19"
+      - name: Run Gremlins Action - Mutation testing
+        uses: go-gremlins/gremlins-action@v1
+        with:
+          version: latest
+          args: --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
+          workdir: ./backend/
