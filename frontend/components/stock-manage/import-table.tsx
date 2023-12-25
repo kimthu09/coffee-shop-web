@@ -58,6 +58,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import { FilterDatePicker } from "./date-picker";
 import StaffList from "../staff-list";
 import getAllImportNoteForExcel from "@/lib/import/getAllImportNoteForExcel";
+import { getToken } from "@/lib/auth";
 
 export const columns: ColumnDef<ImportNote>[] = [
   {
@@ -281,6 +282,9 @@ export function ImportTable() {
   filters.forEach((item) => {
     stringToFilter = stringToFilter.concat(`&${item.type}=${item.value}`);
   });
+  const token = getToken();
+  if (!token) {
+  }
   const {
     mutate: mutate,
     data: response,
@@ -289,6 +293,7 @@ export function ImportTable() {
   } = getAllImportNote({
     page: page,
     filterString: stringToFilter,
+    token: token!,
   });
   const data = response?.data;
   const totalPage = Math.ceil(response?.paging.total / response?.paging.limit);
@@ -339,14 +344,6 @@ export function ImportTable() {
       columnVisibility,
       rowSelection,
     },
-  });
-  const {
-    data: allImport,
-    isLoading: isLoadingAllImport,
-    isError: isErrorAllImport,
-  } = getAllImportNote({
-    page: page,
-    limit: 1000,
   });
   const [exportOption, setExportOption] = useState("all");
   const handleExport = async () => {

@@ -21,7 +21,7 @@ import { GoPeople, GoPerson } from "react-icons/go";
 import { z } from "zod";
 
 export const apiKey =
-  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJfaWQiOiJnM1cyMUE3U1IiLCJyb2xlIjoiIn0sImV4cCI6MTcwMzQwNjQ2MCwiaWF0IjoxNzAzMzIwMDYwfQ.dnPSknjtgTN7QFZONhZq6z2o8tvGBY1BvgykIA_LIgE";
+  "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwYXlsb2FkIjp7InVzZXJfaWQiOiJnM1cyMUE3U1IiLCJyb2xlIjoiIn0sImV4cCI6MTcwMzU1NTY5OCwiaWF0IjoxNzAzNDY5Mjk4fQ.zm-7b5WY4b98_RUuwy-9HSyYNMAzqtOnkw-Z0aOwPSI";
 export const endPoint = "http://localhost:8080/v1";
 
 export const required = z.string().min(1, "Không để trống trường này");

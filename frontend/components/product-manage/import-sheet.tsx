@@ -11,10 +11,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { ImportNote } from "@/types";
-import { Span } from "next/dist/trace";
 import { useState } from "react";
 import { FiUpload } from "react-icons/fi";
+import { toast } from "../ui/use-toast";
 
 const ImportSheet = ({
   handleFile,
@@ -34,6 +33,11 @@ const ImportSheet = ({
         if (selectedFile.size > 2000000) {
           console.log(e.target.files[0].size);
           console.log("Dung lượng file không hợp lệ");
+          toast({
+            variant: "destructive",
+            title: "Có lỗi",
+            description: "Dung lượng file không hợp lệ",
+          });
         } else {
           setFile(null);
           setFile(e.target.files[0]);
@@ -42,7 +46,11 @@ const ImportSheet = ({
         setFile(null);
         console.log(selectedFile.type);
 
-        console.log("file không hợp lệ");
+        toast({
+          variant: "destructive",
+          title: "Có lỗi",
+          description: "File không hợp lệ",
+        });
       }
     }
   };
@@ -74,7 +82,9 @@ const ImportSheet = ({
           <span>
             - Tải file mẫu sản phẩm
             <Button variant={"link"} className="px-1">
-              tại đây
+              <a href={"/import-sample.xlsx"} download="Sample.xlsx">
+                tại đây
+              </a>
             </Button>
           </span>
           <p>- File nhập có dung lượng tối đa là 2MB.</p>

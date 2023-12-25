@@ -59,7 +59,7 @@ const SupplierList = ({
           <DropdownMenuContent className="DropdownMenuContent">
             <Command>
               <CommandInput
-                placeholder="Tìm nhà cung cấp"
+                placeholder="Tìm nhà số điện thoại nhà cung cấp"
                 // onValueChange={(str) => setNewCategory(str)}
               />
               <CommandEmpty className="py-2 px-6">
@@ -68,7 +68,7 @@ const SupplierList = ({
               <CommandGroup className="max-h-48 overflow-y-auto">
                 {suppliers.map((item: any) => (
                   <CommandItem
-                    value={item.name}
+                    value={item.phone}
                     key={item.id}
                     onSelect={() => {
                       setSupplierId(item.id);
@@ -81,7 +81,12 @@ const SupplierList = ({
                         item.id === supplierId ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    {item.name}
+                    <div className="flex flex-col">
+                      {item.name}
+                      <span className="text-muted-foreground">
+                        {item.phone}
+                      </span>
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
