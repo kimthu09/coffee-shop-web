@@ -17,8 +17,8 @@ services:
     image: golang:1.20.7-bookworm
     container_name: cfsm-be
     volumes:
-      - ./coffee_shop_management_backend:/data
-      - ./coffee_shop_management_backend/tools/x86/gin:/usr/bin/gin
+      - ./backend:/data
+      - ./backend/tools/x86/gin:/usr/bin/gin
     working_dir: /data
     environment:
       - GOMEMLIMIT=5120MiB

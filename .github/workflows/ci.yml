@@ -52,25 +52,25 @@ jobs:
 
       - name: Replace DSN in .env
         run: |
-          cd coffee_shop_management_backend
+          cd backend
           sed -i "s|root:123456@tcp(cfsm-mysql:3306)/cfshopmanagement|root:123456@tcp(127.0.0.1:3306)/cfshopmanagement|" .env
 
       - name: Build Go backend
         run: |
-          cd coffee_shop_management_backend
+          cd backend
           go build -v ./...
 
       - name: Test Go backend
         run: |
-          cd coffee_shop_management_backend
+          cd backend
           go test -v ./...
 
-      # - name: Install dependencies for Next.js frontend
-      #   run: |
-      #     cd coffee_shop_management
-      #     npm install
+      - name: Install dependencies for Next.js frontend
+        run: |
+          cd frontend
+          npm install
 
-      # - name: Build Next.js frontend
-      #   run: |
-      #     cd coffee_shop_management
-      #     NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
+      - name: Build Next.js frontend
+        run: |
+          cd frontend
+          NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
