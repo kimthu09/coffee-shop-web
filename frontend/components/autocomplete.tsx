@@ -15,7 +15,7 @@ import {
   useEffect,
 } from "react";
 
-import { cn, toVND } from "@/lib/utils";
+import { cn, toUnit, toVND } from "@/lib/utils";
 import { Check } from "lucide-react";
 import { Ingredient } from "@/types";
 
@@ -154,7 +154,7 @@ export const AutoComplete = ({
                             </span>
                           </span>
                           <div className="basis-2/3 flex justify-between">
-                            {option.measureType}
+                            {toUnit(option.measureType)}
                             <span className="font-medium text-teal-800">
                               {toVND(option.price)}
                             </span>

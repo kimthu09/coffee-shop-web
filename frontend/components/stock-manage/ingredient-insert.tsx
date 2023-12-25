@@ -16,7 +16,7 @@ import { z } from "zod";
 import { FormSchema } from "@/app/stock-manage/import/add-note/page";
 import { AutoComplete } from "../autocomplete";
 import { Ingredient } from "@/types";
-import { toVND } from "@/lib/utils";
+import { toUnit, toVND } from "@/lib/utils";
 import { toast } from "../ui/use-toast";
 import getAllIngredient from "@/lib/getAllIngredient";
 import Loading from "../loading";
@@ -134,7 +134,7 @@ const IngredientInsert = ({
                     <div className="flex">
                       <h2 className="font-medium">{value?.name}</h2>
                       <h2 className="ml-1 text-muted-foreground">
-                        ({value?.measureType})
+                        ({toUnit(value?.measureType)})
                       </h2>
                     </div>
                     <div className="relative p-1">
@@ -156,11 +156,6 @@ const IngredientInsert = ({
                           Giá ban đầu: {toVND(ingre.oldPrice)}
                         </span>
                       </div>
-                      {/* <div className="absolute top-0 right-0 cursor-pointer">
-                      <IoMdInformationCircleOutline
-                        className={`h-5 w-5 text-teal-700`}
-                      />
-                    </div> */}
                     </div>
 
                     <Input
