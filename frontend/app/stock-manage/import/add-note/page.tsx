@@ -18,6 +18,8 @@ import { toast } from "@/components/ui/use-toast";
 import createImportNote from "@/lib/import/createImportNote";
 import { Switch } from "@/components/ui/switch";
 import { useSWRConfig } from "swr";
+import getAllIngredient from "@/lib/getAllIngredient";
+import Loading from "@/components/loading";
 
 export const FormSchema = z.object({
   idNote: z.string().max(12, "Tối đa 12 ký tự"),
@@ -43,7 +45,7 @@ const AddNote = () => {
 
   const handleSupplierIdSet = (idSupplier: string) => {
     setSupplierId(idSupplier);
-    setValue("supplierId", idSupplier);
+    setValue("supplierId", idSupplier, { shouldDirty: true });
     trigger("supplierId");
   };
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -62,7 +64,7 @@ const AddNote = () => {
     trigger,
     watch,
     reset,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = form;
   const onSubmit: SubmitHandler<z.infer<typeof FormSchema>> = async (data) => {
     console.log(data);
@@ -130,18 +132,28 @@ const AddNote = () => {
             }
             if (rowIndex > 2) {
               const idIngre = row.getCell(1).value.toString();
-              //TODO
-              // const oldPrice = ingredients.find(
-              //   (ingre) => ingre.id === idIngre
-              // )?.price;
-              // if (oldPrice) {
-              //   importNote.details.push({
-              //     ingredientId: idIngre,
-              //     amountImport: row.getCell(3).value,
-              //     price: row.getCell(4).value,
-              //     oldPrice: oldPrice,
-              //   });
-              // }
+              const oldPrice = data?.data.find(
+                (ingre) => ingre.id === idIngre
+              )?.price;
+              console.log(oldPrice);
+
+              if (oldPrice) {
+                const detail = {
+                  ingredientId: idIngre,
+                  amountImport: row.getCell(3).value,
+                  price: row.getCell(4).value,
+                  oldPrice: oldPrice,
+                };
+
+                importNote.details.push(detail);
+              } else {
+                toast({
+                  variant: "destructive",
+                  title: "Có lỗi",
+                  description: "Vui lòng kiểm tra file đúng định dạng",
+                });
+                return;
+              }
             }
           });
           console.log(importNote);
@@ -156,92 +168,99 @@ const AddNote = () => {
       });
     };
   };
-  return (
-    <div className="col items-center">
-      <div className="col xl:w-4/5 w-full xl:px-0 md:px-6 px-0">
-        <div className="flex justify-between gap-2">
-          <h1 className="font-medium text-xxl self-start">Thêm phiếu nhập</h1>
-          <ImportSheet handleFile={handleFile} />
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmit, onError)}>
-          <div className="flex flex-col gap-4">
-            <div className="flex lg:flex-row flex-col gap-4">
-              <Card className="basis-3/4">
-                <CardContent className="lg:p-6 p-4 flex lg:flex-row flex-col gap-4">
-                  <div className="flex-1">
-                    <Label>Mã phiếu</Label>
-                    <Input
-                      placeholder="Mã sinh tự động nếu để trống"
-                      {...register("idNote")}
-                    ></Input>
-                    {errors.idNote && (
-                      <span className="error___message">
-                        {errors.idNote.message}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <Label>Nhà cung cấp</Label>
-                    <SupplierList
-                      supplierId={supplierId}
-                      setSupplierId={handleSupplierIdSet}
-                    />
-                    {errors.supplierId && (
-                      <span className="error___message">
-                        {errors.supplierId.message}
-                      </span>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="basis-1/4">
-                <CardContent className="lg:p-6 p-4 flex justify-between gap-4">
-                  <span className="w-2/3 text-sm font-medium">
-                    Cập nhật giá mới khi thêm
-                  </span>
-                  <Switch
-                    checked={isReplacePrice}
-                    onCheckedChange={setIsReplacePrice}
-                  />
-                </CardContent>
-              </Card>
-            </div>
-            <Card>
-              <CardContent className="lg:p-6 p-4">
-                <IngredientInsert form={form} />
-              </CardContent>
-            </Card>
-            <div className="flex md:justify-end justify-stretch gap-2">
-              <Button
-                className="px-4 bg-white md:flex-none flex-1"
-                variant={"outline"}
-                type="button"
-                onClick={() =>
-                  reset({
-                    idNote: "",
-                    supplierId: "",
-                    details: [],
-                  })
-                }
-              >
-                <div className="flex flex-wrap gap-2 items-center">
-                  <FiTrash2 className="text-muted-foreground" />
-                  Hủy
-                </div>
-              </Button>
-              <Button className="px-4 pl-2 md:flex-none  flex-1">
-                <div className="flex flex-wrap gap-2 items-center">
-                  <LuCheck />
-                  Thêm
-                </div>
-              </Button>
-            </div>
+  const { data, isLoading, isError } = getAllIngredient();
+  if (isLoading) {
+    return <Loading />;
+  } else
+    return (
+      <div className="col items-center">
+        <div className="col xl:w-4/5 w-full xl:px-0 md:px-6 px-0">
+          <div className="flex justify-between gap-2">
+            <h1 className="font-medium text-xxl self-start">Thêm phiếu nhập</h1>
+            <ImportSheet handleFile={handleFile} />
           </div>
-        </form>
+
+          <form onSubmit={handleSubmit(onSubmit, onError)}>
+            <div className="flex flex-col gap-4">
+              <div className="flex lg:flex-row flex-col gap-4">
+                <Card className="basis-3/4">
+                  <CardContent className="lg:p-6 p-4 flex lg:flex-row flex-col gap-4">
+                    <div className="flex-1">
+                      <Label>Mã phiếu</Label>
+                      <Input
+                        placeholder="Mã sinh tự động nếu để trống"
+                        {...register("idNote")}
+                      ></Input>
+                      {errors.idNote && (
+                        <span className="error___message">
+                          {errors.idNote.message}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Label>Nhà cung cấp</Label>
+                      <SupplierList
+                        supplierId={supplierId}
+                        setSupplierId={handleSupplierIdSet}
+                      />
+                      {errors.supplierId && (
+                        <span className="error___message">
+                          {errors.supplierId.message}
+                        </span>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card className="basis-1/4">
+                  <CardContent className="lg:p-6 p-4 flex justify-between gap-4">
+                    <span className="w-2/3 text-sm font-medium">
+                      Cập nhật giá mới khi thêm
+                    </span>
+                    <Switch
+                      checked={isReplacePrice}
+                      onCheckedChange={setIsReplacePrice}
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+              <Card>
+                <CardContent className="lg:p-6 p-4">
+                  <IngredientInsert form={form} />
+                </CardContent>
+              </Card>
+              <div className="flex md:justify-end justify-stretch gap-2">
+                <Button
+                  className="px-4 bg-white md:flex-none flex-1"
+                  disabled={!isDirty}
+                  variant={"outline"}
+                  type="button"
+                  onClick={() => {
+                    reset({
+                      idNote: "",
+                      supplierId: "",
+                      details: [],
+                    });
+                    setSupplierId("");
+                  }}
+                >
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <FiTrash2 className="text-muted-foreground" />
+                    Hủy
+                  </div>
+                </Button>
+                <Button className="px-4 pl-2 md:flex-none  flex-1">
+                  <div className="flex flex-wrap gap-2 items-center">
+                    <LuCheck />
+                    Thêm
+                  </div>
+                </Button>
+              </div>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
-  );
+    );
 };
 
 export default AddNote;

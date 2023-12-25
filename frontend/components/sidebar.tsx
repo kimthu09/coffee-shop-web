@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { sidebarItems } from "@/constants";
 import { SidebarItem } from "@/types";
+import { useAuth } from "@/hooks/auth-context";
 
 const initialValue = {
   isCollapsed: false,
@@ -43,69 +44,73 @@ export const SidebarProvider = ({
 
 export function SidebarNav() {
   const context = useContext(SidebarContext);
+  const { user } = useAuth();
   if (!context) {
     throw new Error(
       "`SidebarContext` have to be used inside `CurtainContextProvider`"
     );
   }
-  return (
-    <div className="md:flex hidden z-20">
-      <aside
-        className={`bg-white p-1 h-screen transition-all shadow-md overflow-auto ${
-          context.isCollapsed ? "w-[3.8rem]" : "w-64"
-        }`}
-      >
-        <nav>
-          <div className={`flex items-center my-4 h-[64px]`}>
-            <Link href="/">
+  if (!user) {
+    return null;
+  } else
+    return (
+      <div className="md:flex hidden z-20">
+        <aside
+          className={`bg-white p-1 h-screen transition-all shadow-md overflow-auto ${
+            context.isCollapsed ? "w-[3.8rem]" : "w-64"
+          }`}
+        >
+          <nav>
+            <div className={`flex items-center my-4 h-[64px]`}>
+              <Link href="/">
+                <div
+                  className={`flex align-middle justify-center items-center gap-4 h-[64px] w-[64px]  rounded-xl bg-orange-100 ${
+                    context.isCollapsed ? "hidden" : "flex"
+                  }`}
+                >
+                  <Image
+                    src="/logo.svg"
+                    alt="logo"
+                    className="sidebar__logo"
+                    width={80}
+                    height={80}
+                  ></Image>
+                </div>
+              </Link>
+
+              <Link href="/">
+                <p
+                  className={`text-lg ml-2 font-semibold overflow-hidden whitespace-nowrap ${
+                    context.isCollapsed ? "hidden" : "block"
+                  }`}
+                >
+                  Coffee Shop
+                </p>
+              </Link>
               <div
-                className={`flex align-middle justify-center items-center gap-4 h-[64px] w-[64px]  rounded-xl bg-orange-100 ${
-                  context.isCollapsed ? "hidden" : "flex"
+                className={`rounded-full hover:text-primary cursor-pointer p-2 ${
+                  context.isCollapsed ? "m-auto" : "ml-auto mr-1"
                 }`}
+                onClick={context.toggleCollapse}
               >
-                <Image
-                  src="/logo.svg"
-                  alt="logo"
-                  className="sidebar__logo"
-                  width={80}
-                  height={80}
-                ></Image>
+                <RxHamburgerMenu className="w-6 h-6 " />
               </div>
-            </Link>
-
-            <Link href="/">
-              <p
-                className={`text-lg ml-2 font-semibold overflow-hidden whitespace-nowrap ${
-                  context.isCollapsed ? "hidden" : "block"
-                }`}
-              >
-                Coffee Shop
-              </p>
-            </Link>
-            <div
-              className={`rounded-full hover:text-primary cursor-pointer p-2 ${
-                context.isCollapsed ? "m-auto" : "ml-auto mr-1"
-              }`}
-              onClick={context.toggleCollapse}
-            >
-              <RxHamburgerMenu className="w-6 h-6 " />
             </div>
-          </div>
 
-          <ul className="sidebar__list">
-            {sidebarItems.map((item) => (
-              <li className="sidebar__item" key={item.title}>
-                <MenuItem
-                  item={item}
-                  isCollapse={context.isCollapsed}
-                ></MenuItem>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </aside>
-    </div>
-  );
+            <ul className="sidebar__list">
+              {sidebarItems.map((item) => (
+                <li className="sidebar__item" key={item.title}>
+                  <MenuItem
+                    item={item}
+                    isCollapse={context.isCollapsed}
+                  ></MenuItem>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        </aside>
+      </div>
+    );
 }
 
 const MenuItem = ({

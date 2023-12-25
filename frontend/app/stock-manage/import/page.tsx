@@ -1,6 +1,8 @@
+"use client";
 import ImportSheet from "@/components/product-manage/import-sheet";
 import { ImportTable } from "@/components/stock-manage/import-table";
 import { Button } from "@/components/ui/button";
+import withAuth from "@/lib/withAuth";
 import Link from "next/link";
 import React from "react";
 import { FaPlus } from "react-icons/fa";
@@ -27,4 +29,4 @@ const ImportStock = () => {
   );
 };
 
-export default ImportStock;
+export default withAuth(ImportStock);
