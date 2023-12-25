@@ -1,6 +1,7 @@
 package categorystore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"context"
 	"errors"
@@ -36,6 +37,11 @@ func Test_sqlStore_UpdateInfoCategory(t *testing.T) {
 
 	expectedSql := "UPDATE `Category` SET `name`=?,`description`=? WHERE id = ?"
 
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
+	mockErr := errors.New("some error")
 	type fields struct {
 		db *gorm.DB
 	}
@@ -49,6 +55,7 @@ func Test_sqlStore_UpdateInfoCategory(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -68,6 +75,7 @@ func Test_sqlStore_UpdateInfoCategory(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
@@ -84,9 +92,30 @@ func Test_sqlStore_UpdateInfoCategory(t *testing.T) {
 				sqlDBMock.ExpectBegin()
 				sqlDBMock.ExpectExec(expectedSql).
 					WithArgs(categoryUpdateInfo.Name, categoryUpdateInfo.Description, id).
-					WillReturnError(errors.New("some error"))
+					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Update category info failed because duplicate name",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				id:   id,
+				data: &categoryUpdateInfo,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.ExpectExec(expectedSql).
+					WithArgs(categoryUpdateInfo.Name, categoryUpdateInfo.Description, id).
+					WillReturnError(mockErrName)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    categorymodel.ErrCategoryNameDuplicate,
 			wantErr: true,
 		},
 	}
@@ -102,6 +131,7 @@ func Test_sqlStore_UpdateInfoCategory(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "UpdateInfoCategory() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "UpdateInfoCategory() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "UpdateInfoCategory() error = %v, wantErr %v", err, tt.wantErr)
 			}

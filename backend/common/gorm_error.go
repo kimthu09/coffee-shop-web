@@ -12,6 +12,10 @@ type GormErr struct {
 	Message string `json:"Message"`
 }
 
+func (gErr *GormErr) Error() string {
+	return gErr.Message
+}
+
 func GetGormErr(appErr error) *GormErr {
 	var byteErr, _ = json.Marshal(appErr)
 	var newError GormErr

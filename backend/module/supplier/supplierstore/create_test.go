@@ -1,6 +1,7 @@
 package supplierstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/supplier/suppliermodel"
 	"context"
 	"errors"
@@ -39,6 +40,14 @@ func Test_sqlStore_CreateSupplier(t *testing.T) {
 		Debt:  supplierDebt,
 	}
 	mockErr := errors.New("something went wrong with the database")
+	mockErrPhone := &common.GormErr{
+		Number:  1062,
+		Message: "phone",
+	}
+	mockErrPRIMARY := &common.GormErr{
+		Number:  1062,
+		Message: "PRIMARY",
+	}
 
 	expectedSql := "INSERT INTO `Supplier` (`id`,`name`,`email`,`phone`,`debt`) VALUES (?,?,?,?,?)"
 
@@ -54,6 +63,7 @@ func Test_sqlStore_CreateSupplier(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -79,10 +89,11 @@ func Test_sqlStore_CreateSupplier(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name: "Create supplier in database failed because something wrong happens to database",
+			name: "Create supplier in database failed because of database error",
 			fields: fields{
 				db: gormDB,
 			},
@@ -104,6 +115,59 @@ func Test_sqlStore_CreateSupplier(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Create supplier in database failed because of duplicate phone",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &supplierCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(
+						supplierCreate.Id,
+						supplierCreate.Name,
+						supplierCreate.Email,
+						supplierCreate.Phone,
+						supplierCreate.Debt,
+					).
+					WillReturnError(mockErrPhone)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    suppliermodel.ErrSupplierPhoneDuplicate,
+			wantErr: true,
+		},
+		{
+			name: "Create supplier in database failed because of duplicate id",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &supplierCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(
+						supplierCreate.Id,
+						supplierCreate.Name,
+						supplierCreate.Email,
+						supplierCreate.Phone,
+						supplierCreate.Debt,
+					).
+					WillReturnError(mockErrPRIMARY)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    suppliermodel.ErrSupplierIdDuplicate,
 			wantErr: true,
 		},
 	}
@@ -119,6 +183,7 @@ func Test_sqlStore_CreateSupplier(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "CreateSupplier() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "CreateSupplier() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "CreateSupplier() error = %v, wantErr %v", err, tt.wantErr)
 			}

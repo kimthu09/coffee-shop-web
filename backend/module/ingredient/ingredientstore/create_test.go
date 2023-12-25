@@ -1,6 +1,7 @@
 package ingredientstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/common/enum"
 	"coffee_shop_management_backend/module/ingredient/ingredientmodel"
 	"context"
@@ -46,6 +47,14 @@ func Test_sqlStore_CreateIngredient(t *testing.T) {
 		Price:       price,
 	}
 	mockErr := errors.New(mock.Anything)
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
+	mockErrPRIMARY := &common.GormErr{
+		Number:  1062,
+		Message: "PRIMARY",
+	}
 	expectedSql := "INSERT INTO `Ingredient` (`id`,`name`,`measureType`,`price`) VALUES (?,?,?,?)"
 
 	tests := []struct {
@@ -53,6 +62,7 @@ func Test_sqlStore_CreateIngredient(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -72,10 +82,11 @@ func Test_sqlStore_CreateIngredient(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name: "Create ingredient in database successfully",
+			name: "Create ingredient in database failed because of database error",
 			fields: fields{
 				db: gormDB,
 			},
@@ -91,6 +102,47 @@ func Test_sqlStore_CreateIngredient(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Create ingredient in database failed because of duplicate name",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &ingredientCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(id, name, measureType, price).
+					WillReturnError(mockErrName)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    ingredientmodel.ErrIngredientNameDuplicate,
+			wantErr: true,
+		},
+		{
+			name: "Create ingredient in database failed because of duplicate id",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &ingredientCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(id, name, measureType, price).
+					WillReturnError(mockErrPRIMARY)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    ingredientmodel.ErrIngredientIdDuplicate,
 			wantErr: true,
 		},
 	}
@@ -106,6 +158,7 @@ func Test_sqlStore_CreateIngredient(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "CreateIngredient() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "CreateIngredient() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "CreateIngredient() error = %v, wantErr %v", err, tt.wantErr)
 			}
