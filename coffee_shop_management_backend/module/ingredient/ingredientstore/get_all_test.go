@@ -49,7 +49,7 @@ func Test_sqlStore_GetAllIngredient(t *testing.T) {
 		},
 	}
 
-	expectedQuery := "SELECT * FROM `Ingredient`"
+	expectedQuery := "SELECT * FROM `Ingredient` ORDER BY name"
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {

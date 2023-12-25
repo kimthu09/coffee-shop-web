@@ -14,6 +14,7 @@ func (s *sqlStore) GetAllIngredient(
 	db = db.Table(common.TableIngredient)
 
 	if err := db.
+		Order("name").
 		Find(&result).Error; err != nil {
 		return nil, common.ErrDB(err)
 	}
