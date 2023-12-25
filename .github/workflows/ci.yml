@@ -93,4 +93,4 @@ jobs:
         with:
           version: latest
           args: --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
-          workdir: ./backend
+          workdir: /backend/
