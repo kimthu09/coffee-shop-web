@@ -1,6 +1,7 @@
 package productstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"context"
 	"errors"
@@ -38,6 +39,10 @@ func Test_sqlStore_UpdateFood(t *testing.T) {
 		},
 	}
 	mockErr := errors.New(mock.Anything)
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
 
 	queryString :=
 		"UPDATE `Food` SET `name`=?,`description`=?,`cookingGuide`=? WHERE id = ?"
@@ -55,6 +60,7 @@ func Test_sqlStore_UpdateFood(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -77,10 +83,11 @@ func Test_sqlStore_UpdateFood(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(0, 1))
 				mockSqlDB.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name:   "Update food failed",
+			name:   "Update food failed because of db error",
 			fields: fields{db: gormDB},
 			args: args{
 				ctx:  context.Background(),
@@ -99,6 +106,30 @@ func Test_sqlStore_UpdateFood(t *testing.T) {
 					WillReturnError(mockErr)
 				mockSqlDB.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name:   "Update food failed because of duplicate name",
+			fields: fields{db: gormDB},
+			args: args{
+				ctx:  context.Background(),
+				id:   id,
+				data: updateData,
+			},
+			mock: func() {
+				mockSqlDB.ExpectBegin()
+				mockSqlDB.
+					ExpectExec(queryString).
+					WithArgs(
+						*updateData.Name,
+						*updateData.Description,
+						*updateData.CookingGuide,
+						id).
+					WillReturnError(mockErrName)
+				mockSqlDB.ExpectRollback()
+			},
+			want:    productmodel.ErrFoodNameDuplicate,
 			wantErr: true,
 		},
 	}
@@ -114,6 +145,7 @@ func Test_sqlStore_UpdateFood(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "UpdateFood() err = %v, wantErr = %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "UpdateFood() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "UpdateFood() err = %v, wantErr = %v", err, tt.wantErr)
 			}

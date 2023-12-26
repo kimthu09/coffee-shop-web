@@ -1,6 +1,7 @@
 package productstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/product/productmodel"
 	"context"
 	"errors"
@@ -40,6 +41,14 @@ func Test_sqlStore_CreateTopping(t *testing.T) {
 	}
 	expectedQuery := "INSERT INTO `Topping` (`id`,`name`,`description`,`cookingGuide`,`cost`,`price`,`recipeId`) VALUES (?,?,?,?,?,?,?)"
 	mockErr := errors.New(mock.Anything)
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
+	mockErrPRIMARY := &common.GormErr{
+		Number:  1062,
+		Message: "PRIMARY",
+	}
 
 	type fields struct {
 		db *gorm.DB
@@ -53,6 +62,7 @@ func Test_sqlStore_CreateTopping(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -78,6 +88,7 @@ func Test_sqlStore_CreateTopping(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				mockSqlDB.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
@@ -103,6 +114,59 @@ func Test_sqlStore_CreateTopping(t *testing.T) {
 					WillReturnError(mockErr)
 				mockSqlDB.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name:   "Create topping failed because duplicate id",
+			fields: fields{db: gormDB},
+			args: args{
+				ctx:  context.Background(),
+				data: toppingCreate,
+			},
+			mock: func() {
+				mockSqlDB.ExpectBegin()
+				mockSqlDB.
+					ExpectExec(expectedQuery).
+					WithArgs(
+						toppingCreate.Id,
+						toppingCreate.Name,
+						toppingCreate.Description,
+						toppingCreate.CookingGuide,
+						toppingCreate.Cost,
+						toppingCreate.Price,
+						toppingCreate.RecipeId,
+					).
+					WillReturnError(mockErrPRIMARY)
+				mockSqlDB.ExpectRollback()
+			},
+			want:    productmodel.ErrToppingIdDuplicate,
+			wantErr: true,
+		},
+		{
+			name:   "Create topping failed because duplicate name",
+			fields: fields{db: gormDB},
+			args: args{
+				ctx:  context.Background(),
+				data: toppingCreate,
+			},
+			mock: func() {
+				mockSqlDB.ExpectBegin()
+				mockSqlDB.
+					ExpectExec(expectedQuery).
+					WithArgs(
+						toppingCreate.Id,
+						toppingCreate.Name,
+						toppingCreate.Description,
+						toppingCreate.CookingGuide,
+						toppingCreate.Cost,
+						toppingCreate.Price,
+						toppingCreate.RecipeId,
+					).
+					WillReturnError(mockErrName)
+				mockSqlDB.ExpectRollback()
+			},
+			want:    productmodel.ErrToppingNameDuplicate,
 			wantErr: true,
 		},
 	}
@@ -118,6 +182,7 @@ func Test_sqlStore_CreateTopping(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "CreateTopping() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "CreateTopping() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "CreateTopping() error = %v, wantErr %v", err, tt.wantErr)
 			}

@@ -133,7 +133,7 @@ func Test_seeCustomerInvoiceBiz_SeeCustomerInvoice(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    invoices,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -165,7 +165,7 @@ func Test_seeCustomerInvoiceBiz_SeeCustomerInvoice(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    invoices,
+			want:    nil,
 			wantErr: true,
 		},
 		{

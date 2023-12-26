@@ -21,10 +21,10 @@ func (data *ImportNoteDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
 		return ErrImportDetailIngredientIdInvalid
 	}
-	if common.ValidateNegativeNumber(data.Price) {
+	if common.ValidateNegativeNumberFloat(data.Price) {
 		return ErrImportDetailPriceIsNegativeNumber
 	}
-	if common.ValidateNotPositiveNumber(data.AmountImport) {
+	if common.ValidateNotPositiveNumberInt(data.AmountImport) {
 		return ErrImportDetailAmountImportIsNotPositiveNumber
 	}
 	return nil

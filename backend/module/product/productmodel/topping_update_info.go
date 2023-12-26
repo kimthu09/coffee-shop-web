@@ -22,10 +22,10 @@ func (data *ToppingUpdateInfo) Validate() error {
 			return err
 		}
 	}
-	if data.Cost != nil && common.ValidateNegativeNumber(*data.Cost) {
+	if data.Cost != nil && common.ValidateNegativeNumberInt(*data.Cost) {
 		return ErrToppingCostIsNegativeNumber
 	}
-	if data.Price != nil && common.ValidateNegativeNumber(*data.Price) {
+	if data.Price != nil && common.ValidateNegativeNumberInt(*data.Price) {
 		return ErrToppingPriceIsNegativeNumber
 	}
 	if data.Recipe != nil {

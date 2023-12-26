@@ -114,7 +114,7 @@ func Test_seeCustomerDetailBiz_SeeCustomerDetail(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    &customer,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -141,7 +141,7 @@ func Test_seeCustomerDetailBiz_SeeCustomerDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &customer,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -156,7 +156,7 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 					).
 					WillReturnError(mockErr)
 			},
-			want:    listImportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -196,7 +196,7 @@ func Test_sqlStore_ListImportNote(t *testing.T) {
 					).
 					WillReturnError(mockErr)
 			},
-			want:    listImportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -174,7 +174,7 @@ func Test_seeInvoiceDetailRepo_SeeInvoiceDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &finalInvoice,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -203,7 +203,7 @@ func Test_seeInvoiceDetailRepo_SeeInvoiceDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &finalInvoice,
+			want:    nil,
 			wantErr: true,
 		},
 		{

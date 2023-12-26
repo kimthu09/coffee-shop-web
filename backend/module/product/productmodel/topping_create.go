@@ -24,10 +24,10 @@ func (data *ToppingCreate) Validate() error {
 	if err := (*data.ProductCreate).Validate(); err != nil {
 		return err
 	}
-	if common.ValidateNegativeNumber(data.Cost) {
+	if common.ValidateNegativeNumberInt(data.Cost) {
 		return ErrToppingCostIsNegativeNumber
 	}
-	if common.ValidateNegativeNumber(data.Price) {
+	if common.ValidateNegativeNumberInt(data.Price) {
 		return ErrToppingPriceIsNegativeNumber
 	}
 	if data.Recipe == nil {

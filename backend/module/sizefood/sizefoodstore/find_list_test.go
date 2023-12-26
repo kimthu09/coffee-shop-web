@@ -104,7 +104,7 @@ func Test_sqlStore_FindListSizeFood(t *testing.T) {
 					WithArgs(foodId).
 					WillReturnError(mockErr)
 			},
-			want:    sizeFoods,
+			want:    nil,
 			wantErr: true,
 		},
 	}

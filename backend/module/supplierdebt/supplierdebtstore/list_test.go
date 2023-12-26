@@ -129,15 +129,7 @@ func Test_sqlStore_ListSupplierDebtBySupplier(t *testing.T) {
 						&dateTo).
 					WillReturnError(mockErr)
 			},
-			want: []supplierdebtmodel.SupplierDebt{
-				{
-					Id:         "1",
-					SupplierId: supplierId,
-					Amount:     100,
-					AmountLeft: 200,
-					DebtType:   &pay,
-					CreatedBy:  "admin"},
-			},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -167,15 +159,7 @@ func Test_sqlStore_ListSupplierDebtBySupplier(t *testing.T) {
 						&dateTo).
 					WillReturnError(mockErr)
 			},
-			want: []supplierdebtmodel.SupplierDebt{
-				{
-					Id:         "1",
-					SupplierId: supplierId,
-					Amount:     100,
-					AmountLeft: 200,
-					DebtType:   &pay,
-					CreatedBy:  "admin"},
-			},
+			want:    nil,
 			wantErr: true,
 		},
 	}

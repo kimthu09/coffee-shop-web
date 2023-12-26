@@ -90,7 +90,7 @@ func Test_sqlStore_FindRole(t *testing.T) {
 					WithArgs(mockConditions["id"]).
 					WillReturnError(mockErr)
 			},
-			want:    &role,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -108,7 +108,7 @@ func Test_sqlStore_FindRole(t *testing.T) {
 					WithArgs(mockConditions["foodId"], mockConditions["sizeId"]).
 					WillReturnError(gorm.ErrRecordNotFound)
 			},
-			want:    &role,
+			want:    nil,
 			wantErr: true,
 		},
 	}

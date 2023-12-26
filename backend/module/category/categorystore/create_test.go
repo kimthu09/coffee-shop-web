@@ -1,6 +1,7 @@
 package categorystore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/category/categorymodel"
 	"context"
 	"errors"
@@ -11,6 +12,15 @@ import (
 	"gorm.io/gorm"
 	"testing"
 )
+
+type FakeGormErr struct {
+	Number  int    `json:"Numbers"`
+	Message string `json:"Messages"`
+}
+
+func (gErr *FakeGormErr) Error() string {
+	return gErr.Message
+}
 
 func Test_sqlStore_CreateCategory(t *testing.T) {
 	sqlDB, sqlDBMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
@@ -35,6 +45,18 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 		Description: categoryDescription,
 	}
 	mockErr := errors.New("some thing when wrong")
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
+	mockErrPRIMARY := &common.GormErr{
+		Number:  1062,
+		Message: "PRIMARY",
+	}
+	mockErrFaKeGorm := &FakeGormErr{
+		Number:  1062,
+		Message: "FakeGorm",
+	}
 	expectedSql := "INSERT INTO `Category` (`id`,`name`,`description`) VALUES (?,?,?)"
 
 	type fields struct {
@@ -49,6 +71,7 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -71,6 +94,7 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
@@ -93,6 +117,76 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Create category in database failed because duplicate id",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &categoryCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(
+						categoryCreate.Id,
+						categoryCreate.Name,
+						categoryCreate.Description).
+					WillReturnError(mockErrPRIMARY)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    categorymodel.ErrCategoryIdDuplicate,
+			wantErr: true,
+		},
+		{
+			name: "Create category in database failed because duplicate name",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &categoryCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(
+						categoryCreate.Id,
+						categoryCreate.Name,
+						categoryCreate.Description).
+					WillReturnError(mockErrName)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    categorymodel.ErrCategoryNameDuplicate,
+			wantErr: true,
+		},
+		{
+			name: "Create category in database failed because error is not in right format",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				data: &categoryCreate,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.
+					ExpectExec(expectedSql).
+					WithArgs(
+						categoryCreate.Id,
+						categoryCreate.Name,
+						categoryCreate.Description).
+					WillReturnError(mockErrFaKeGorm)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    common.ErrDB(mockErrFaKeGorm),
 			wantErr: true,
 		},
 	}
@@ -108,6 +202,7 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "CreateCategory() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "CreateCategory() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "CreateCategory() error = %v, wantErr %v", err, tt.wantErr)
 			}

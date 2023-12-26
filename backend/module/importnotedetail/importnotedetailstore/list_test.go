@@ -124,7 +124,7 @@ func Test_sqlStore_ListImportNoteDetail(t *testing.T) {
 					WithArgs(importNoteID).
 					WillReturnError(mockErr)
 			},
-			want:    details,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -151,7 +151,7 @@ func Test_sqlStore_ListImportNoteDetail(t *testing.T) {
 					WithArgs("ingredient1", "ingredient2").
 					WillReturnError(mockErr)
 			},
-			want:    details,
+			want:    nil,
 			wantErr: true,
 		},
 	}

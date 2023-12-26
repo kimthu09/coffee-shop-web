@@ -108,7 +108,7 @@ func Test_seeProfileBiz_SeeProfile(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &user,
+			want:    nil,
 			wantErr: true,
 		},
 		{

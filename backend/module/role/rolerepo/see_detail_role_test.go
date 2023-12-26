@@ -195,7 +195,7 @@ func Test_seeRoleDetailRepo_SeeRoleDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &roleDetail,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -226,7 +226,7 @@ func Test_seeRoleDetailRepo_SeeRoleDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &roleDetail,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -264,7 +264,7 @@ func Test_seeRoleDetailRepo_SeeRoleDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &roleDetail,
+			want:    nil,
 			wantErr: true,
 		},
 		{

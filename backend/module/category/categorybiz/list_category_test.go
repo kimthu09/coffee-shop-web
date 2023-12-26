@@ -115,7 +115,7 @@ func Test_listCategoryBiz_ListCategory(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listCategories,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -145,7 +145,7 @@ func Test_listCategoryBiz_ListCategory(t *testing.T) {
 					Return(emptyListCategories, mockErr).
 					Once()
 			},
-			want:    listCategories,
+			want:    nil,
 			wantErr: true,
 		},
 		{

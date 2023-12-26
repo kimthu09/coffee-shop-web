@@ -118,7 +118,7 @@ func Test_listUserBiz_ListUser(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listUser,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -154,7 +154,7 @@ func Test_listUserBiz_ListUser(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listUser,
+			want:    nil,
 			wantErr: true,
 		},
 		{

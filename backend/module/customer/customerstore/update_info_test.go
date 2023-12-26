@@ -1,6 +1,7 @@
 package customerstore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/customer/customermodel"
 	"context"
 	"errors"
@@ -36,6 +37,10 @@ func Test_sqlStore_UpdateCustomerInfo(t *testing.T) {
 	expectedSql := "UPDATE `Customer` SET `name`=?,`email`=?,`phone`=? WHERE id = ?"
 
 	mockErr := errors.New(mock.Anything)
+	mockErrPhone := &common.GormErr{
+		Number:  1062,
+		Message: "phone",
+	}
 
 	type fields struct {
 		db *gorm.DB
@@ -50,6 +55,7 @@ func Test_sqlStore_UpdateCustomerInfo(t *testing.T) {
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -69,6 +75,7 @@ func Test_sqlStore_UpdateCustomerInfo(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
@@ -88,6 +95,27 @@ func Test_sqlStore_UpdateCustomerInfo(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Update customer info failed because duplicate phone",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				id:   customerId,
+				data: updateData,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.ExpectExec(expectedSql).
+					WithArgs(updateData.Name, updateData.Email, updateData.Phone, customerId).
+					WillReturnError(mockErrPhone)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    customermodel.ErrCustomerPhoneDuplicate,
 			wantErr: true,
 		},
 	}
@@ -103,6 +131,7 @@ func Test_sqlStore_UpdateCustomerInfo(t *testing.T) {
 
 			if tt.wantErr {
 				assert.NotNil(t, err, "UpdateCustomerInfo() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "UpdateCustomerInfo() = %v, want %v", err, tt.want)
 			} else {
 				assert.Nil(t, err, "UpdateCustomerInfo() error = %v, wantErr %v", err, tt.wantErr)
 			}

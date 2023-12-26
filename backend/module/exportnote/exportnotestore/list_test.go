@@ -124,7 +124,7 @@ func Test_sqlStore_ListExportNote(t *testing.T) {
 						createdBy).
 					WillReturnError(mockErr)
 			},
-			want:    listExportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -157,7 +157,7 @@ func Test_sqlStore_ListExportNote(t *testing.T) {
 						createdBy).
 					WillReturnError(mockErr)
 			},
-			want:    listExportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

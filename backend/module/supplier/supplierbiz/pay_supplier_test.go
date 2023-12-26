@@ -150,7 +150,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -179,7 +179,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(createdBy).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -208,7 +208,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(createdBy).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -242,7 +242,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -279,7 +279,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(&currentDebtSupplier, nil).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -319,7 +319,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -368,7 +368,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(mockErr).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -425,7 +425,7 @@ func Test_paySupplierBiz_PaySupplier(t *testing.T) {
 					Return(mockErr).
 					Once()
 			},
-			want:    &supplierDebtId,
+			want:    nil,
 			wantErr: true,
 		},
 		{

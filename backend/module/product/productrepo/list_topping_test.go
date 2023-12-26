@@ -20,6 +20,9 @@ func (m *mockListToppingStore) ListTopping(
 	paging *common.Paging,
 ) ([]productmodel.Topping, error) {
 	args := m.Called(ctx, filter, propertiesContainSearchKey, paging)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]productmodel.Topping), args.Error(1)
 }
 
@@ -74,7 +77,6 @@ func Test_listToppingRepo_ListTopping(t *testing.T) {
 	mockErr := assert.AnError
 
 	listToppings := make([]productmodel.Topping, 0)
-	var emptyListToppings []productmodel.Topping
 
 	tests := []struct {
 		name    string
@@ -101,10 +103,10 @@ func Test_listToppingRepo_ListTopping(t *testing.T) {
 						filterTopping,
 						[]string{"id", "name"},
 						paging).
-					Return(emptyListToppings, mockErr).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    listToppings,
+			want:    nil,
 			wantErr: true,
 		},
 		{

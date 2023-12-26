@@ -1,6 +1,7 @@
 package rolestore
 
 import (
+	"coffee_shop_management_backend/common"
 	"coffee_shop_management_backend/module/role/rolemodel"
 	"context"
 	"errors"
@@ -43,12 +44,17 @@ func Test_sqlStore_UpdateRole(t *testing.T) {
 
 	expectedQuery := "UPDATE `Role` SET `name`=? WHERE id = ?"
 	mockErr := errors.New(mock.Anything)
+	mockErrName := &common.GormErr{
+		Number:  1062,
+		Message: "name",
+	}
 
 	tests := []struct {
 		name    string
 		fields  fields
 		args    args
 		mock    func()
+		want    error
 		wantErr bool
 	}{
 		{
@@ -68,10 +74,11 @@ func Test_sqlStore_UpdateRole(t *testing.T) {
 					WillReturnResult(sqlmock.NewResult(1, 1))
 				sqlDBMock.ExpectCommit()
 			},
+			want:    nil,
 			wantErr: false,
 		},
 		{
-			name: "Update role failed",
+			name: "Update role failed because of database error",
 			fields: fields{
 				db: gormDB,
 			},
@@ -87,6 +94,27 @@ func Test_sqlStore_UpdateRole(t *testing.T) {
 					WillReturnError(mockErr)
 				sqlDBMock.ExpectRollback()
 			},
+			want:    common.ErrDB(mockErr),
+			wantErr: true,
+		},
+		{
+			name: "Update role failed because of duplicate name",
+			fields: fields{
+				db: gormDB,
+			},
+			args: args{
+				ctx:  context.Background(),
+				id:   roleId,
+				data: mockData,
+			},
+			mock: func() {
+				sqlDBMock.ExpectBegin()
+				sqlDBMock.ExpectExec(expectedQuery).
+					WithArgs(mockData.Name, roleId).
+					WillReturnError(mockErrName)
+				sqlDBMock.ExpectRollback()
+			},
+			want:    rolemodel.ErrRoleNameDuplicate,
 			wantErr: true,
 		},
 	}
@@ -102,9 +130,10 @@ func Test_sqlStore_UpdateRole(t *testing.T) {
 			err := s.UpdateRole(tt.args.ctx, tt.args.id, tt.args.data)
 
 			if tt.wantErr {
-				assert.NotNil(t, err, "CreateSizeFood() error = %v, wantErr %v", err, tt.wantErr)
+				assert.NotNil(t, err, "UpdateRole() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, err, tt.want, "UpdateRole() = %v, want %v", err, tt.want)
 			} else {
-				assert.Nil(t, err, "CreateSizeFood() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Nil(t, err, "UpdateRole() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}

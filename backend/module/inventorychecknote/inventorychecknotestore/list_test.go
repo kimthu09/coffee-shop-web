@@ -127,7 +127,7 @@ func Test_sqlStore_ListInventoryCheckNote(t *testing.T) {
 						"user001").
 					WillReturnRows(countRows)
 			},
-			want:    listInventoryCheckNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -158,7 +158,7 @@ func Test_sqlStore_ListInventoryCheckNote(t *testing.T) {
 						"user001").
 					WillReturnError(mockErr)
 			},
-			want:    listInventoryCheckNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -122,7 +122,7 @@ func Test_listImportNoteBySupplierBiz_ListImportNoteBySupplier(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    importNotes,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -154,7 +154,7 @@ func Test_listImportNoteBySupplierBiz_ListImportNoteBySupplier(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    importNotes,
+			want:    nil,
 			wantErr: true,
 		},
 		{

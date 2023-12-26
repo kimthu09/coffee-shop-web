@@ -159,7 +159,7 @@ func Test_seeDetailInventoryCheckNoteRepo_SeeDetailInventoryCheckNote(t *testing
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &finalInventoryNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -192,7 +192,7 @@ func Test_seeDetailInventoryCheckNoteRepo_SeeDetailInventoryCheckNote(t *testing
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &finalInventoryNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

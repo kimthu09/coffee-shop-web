@@ -111,7 +111,7 @@ func Test_seeDetailInventoryCheckNoteBiz_SeeDetailInventoryCheckNote(t *testing.
 					Return(false).
 					Once()
 			},
-			want:    &inventoryCheckNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -138,7 +138,7 @@ func Test_seeDetailInventoryCheckNoteBiz_SeeDetailInventoryCheckNote(t *testing.
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &inventoryCheckNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

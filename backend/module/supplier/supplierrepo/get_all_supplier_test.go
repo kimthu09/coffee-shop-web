@@ -95,7 +95,7 @@ func Test_getAllSupplierRepo_GetAllSupplier(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    simpleSuppliers,
+			want:    nil,
 			wantErr: true,
 		},
 		{

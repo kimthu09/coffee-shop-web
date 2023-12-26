@@ -121,11 +121,11 @@ func Test_listInventoryCheckNoteRepo_ListInventoryCheckNote(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    mockExportNotes,
+			want:    nil,
 			wantErr: true,
 		},
 		{
-			name: "List inventory check note failed",
+			name: "List inventory check note successfully",
 			fields: fields{
 				store: mockInventoryCheckNote,
 			},

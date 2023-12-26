@@ -107,7 +107,7 @@ func Test_sqlStore_ListInvoiceDetail(t *testing.T) {
 					WithArgs(invoiceId).
 					WillReturnError(mockErr)
 			},
-			want:    details,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -131,7 +131,7 @@ func Test_sqlStore_ListInvoiceDetail(t *testing.T) {
 					WithArgs("food123").
 					WillReturnError(mockErr)
 			},
-			want:    details,
+			want:    nil,
 			wantErr: true,
 		},
 	}

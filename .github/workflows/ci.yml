@@ -80,3 +80,14 @@ jobs:
         run: |
           cd frontend
           NEXT_PUBLIC_ENVIRONMENT=${{ matrix.next-env }} npm run build
+
+  mutation-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Run Gremlins in Docker
+        run: |
+          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash

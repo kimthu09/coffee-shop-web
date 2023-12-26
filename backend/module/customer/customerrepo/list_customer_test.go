@@ -106,7 +106,7 @@ func Test_listCustomerRepo_ListCustomer(t *testing.T) {
 					Return(emptyListCustomers, mockErr).
 					Once()
 			},
-			want:    listCustomers,
+			want:    nil,
 			wantErr: true,
 		},
 		{

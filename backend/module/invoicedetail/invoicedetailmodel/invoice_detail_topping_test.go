@@ -157,7 +157,7 @@ func TestInvoiceDetailToppings_Scan(t *testing.T) {
 			args: args{
 				value: []byte(`"invalid-json": "123"`),
 			},
-			wantedData: InvoiceDetailToppings{},
+			wantedData: nil,
 			wantErr:    true,
 		},
 	}

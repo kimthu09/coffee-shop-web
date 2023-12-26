@@ -116,7 +116,7 @@ func Test_listInventoryCheckNoteBiz_ListInventoryCheckNote(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    mockListInventoryCheckNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -145,7 +145,7 @@ func Test_listInventoryCheckNoteBiz_ListInventoryCheckNote(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    mockListInventoryCheckNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

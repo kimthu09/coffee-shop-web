@@ -103,7 +103,7 @@ func Test_refreshTokenBiz_RefreshToken(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &account,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -132,7 +132,7 @@ func Test_refreshTokenBiz_RefreshToken(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &account,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -126,7 +126,7 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "List export note successfully",
+			name: "List export note failed because can not get data from database",
 			fields: fields{
 				store: mockExportNote,
 			},
@@ -147,7 +147,7 @@ func Test_listExportNoteRepo_ListExportNote(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    mockExportNotes,
+			want:    nil,
 			wantErr: true,
 		},
 	}

@@ -113,7 +113,7 @@ func Test_resetPasswordRepo_CheckUserStatusPermission(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    userData,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -135,7 +135,7 @@ func Test_resetPasswordRepo_CheckUserStatusPermission(t *testing.T) {
 					Return(inactiveUserData, nil).
 					Once()
 			},
-			want:    inactiveUserData,
+			want:    nil,
 			wantErr: true,
 		},
 		{
