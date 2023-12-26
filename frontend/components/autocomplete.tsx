@@ -144,8 +144,11 @@ export const AutoComplete = ({
                           event.stopPropagation();
                         }}
                         onSelect={() => handleSelectOption(option)}
-                        className={cn("flex items-center gap-2 w-full pl-6")}
+                        className={cn("flex items-center gap-2 w-full pl-2")}
                       >
+                        <div className="basis-1/5">
+                          <span className="">{option.id}</span>
+                        </div>
                         <div className="flex justify-between flex-1">
                           <span className="font-semibold flex-1">
                             {option.name}{" "}
@@ -153,7 +156,7 @@ export const AutoComplete = ({
                               ({option.amount})
                             </span>
                           </span>
-                          <div className="basis-2/3 flex justify-between">
+                          <div className="basis-1/3 flex justify-between">
                             {toUnit(option.measureType)}
                             <span className="font-medium text-teal-800">
                               {toVND(option.price)}
