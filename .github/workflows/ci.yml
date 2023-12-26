@@ -90,4 +90,4 @@ jobs:
 
       - name: Run Gremlins in Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash  --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
+          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash
