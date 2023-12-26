@@ -145,7 +145,7 @@ const IngredientTabs = ({
       <CommandDialog open={openIngre} onOpenChange={setOpenIngre}>
         <CommandInput placeholder="Tìm nguyên liệu" />
         <CommandList className="h-80">
-          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandEmpty> Không tìm thấy bản ghi</CommandEmpty>
           <CommandGroup heading="Nguyên liệu" className="h-56 overflow-y-auto">
             {ingredientForChoose.map((item, index) => (
               <CommandItem

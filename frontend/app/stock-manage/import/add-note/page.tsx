@@ -135,6 +135,7 @@ const AddNote = () => {
             }
             if (rowIndex > 2) {
               const idIngre = row.getCell(1).value.toString();
+              console.log(idIngre);
               const oldPrice = data?.data.find(
                 (ingre) => ingre.id === idIngre
               )?.price;

@@ -232,7 +232,7 @@ export function StockTable() {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  Không tìm thấy bản ghi
                 </TableCell>
               </TableRow>
             )}

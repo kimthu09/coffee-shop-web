@@ -276,7 +276,7 @@ export function ImportTable() {
     filters = filters.concat({ type: "search", value: search });
   }
   if (createdAtFrom) {
-    filters = filters.concat({ type: "createdAtForm", value: createdAtFrom });
+    filters = filters.concat({ type: "createdAtFrom", value: createdAtFrom });
   }
   if (createdAtTo) {
     filters = filters.concat({ type: "createdAtTo", value: createdAtTo });
@@ -695,20 +695,28 @@ export function ImportTable() {
           <Paging
             page={page}
             onNavigateNext={() =>
-              router.push(`/stock-manage/import?page=${+page + 1}`)
+              router.push(
+                `/stock-manage/import?page=${+page + 1}${stringToFilter}`
+              )
             }
             onNavigateBack={() =>
-              router.push(`/stock-manage/import?page=${+page - 1}`)
+              router.push(
+                `/stock-manage/import?page=${+page - 1}${stringToFilter}`
+              )
             }
             totalPage={totalPage}
             onPageSelect={(selectedPage) => {
-              router.push(`/stock-manage/import?page=${selectedPage}`);
+              router.push(
+                `/stock-manage/import?page=${selectedPage}${stringToFilter}`
+              );
             }}
             onNavigateFirst={() =>
-              router.push(`/stock-manage/import?page=${1}`)
+              router.push(`/stock-manage/import?page=${1}${stringToFilter}`)
             }
             onNavigateLast={() =>
-              router.push(`/stock-manage/import?page=${totalPage}`)
+              router.push(
+                `/stock-manage/import?page=${totalPage}${stringToFilter}`
+              )
             }
           />
         </div>

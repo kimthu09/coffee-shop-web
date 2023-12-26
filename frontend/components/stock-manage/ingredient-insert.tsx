@@ -114,13 +114,7 @@ const IngredientInsert = ({
             {fieldsIngre.length < 1 ? (
               <div className="flex flex-col items-center gap-4 py-8 text-muted-foreground font-medium">
                 <CiBoxes className="h-24 w-24 text-muted-foreground/40" />
-                {errors.details?.root ? (
-                  <span className="error___message">
-                    {errors.details.root?.message}
-                  </span>
-                ) : (
-                  "Chọn sản phẩm nhập kho"
-                )}
+                Chọn sản phẩm nhập kho
               </div>
             ) : null}
             {fieldsIngre.map((ingre, index) => {

@@ -24,7 +24,6 @@ const ImportSheet = ({
   const [errorMessage, setErrorMessage] = useState(false);
   const fileType = [
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-    "application/vnd.ms-excel",
   ];
   const handleChange = (e: any) => {
     let selectedFile = e.target.files[0];

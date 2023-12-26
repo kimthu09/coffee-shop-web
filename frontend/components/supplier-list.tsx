@@ -61,7 +61,7 @@ const SupplierList = ({
           <DropdownMenuContent className="DropdownMenuContent">
             <Command>
               <CommandInput
-                placeholder="Tìm nhà số điện thoại nhà cung cấp"
+                placeholder="Tìm số điện thoại nhà cung cấp"
                 // onValueChange={(str) => setNewCategory(str)}
               />
               <CommandEmpty className="py-2 px-6">
