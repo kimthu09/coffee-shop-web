@@ -129,7 +129,7 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "List import note successfully",
+			name: "List import note failed",
 			fields: fields{
 				store: mockStore,
 			},
@@ -151,7 +151,7 @@ func Test_listImportNoteRepo_ListImportNote(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    importNotes,
+			want:    nil,
 			wantErr: true,
 		},
 	}

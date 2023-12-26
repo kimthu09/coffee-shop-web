@@ -105,7 +105,7 @@ func Test_sqlStore_FindListImportNoteDetail(t *testing.T) {
 					WithArgs("1").
 					WillReturnError(mockErr)
 			},
-			want:    details,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -123,7 +123,7 @@ func Test_sqlStore_FindListImportNoteDetail(t *testing.T) {
 					WithArgs("1").
 					WillReturnError(gorm.ErrRecordNotFound)
 			},
-			want:    details,
+			want:    nil,
 			wantErr: true,
 		},
 	}

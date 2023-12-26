@@ -123,7 +123,7 @@ func Test_sqlStore_ListAllInvoiceByCustomer(t *testing.T) {
 					).
 					WillReturnError(mockErr)
 			},
-			want:    listInvoice,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -154,7 +154,7 @@ func Test_sqlStore_ListAllInvoiceByCustomer(t *testing.T) {
 					).
 					WillReturnError(mockErr)
 			},
-			want:    listInvoice,
+			want:    nil,
 			wantErr: true,
 		},
 		{

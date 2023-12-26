@@ -256,7 +256,7 @@ func Test_updateFoodBiz_FindCategories(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    categories,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -366,7 +366,7 @@ func Test_updateFoodBiz_FindFood(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &food,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -485,7 +485,7 @@ func Test_updateFoodBiz_FindRecipeDetails(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    recipeDetails,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -601,7 +601,7 @@ func Test_updateFoodRepo_FindSizeFoods(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    sizeFoods,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -78,7 +78,7 @@ func Test_sqlStore_ListFeature(t *testing.T) {
 					ExpectQuery(queryString).
 					WillReturnError(mockErr)
 			},
-			want:    features,
+			want:    nil,
 			wantErr: true,
 		},
 		{

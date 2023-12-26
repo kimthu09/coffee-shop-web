@@ -141,7 +141,7 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &importNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -170,7 +170,7 @@ func Test_seeImportNoteDetailRepo_SeeImportNoteDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &importNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

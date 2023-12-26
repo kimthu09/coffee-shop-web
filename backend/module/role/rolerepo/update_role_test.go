@@ -149,7 +149,7 @@ func Test_updateRoleRepo_GetListRoleFeatures(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    featureStr,
+			want:    nil,
 			wantErr: true,
 		},
 		{

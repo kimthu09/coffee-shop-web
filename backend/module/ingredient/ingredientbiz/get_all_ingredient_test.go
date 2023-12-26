@@ -98,7 +98,7 @@ func Test_getAllIngredientBiz_GetAllUser(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listIngredients,
+			want:    nil,
 			wantErr: true,
 		},
 		{

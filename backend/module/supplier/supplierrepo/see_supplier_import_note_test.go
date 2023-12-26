@@ -140,7 +140,7 @@ func Test_seeSupplierImportNoteRepo_SeeSupplierImportNote(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    importNotes,
+			want:    nil,
 			wantErr: true,
 		},
 		{

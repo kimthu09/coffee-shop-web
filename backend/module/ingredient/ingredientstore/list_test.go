@@ -146,7 +146,7 @@ func Test_sqlStore_ListIngredient(t *testing.T) {
 					).
 					WillReturnError(mockErr)
 			},
-			want:    mockData,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -185,7 +185,7 @@ func Test_sqlStore_ListIngredient(t *testing.T) {
 					).
 					WillReturnError(mockErr)
 			},
-			want:    mockData,
+			want:    nil,
 			wantErr: true,
 		},
 		{

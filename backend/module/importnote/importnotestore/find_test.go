@@ -115,7 +115,7 @@ func Test_sqlStore_FindImportNote(t *testing.T) {
 					WithArgs(validId).
 					WillReturnError(mockErr)
 			},
-			want:    &importNote,
+			want:    nil,
 			wantErr: true,
 		},
 	}

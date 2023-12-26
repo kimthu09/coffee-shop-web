@@ -121,7 +121,7 @@ func Test_listImportNoteBySupplierRepo_ListImportNoteBySupplier(t *testing.T) {
 					Return(emptyListImportNotes, mockErr).
 					Once()
 			},
-			want:    listImportNotes,
+			want:    nil,
 			wantErr: true,
 		},
 		{

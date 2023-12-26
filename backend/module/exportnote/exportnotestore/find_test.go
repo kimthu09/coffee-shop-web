@@ -94,7 +94,7 @@ func Test_sqlStore_FindExportNote(t *testing.T) {
 					WithArgs(exportNoteId).
 					WillReturnError(mockErr)
 			},
-			want:    mockData,
+			want:    nil,
 			wantErr: true,
 		},
 	}

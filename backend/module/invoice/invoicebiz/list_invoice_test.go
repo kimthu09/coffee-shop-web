@@ -121,7 +121,7 @@ func Test_listInvoiceBiz_ListInvoice(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listInvoice,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -151,7 +151,7 @@ func Test_listInvoiceBiz_ListInvoice(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listInvoice,
+			want:    nil,
 			wantErr: true,
 		},
 		{

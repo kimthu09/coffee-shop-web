@@ -121,7 +121,7 @@ func Test_updateToppingRepo_FindRecipeDetails(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    recipeDetails,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -217,7 +217,7 @@ func Test_updateToppingRepo_FindTopping(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &topping,
+			want:    nil,
 			wantErr: true,
 		},
 		{

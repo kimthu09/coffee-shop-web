@@ -111,7 +111,7 @@ func Test_listUserRepo_ListUser(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    userData,
+			want:    nil,
 			wantErr: true,
 		},
 		{

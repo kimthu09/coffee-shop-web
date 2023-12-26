@@ -76,7 +76,7 @@ func Test_sqlStore_ListRole(t *testing.T) {
 				sqlDBMock.ExpectQuery(expectedRoleQuery).
 					WillReturnError(mockErr)
 			},
-			want:    mockData,
+			want:    nil,
 			wantErr: true,
 		},
 	}
