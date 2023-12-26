@@ -115,7 +115,7 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listCustomers,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -144,7 +144,7 @@ func Test_listCustomerBiz_ListCustomer(t *testing.T) {
 					Return(emptyListCustomers, mockErr).
 					Once()
 			},
-			want:    listCustomers,
+			want:    nil,
 			wantErr: true,
 		},
 		{

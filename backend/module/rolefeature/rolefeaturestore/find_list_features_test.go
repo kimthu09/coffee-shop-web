@@ -97,7 +97,7 @@ func Test_sqlStore_FindListFeatures(t *testing.T) {
 						roleId).
 					WillReturnError(mockErr)
 			},
-			want:    roleFeatures,
+			want:    nil,
 			wantErr: true,
 		},
 	}

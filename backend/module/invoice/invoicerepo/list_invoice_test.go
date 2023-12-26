@@ -21,6 +21,9 @@ func (m *mockListInvoiceStore) ListInvoice(
 	moreKeys ...string,
 ) ([]invoicemodel.Invoice, error) {
 	args := m.Called(ctx, filter, propertiesContainSearchKey, paging, moreKeys)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]invoicemodel.Invoice), args.Error(1)
 }
 
@@ -83,7 +86,6 @@ func Test_listInvoiceRepo_ListInvoice(t *testing.T) {
 
 	moreKeys := []string{"Customer", "CreatedByUser"}
 	listInvoices := make([]invoicemodel.Invoice, 0)
-	var emptyListInvoices []invoicemodel.Invoice
 
 	mockErr := assert.AnError
 
@@ -113,10 +115,10 @@ func Test_listInvoiceRepo_ListInvoice(t *testing.T) {
 						[]string{"Invoice.id"},
 						paging,
 						moreKeys).
-					Return(emptyListInvoices, mockErr).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    listInvoices,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -21,6 +21,9 @@ func (m *mockListSupplierRepo) ListSupplier(
 	filter *filter.Filter,
 	paging *common.Paging) ([]suppliermodel.Supplier, error) {
 	args := m.Called(ctx, filter, paging)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]suppliermodel.Supplier), args.Error(1)
 }
 
@@ -88,7 +91,6 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 		MaxDebt:   nil,
 	}
 	listSuppliers := make([]suppliermodel.Supplier, 0)
-	var emptyListSuppliers []suppliermodel.Supplier
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -116,7 +118,7 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listSuppliers,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -142,10 +144,10 @@ func Test_listSupplierBiz_ListSupplier(t *testing.T) {
 						context.Background(),
 						&filterSupplier,
 						&paging).
-					Return(emptyListSuppliers, mockErr).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    listSuppliers,
+			want:    nil,
 			wantErr: true,
 		},
 		{

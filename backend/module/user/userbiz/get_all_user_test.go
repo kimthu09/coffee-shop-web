@@ -93,7 +93,7 @@ func Test_getAllUserBiz_GetAllUser(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listUser,
+			want:    nil,
 			wantErr: true,
 		},
 		{

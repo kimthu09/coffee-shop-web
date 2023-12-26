@@ -137,7 +137,7 @@ func Test_seeSupplierDebtBiz_SeeSupplierDebt(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    supplierDebts,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -169,7 +169,7 @@ func Test_seeSupplierDebtBiz_SeeSupplierDebt(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    supplierDebts,
+			want:    nil,
 			wantErr: true,
 		}, {
 			name: "See supplier debt successfully",

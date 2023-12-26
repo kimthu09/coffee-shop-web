@@ -119,7 +119,7 @@ func Test_listIngredientBiz_ListImportNote(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listIngredients,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -150,7 +150,7 @@ func Test_listIngredientBiz_ListImportNote(t *testing.T) {
 					Return(emptyListIngredients, mockErr).
 					Once()
 			},
-			want:    listIngredients,
+			want:    nil,
 			wantErr: true,
 		},
 		{

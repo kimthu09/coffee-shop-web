@@ -101,7 +101,7 @@ func Test_listRoleRepo_ListRole(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    roles,
+			want:    nil,
 			wantErr: true,
 		},
 		{

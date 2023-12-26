@@ -389,7 +389,7 @@ func Test_changeStatusImportNoteRepo_FindImportNote(t *testing.T) {
 						mockErr).
 					Once()
 			},
-			want:    &importNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

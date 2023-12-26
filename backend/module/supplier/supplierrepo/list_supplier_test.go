@@ -109,7 +109,7 @@ func Test_listSupplierRepo_ListSupplier(t *testing.T) {
 					Return(emptyListSuppliers, mockErr).
 					Once()
 			},
-			want:    listSuppliers,
+			want:    nil,
 			wantErr: true,
 		},
 		{

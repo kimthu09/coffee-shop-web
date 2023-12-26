@@ -20,6 +20,9 @@ func (m *mockListExportNoteRepo) ListExportNote(
 	filter *exportnotemodel.Filter,
 	paging *common.Paging) ([]exportnotemodel.ExportNote, error) {
 	args := m.Called(ctx, filter, paging)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]exportnotemodel.ExportNote), args.Error(1)
 }
 
@@ -107,7 +110,6 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 		Page: 1,
 	}
 	mockListExportNote := make([]exportnotemodel.ExportNote, 0)
-	var mockEmptyListExportNote []exportnotemodel.ExportNote
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -135,7 +137,7 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    mockListExportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -162,10 +164,10 @@ func Test_listExportNoteBiz_ListExportNote(t *testing.T) {
 						&mockFilter,
 						&mockPaging,
 					).
-					Return(mockEmptyListExportNote, mockErr).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    mockListExportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

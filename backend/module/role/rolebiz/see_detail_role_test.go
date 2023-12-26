@@ -121,7 +121,7 @@ func Test_seeDetailRoleBiz_SeeDetailRole(t *testing.T) {
 					Return(noAdminRole.Id).
 					Once()
 			},
-			want:    &role,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -145,7 +145,7 @@ func Test_seeDetailRoleBiz_SeeDetailRole(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &role,
+			want:    nil,
 			wantErr: true,
 		},
 		{

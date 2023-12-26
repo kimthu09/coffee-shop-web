@@ -92,7 +92,7 @@ func Test_seeUserDetailBiz_SeeUserDetail(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    &user,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -116,7 +116,7 @@ func Test_seeUserDetailBiz_SeeUserDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &user,
+			want:    nil,
 			wantErr: true,
 		},
 		{

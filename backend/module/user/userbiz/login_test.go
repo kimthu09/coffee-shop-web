@@ -188,7 +188,7 @@ func Test_loginBiz_Login(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &account,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -220,7 +220,7 @@ func Test_loginBiz_Login(t *testing.T) {
 					Return("This is wrong pass").
 					Once()
 			},
-			want:    &account,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -261,7 +261,7 @@ func Test_loginBiz_Login(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &account,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -311,7 +311,7 @@ func Test_loginBiz_Login(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &account,
+			want:    nil,
 			wantErr: true,
 		},
 		{

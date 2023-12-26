@@ -124,7 +124,7 @@ func Test_sqlStore_ListFood(t *testing.T) {
 						*filter.IsActive).
 					WillReturnError(mockErr)
 			},
-			want:    listFood,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -153,7 +153,7 @@ func Test_sqlStore_ListFood(t *testing.T) {
 						*filter.IsActive).
 					WillReturnError(mockErr)
 			},
-			want:    listFood,
+			want:    nil,
 			wantErr: true,
 		},
 		{

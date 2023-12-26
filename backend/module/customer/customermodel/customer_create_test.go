@@ -95,6 +95,16 @@ func TestCustomerCreate_Validate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name: "CustomerCreate is valid with empty email",
+			fields: fields{
+				Id:    nil,
+				Name:  mock.Anything,
+				Email: "",
+				Phone: "0123456789",
+			},
+			wantErr: false,
+		},
+		{
 			name: "CustomerCreate is valid",
 			fields: fields{
 				Id:    nil,

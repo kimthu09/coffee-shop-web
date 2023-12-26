@@ -137,7 +137,7 @@ func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
 					Return(false).
 					Once()
 			},
-			want:    listImportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -167,7 +167,7 @@ func Test_listImportNoteBiz_ListImportNote(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listImportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

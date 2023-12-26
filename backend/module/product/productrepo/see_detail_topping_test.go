@@ -99,7 +99,7 @@ func Test_seeDetailToppingRepo_SeeDetailTopping(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    mockTopping,
+			want:    nil,
 			wantErr: true,
 		},
 		{

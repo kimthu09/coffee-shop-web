@@ -132,7 +132,7 @@ func Test_listFeatureBiz_ListFeature(t *testing.T) {
 					Return(roleNoAdmin.Id).
 					Once()
 			},
-			want:    listFeature,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -158,7 +158,7 @@ func Test_listFeatureBiz_ListFeature(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    listFeature,
+			want:    nil,
 			wantErr: true,
 		},
 		{

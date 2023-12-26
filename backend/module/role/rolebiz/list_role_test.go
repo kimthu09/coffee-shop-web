@@ -18,6 +18,9 @@ type mockListRoleRepo struct {
 func (m *mockListRoleRepo) ListRole(
 	ctx context.Context) ([]rolemodel.SimpleRole, error) {
 	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
 	return args.Get(0).([]rolemodel.SimpleRole), args.Error(1)
 }
 
@@ -100,7 +103,6 @@ func Test_listRoleBiz_ListRole(t *testing.T) {
 	adminRole := rolemodel.SimpleRole{Id: common.RoleAdminId}
 	noAdminRole := rolemodel.SimpleRole{Id: mock.Anything}
 	listRole := make([]rolemodel.SimpleRole, 0)
-	var emptyListRole []rolemodel.SimpleRole
 	mockErr := errors.New(mock.Anything)
 
 	tests := []struct {
@@ -126,7 +128,7 @@ func Test_listRoleBiz_ListRole(t *testing.T) {
 					Return(noAdminRole.Id).
 					Once()
 			},
-			want:    listRole,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -149,10 +151,10 @@ func Test_listRoleBiz_ListRole(t *testing.T) {
 						"ListRole",
 						context.Background(),
 					).
-					Return(emptyListRole, mockErr).
+					Return(nil, mockErr).
 					Once()
 			},
-			want:    listRole,
+			want:    nil,
 			wantErr: true,
 		},
 		{

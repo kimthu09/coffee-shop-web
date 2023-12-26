@@ -97,7 +97,7 @@ func Test_seeUserDetailRepo_SeeUserDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    userData,
+			want:    nil,
 			wantErr: true,
 		},
 		{

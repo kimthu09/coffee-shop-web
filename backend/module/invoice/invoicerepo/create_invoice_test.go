@@ -251,7 +251,7 @@ func Test_createInvoiceRepo_FindCustomer(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &customer,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -376,7 +376,7 @@ func Test_createInvoiceRepo_GetShopGeneral(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &shopGeneral,
+			want:    nil,
 			wantErr: true,
 		},
 		{

@@ -152,7 +152,7 @@ func Test_seeExportNoteDetailRepo_SeeExportNoteDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &finalExportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -185,7 +185,7 @@ func Test_seeExportNoteDetailRepo_SeeExportNoteDetail(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    &finalExportNote,
+			want:    nil,
 			wantErr: true,
 		},
 		{

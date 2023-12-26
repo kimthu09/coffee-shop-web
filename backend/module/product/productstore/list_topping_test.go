@@ -138,7 +138,7 @@ func Test_sqlStore_ListTopping(t *testing.T) {
 						*filter.IsActive).
 					WillReturnError(mockErr)
 			},
-			want:    listTopping,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -167,7 +167,7 @@ func Test_sqlStore_ListTopping(t *testing.T) {
 						*filter.IsActive).
 					WillReturnError(mockErr)
 			},
-			want:    listTopping,
+			want:    nil,
 			wantErr: true,
 		},
 		{

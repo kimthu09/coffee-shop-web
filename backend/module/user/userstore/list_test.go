@@ -173,7 +173,7 @@ func Test_sqlStore_ListUser(t *testing.T) {
 						userSearch).
 					WillReturnError(mockErr)
 			},
-			want:    listUsers,
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -213,7 +213,7 @@ func Test_sqlStore_ListUser(t *testing.T) {
 						userSearch).
 					WillReturnError(mockErr)
 			},
-			want:    listUsers,
+			want:    nil,
 			wantErr: true,
 		},
 	}

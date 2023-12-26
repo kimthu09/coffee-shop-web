@@ -130,7 +130,7 @@ func Test_seeSupplierDebtRepo_SeeSupplierDebt(t *testing.T) {
 					Return(nil, mockErr).
 					Once()
 			},
-			want:    supplierDebts,
+			want:    nil,
 			wantErr: true,
 		},
 		{
