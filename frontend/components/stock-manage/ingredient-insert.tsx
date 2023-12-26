@@ -16,10 +16,11 @@ import { z } from "zod";
 import { FormSchema } from "@/app/stock-manage/import/add-note/page";
 import { AutoComplete } from "../autocomplete";
 import { Ingredient } from "@/types";
-import { toVND } from "@/lib/utils";
+import { toUnit, toVND } from "@/lib/utils";
 import { toast } from "../ui/use-toast";
 import getAllIngredient from "@/lib/getAllIngredient";
 import Loading from "../loading";
+import { getToken } from "@/lib/auth";
 const Total = ({
   control,
 }: {
@@ -74,7 +75,8 @@ const IngredientInsert = ({
     control: control,
     name: "details",
   });
-  const { data, isLoading, isError, mutate } = getAllIngredient();
+  const token = getToken();
+  const { data, isLoading, isError, mutate } = getAllIngredient(token!);
   const [value, setValue] = useState<Ingredient>();
   const handleOnValueChange = (item: Ingredient) => {
     if (!fieldsIngre.find((ingre) => ingre.ingredientId === item.id)) {
@@ -134,7 +136,7 @@ const IngredientInsert = ({
                     <div className="flex">
                       <h2 className="font-medium">{value?.name}</h2>
                       <h2 className="ml-1 text-muted-foreground">
-                        ({value?.measureType})
+                        ({toUnit(value?.measureType)})
                       </h2>
                     </div>
                     <div className="relative p-1">
@@ -144,6 +146,11 @@ const IngredientInsert = ({
                         {...register(`details.${index}.price` as const)}
                         min={1}
                       ></Input>
+                      {errors.details && errors.details[index] ? (
+                        <span className="error___message">
+                          {errors.details[index]?.message}
+                        </span>
+                      ) : null}
                       <div className="absolute top-0 right-0 cursor-pointer group">
                         <IoMdInformationCircleOutline
                           className={`h-5 w-5 text-teal-700`}
@@ -156,11 +163,6 @@ const IngredientInsert = ({
                           Giá ban đầu: {toVND(ingre.oldPrice)}
                         </span>
                       </div>
-                      {/* <div className="absolute top-0 right-0 cursor-pointer">
-                      <IoMdInformationCircleOutline
-                        className={`h-5 w-5 text-teal-700`}
-                      />
-                    </div> */}
                     </div>
 
                     <Input

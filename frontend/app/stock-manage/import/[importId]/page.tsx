@@ -5,22 +5,32 @@ import { ExportImportNoteDetail } from "@/components/stock-manage/excel-import-d
 import { ImportDetailTable } from "@/components/stock-manage/import-detail-table";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
+import { getToken } from "@/lib/auth";
 import updateStatus from "@/lib/import/changeStatus";
 import getImportNoteDetail from "@/lib/import/getImportDetail";
 import { toVND } from "@/lib/utils";
+import withAuth from "@/lib/withAuth";
 import { StatusNote } from "@/types";
+import { useRouter } from "next/navigation";
 import { BiBox } from "react-icons/bi";
 import { FaRegFileExcel } from "react-icons/fa";
 import { FiTrash2 } from "react-icons/fi";
 import { LuPackageCheck, LuPhone } from "react-icons/lu";
 const ImportDetail = ({ params }: { params: { importId: string } }) => {
-  const { data, isLoading, isError, mutate } = getImportNoteDetail(
-    params.importId
-  );
+  const token = getToken();
+  const router = useRouter();
+  if (!token) {
+    router.push("/login");
+  }
+  const { data, isLoading, isError, mutate } = getImportNoteDetail({
+    idNote: params.importId,
+    token: token!,
+  });
   const changeStatus = async (status: StatusNote) => {
     const response: Promise<any> = updateStatus({
       idNote: params.importId,
       status: status,
+      token: token!,
     });
     const responseData = await response;
     console.log(responseData);
@@ -146,4 +156,4 @@ const ImportDetail = ({ params }: { params: { importId: string } }) => {
     );
 };
 
-export default ImportDetail;
+export default withAuth(ImportDetail);

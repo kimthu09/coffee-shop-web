@@ -28,7 +28,7 @@ import { ImportNoteDetail } from "@/types";
 
 import { useState } from "react";
 import { Input } from "../ui/input";
-import { toVND } from "@/lib/utils";
+import { toUnit, toVND } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef<ImportNoteDetail>[] = [
@@ -64,7 +64,7 @@ export const columns: ColumnDef<ImportNoteDetail>[] = [
       <div className="leading-6 flex flex-col">
         {row.original.ingredient.name}
         <span className="text-muted-foreground">
-          ({row.original.ingredient.measureType})
+          ({toUnit(row.original.ingredient.measureType)})
         </span>
       </div>
     ),
@@ -90,7 +90,7 @@ export const columns: ColumnDef<ImportNoteDetail>[] = [
     accessorKey: "price",
     header: ({ column }) => (
       <div className="flex justify-end whitespace-normal">
-        <span className="font-semibold">Giá trị nhập</span>
+        <span className="font-semibold">Đơn giá</span>
       </div>
     ),
     cell: ({ row }) => {
@@ -197,7 +197,7 @@ export function ImportDetailTable(details: ImportNoteDetail[]) {
           ) : (
             <TableRow>
               <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+                Không tìm thấy bản ghi
               </TableCell>
             </TableRow>
           )}

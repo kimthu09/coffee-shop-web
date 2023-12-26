@@ -12,7 +12,7 @@ type WithAuthProps = {
 type ComponentType = (props: any) => JSX.Element;
 
 const withAuth = <P extends WithAuthProps>(WrappedComponent: ComponentType) => {
-  const Wrapper = () => {
+  const Wrapper = (props: any) => {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true);
     const { login } = useAuth();
@@ -31,7 +31,7 @@ const withAuth = <P extends WithAuthProps>(WrappedComponent: ComponentType) => {
       }
     }, [router]);
 
-    return isLoading ? <Loading /> : <WrappedComponent />;
+    return isLoading ? <Loading /> : <WrappedComponent {...props} />;
   };
 
   return Wrapper;

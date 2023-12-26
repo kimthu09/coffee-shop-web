@@ -5,16 +5,18 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Command, CommandGroup, CommandItem } from "./ui/command";
+import { Command, CommandGroup, CommandInput, CommandItem } from "./ui/command";
 import { LuCheck, LuChevronsUpDown } from "react-icons/lu";
 import { Button } from "./ui/button";
 import { cn } from "@/lib/utils";
 import Loading from "./loading";
 import getAllStaff from "@/lib/getAllStaffClient";
+import { getToken } from "@/lib/auth";
 
 const StaffList = ({ staff, setStaff }: StaffListProps) => {
   const [openRole, setOpenRole] = useState(false);
-  const { staffs, isLoading, isError } = getAllStaff();
+  const token = getToken();
+  const { staffs, isLoading, isError } = getAllStaff(token!);
   useEffect(() => {
     // handleStaffSelected(staff);
   }, [staff]);
@@ -39,6 +41,10 @@ const StaffList = ({ staff, setStaff }: StaffListProps) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent className="DropdownMenuContent">
           <Command>
+            <CommandInput
+              placeholder="Tìm tên nhân viên"
+              // onValueChange={(str) => setNewCategory(str)}
+            />
             <CommandGroup className="p-0">
               {staffs.map((item) => (
                 <CommandItem

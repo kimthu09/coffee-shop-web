@@ -103,6 +103,11 @@ export enum StatusNote {
   Done = "Done",
   Cancel = "Cancel",
 }
+export enum MeasureType {
+  Volume = "Volume",
+  Weight = "Weight",
+  Unit = "Unit",
+}
 export type Customer = {
   id: string;
   name: string;

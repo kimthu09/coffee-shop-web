@@ -20,6 +20,8 @@ import { Switch } from "@/components/ui/switch";
 import { useSWRConfig } from "swr";
 import getAllIngredient from "@/lib/getAllIngredient";
 import Loading from "@/components/loading";
+import { getToken } from "@/lib/auth";
+import withAuth from "@/lib/withAuth";
 
 export const FormSchema = z.object({
   idNote: z.string().max(12, "Tối đa 12 ký tự"),
@@ -79,6 +81,7 @@ const AddNote = () => {
       }),
       id: data.idNote,
       supplierId: data.supplierId,
+      token: token!,
     });
     const responseData = await response;
     if (responseData.hasOwnProperty("errorKey")) {
@@ -168,8 +171,8 @@ const AddNote = () => {
       });
     };
   };
-
-  const { data, isLoading, isError } = getAllIngredient();
+  const token = getToken();
+  const { data, isLoading, isError } = getAllIngredient(token!);
   if (isLoading) {
     return <Loading />;
   } else
@@ -263,4 +266,4 @@ const AddNote = () => {
     );
 };
 
-export default AddNote;
+export default withAuth(AddNote);

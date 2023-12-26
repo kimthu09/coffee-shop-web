@@ -5,9 +5,11 @@ import axios from "axios";
 export default async function updateStatus({
   idNote,
   status,
+  token,
 }: {
   idNote: string;
   status: StatusNote;
+  token: string;
 }) {
   const url = `${endPoint}/importNotes/${idNote}`;
   const data = {
@@ -16,7 +18,7 @@ export default async function updateStatus({
   console.log(data);
   const headers = {
     "Content-Type": "application/json",
-    Authorization: apiKey,
+    Authorization: `Bearer ${token}`,
     accept: "application/json",
   };
 

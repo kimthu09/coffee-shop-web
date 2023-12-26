@@ -5,6 +5,7 @@ export default async function createImportNote({
   details,
   id,
   supplierId,
+  token,
 }: {
   details: {
     ingredientId: string;
@@ -14,6 +15,7 @@ export default async function createImportNote({
   }[];
   id?: string;
   supplierId: string;
+  token: string;
 }) {
   const url = `${endPoint}/importNotes`;
 
@@ -26,7 +28,7 @@ export default async function createImportNote({
   const headers = {
     accept: "application/json",
     "Content-Type": "application/json",
-    Authorization: apiKey,
+    Authorization: `Bearer ${token}`,
 
     // Add other headers as needed
   };

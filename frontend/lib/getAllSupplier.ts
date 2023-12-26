@@ -2,21 +2,20 @@ import { apiKey, endPoint } from "@/constants";
 import { Supplier } from "@/types";
 import useSWR from "swr";
 
-const fetcher = (url: string) =>
-  fetch(url, {
-    headers: {
-      accept: "application/json",
-      Authorization: apiKey,
-    },
-  })
-    .then((res) => {
-      return res.json();
+export default function getAllSupplier(token: string) {
+  const fetcher = (url: string) =>
+    fetch(url, {
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     })
-    .then((json) => {
-      return json.data as Supplier[];
-    });
-
-export default function getAllSupplier() {
+      .then((res) => {
+        return res.json();
+      })
+      .then((json) => {
+        return json.data as Supplier[];
+      });
   const { data, error, isLoading, mutate } = useSWR(
     `${endPoint}/suppliers/all`,
     fetcher
