@@ -530,8 +530,6 @@ INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, 
 INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
 ('PN011', 'SupMilk0001', -320000, -325000, 'Debt', '2023-12-26 05:15:59', 'g3W21A7SR');
 
-
-DELIMITER //
 CREATE TRIGGER update_closedAt
 BEFORE UPDATE ON ImportNote
 FOR EACH ROW
@@ -540,8 +538,6 @@ BEGIN
         SET NEW.closedAt = CURRENT_TIMESTAMP;
     END IF;
 END;
-//
-DELIMITER ;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
