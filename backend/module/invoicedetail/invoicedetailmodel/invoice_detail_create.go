@@ -27,7 +27,7 @@ func (data *InvoiceDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.SizeId) {
 		return ErrInvoiceDetailSizeIdInvalid
 	}
-	if common.ValidateNotPositiveNumber(data.Amount) {
+	if common.ValidateNotPositiveNumberInt(data.Amount) {
 		return ErrInvoiceDetailAmountIsNotPositiveNumber
 	}
 	if data.Toppings == nil {

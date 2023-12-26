@@ -26,7 +26,7 @@ func (data *IngredientCreate) Validate() *common.AppError {
 	if data.MeasureType == nil {
 		return ErrIngredientMeasureTypeEmpty
 	}
-	if common.ValidateNegativeNumber(data.Price) {
+	if common.ValidateNegativeNumberFloat(data.Price) {
 		return ErrIngredientPriceIsNegativeNumber
 	}
 	return nil

@@ -23,10 +23,10 @@ func (data *ShopGeneralUpdate) Validate() *common.AppError {
 	if data.Phone != nil && *data.Phone != "" && !common.ValidatePhone(*data.Phone) {
 		return ErrPhoneInvalid
 	}
-	if data.AccumulatePointPercent != nil && common.ValidateNegativeNumber(*data.AccumulatePointPercent) {
+	if data.AccumulatePointPercent != nil && common.ValidateNegativeNumberFloat(*data.AccumulatePointPercent) {
 		return ErrAccumulatePointPercentInvalid
 	}
-	if data.UsePointPercent != nil && common.ValidateNegativeNumber(*data.UsePointPercent) {
+	if data.UsePointPercent != nil && common.ValidateNegativeNumberFloat(*data.UsePointPercent) {
 		return ErrUsePointPercentInvalid
 	}
 	return nil

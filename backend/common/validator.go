@@ -43,63 +43,21 @@ func ValidateId(id *string) bool {
 	return true
 }
 
-func ValidateNegativeNumber(number interface{}) bool {
-	switch v := number.(type) {
-	case int:
-		return v < 0
-	case int8:
-		return v < 0
-	case int16:
-		return v < 0
-	case int64:
-		return v < 0
-	case float32:
-		return v < 0
-	case float64:
-		return v < 0
-	default:
-		return false
-	}
+func ValidateNegativeNumberInt(number int) bool {
+	return number < 0
+}
+func ValidateNegativeNumberFloat(number float32) bool {
+	return number < 0
 }
 
-func ValidateNotPositiveNumber(number interface{}) bool {
-	switch v := number.(type) {
-	case int:
-		return v <= 0
-	case int8:
-		return v <= 0
-	case int16:
-		return v <= 0
-	case int64:
-		return v <= 0
-	case float32:
-		return v <= 0
-	case float64:
-		return v <= 0
-	default:
-		return false
-	}
+func ValidateNotPositiveNumberInt(number int) bool {
+	return number <= 0
 }
 
 func ValidatePassword(pass *string) bool {
 	return pass != nil && len(*pass) >= 6
 }
 
-func ValidatePositiveNumber(number interface{}) bool {
-	switch v := number.(type) {
-	case int:
-		return v > 0
-	case int8:
-		return v > 0
-	case int16:
-		return v > 0
-	case int64:
-		return v > 0
-	case float32:
-		return v > 0
-	case float64:
-		return v > 0
-	default:
-		return false
-	}
+func ValidatePositiveNumberInt(number int) bool {
+	return number > 0
 }

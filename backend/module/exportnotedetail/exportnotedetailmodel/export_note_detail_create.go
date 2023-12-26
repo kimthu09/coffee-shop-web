@@ -16,7 +16,7 @@ func (data *ExportNoteDetailCreate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
 		return ErrExportDetailIngredientIdInvalid
 	}
-	if common.ValidateNotPositiveNumber(data.AmountExport) {
+	if common.ValidateNotPositiveNumberInt(data.AmountExport) {
 		return ErrExportDetailAmountExportIsNotPositiveNumber
 	}
 	return nil
