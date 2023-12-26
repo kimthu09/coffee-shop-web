@@ -18,6 +18,7 @@ import getAllSupplier from "@/lib/getAllSupplier";
 import { cn } from "@/lib/utils";
 import { FaPlus } from "react-icons/fa";
 import { get } from "http";
+import { getToken } from "@/lib/auth";
 
 export interface SupplierListProps {
   supplierId: string;
@@ -30,7 +31,8 @@ const SupplierList = ({
   canAdd,
 }: SupplierListProps) => {
   const [open, setOpen] = useState(false);
-  const { suppliers, isLoading, isError, mutate } = getAllSupplier();
+  const token = getToken();
+  const { suppliers, isLoading, isError, mutate } = getAllSupplier(token!);
   const handlePublisherAdded = async (publisherId: string) => {
     await mutate();
     //TODO

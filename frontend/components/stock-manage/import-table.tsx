@@ -37,7 +37,7 @@ import { FilterValue, ImportNote, StatusNote } from "@/types";
 
 import { useEffect, useState } from "react";
 import { Input } from "../ui/input";
-import { toVND } from "@/lib/utils";
+import { statusNoteToString, toVND } from "@/lib/utils";
 import ExportDialog from "./export-dialog";
 import { ExportImportNote } from "./excel-import-list";
 import { toast } from "../ui/use-toast";
@@ -59,6 +59,8 @@ import { FilterDatePicker } from "./date-picker";
 import StaffList from "../staff-list";
 import getAllImportNoteForExcel from "@/lib/import/getAllImportNoteForExcel";
 import { getToken } from "@/lib/auth";
+import SupplierList from "../supplier-list";
+import StatusList from "../status-list";
 
 export const columns: ColumnDef<ImportNote>[] = [
   {
@@ -235,7 +237,8 @@ export function ImportTable() {
 
   const createdBy = searchParams.get("createdBy") ?? undefined;
   const closedBy = searchParams.get("closedBy") ?? undefined;
-
+  const supplier = searchParams.get("supplier") ?? undefined;
+  const statusSearch = searchParams.get("status") ?? undefined;
   useEffect(() => {
     if (createdBy) {
       setStaffCreate(createdBy);
@@ -246,9 +249,21 @@ export function ImportTable() {
       setStaffClose(closedBy);
     }
   }, [closedBy]);
+  useEffect(() => {
+    if (supplier) {
+      setSupplierId(supplier);
+    }
+  }, [supplier]);
+  useEffect(() => {
+    if (statusSearch) {
+      setStatus(statusSearch);
+    }
+  }, [statusSearch]);
   const [latestFilter, setLatestFilter] = useState("");
   const [staffCreate, setStaffCreate] = useState("");
   const [staffClose, setStaffClose] = useState("");
+  const [supplierId, setSupplierId] = useState("");
+  const [status, setStatus] = useState("");
   let filters = [{ type: "", value: "" }];
   filters.pop();
   if (maxPrice) {
@@ -277,6 +292,12 @@ export function ImportTable() {
   }
   if (closedBy) {
     filters = filters.concat({ type: "closedBy", value: closedBy });
+  }
+  if (supplier) {
+    filters = filters.concat({ type: "supplier", value: supplier });
+  }
+  if (statusSearch) {
+    filters = filters.concat({ type: "status", value: statusSearch });
   }
   let stringToFilter = "";
   filters.forEach((item) => {
@@ -309,6 +330,8 @@ export function ImportTable() {
     { type: "closedAtTo", name: "Đóng đến ngày" },
     { type: "createdBy", name: "Mã người tạo" },
     { type: "closedBy", name: "Mã người đóng" },
+    { type: "supplier", name: "Mã nhà cung cấp" },
+    { type: "status", name: "Trạng thái" },
   ];
 
   const { register, handleSubmit, reset, control, getValues } =
@@ -351,7 +374,7 @@ export function ImportTable() {
       const importNoteData: Promise<{
         data: ImportNote[];
         paging: PagingProps;
-      }> = getAllImportNoteForExcel({ page: "1", limit: 10000 });
+      }> = getAllImportNoteForExcel({ page: "1", limit: 10000, token: token! });
       const notesToExport = await importNoteData;
       if (notesToExport.data.length < 1) {
         toast({
@@ -412,7 +435,7 @@ export function ImportTable() {
                     <LuFilter className="ml-1 h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-96">
+                <PopoverContent className="w-96 max-h-[32rem] overflow-y-auto">
                   <form
                     className="flex flex-col gap-4"
                     onSubmit={handleSubmit(onSubmit)}
@@ -491,6 +514,32 @@ export function ImportTable() {
                                   });
                                 }}
                               />
+                            ) : item.type === "supplier" ? (
+                              <div className="flex-1">
+                                <SupplierList
+                                  supplierId={supplierId}
+                                  setSupplierId={(value) => {
+                                    setSupplierId(value);
+                                    update(index, {
+                                      type: item.type,
+                                      value: value,
+                                    });
+                                  }}
+                                />
+                              </div>
+                            ) : item.type === "status" ? (
+                              <div className="flex-1">
+                                <StatusList
+                                  status={status}
+                                  setStatus={(value) => {
+                                    setStatus(value);
+                                    update(index, {
+                                      type: item.type,
+                                      value: value,
+                                    });
+                                  }}
+                                />
+                              </div>
                             ) : null}
                             <Button
                               variant={"ghost"}
@@ -561,7 +610,13 @@ export function ImportTable() {
                     <span>
                       {name?.name}
                       {": "}
-                      {item.value}
+                      {item.type.includes("At")
+                        ? new Date(+item.value * 1000).toLocaleDateString(
+                            "vi-VN"
+                          )
+                        : item.type === "status"
+                        ? statusNoteToString(status as StatusNote)
+                        : item.value}
                     </span>
                   </div>
                 );
@@ -574,7 +629,10 @@ export function ImportTable() {
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id} className="bg-orange-50">
+                <TableRow
+                  key={headerGroup.id}
+                  className="bg-orange-50 hover:bg-orange-50"
+                >
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead key={header.id}>
@@ -622,7 +680,7 @@ export function ImportTable() {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    Không tìm thấy bản ghi
                   </TableCell>
                 </TableRow>
               )}
