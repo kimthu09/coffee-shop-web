@@ -85,16 +85,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v2
 
-      - name: Set up Docker Environment
-        uses: docker/setup-buildx-action@v1
-
-      - name: Run Mutation Testing
+      - name: Run Gremlins in Docker
         run: |
-          docker build --pull --file - . <<EOF
-          FROM gogremlins/gremlins:0.5.0 AS mutation-testing
-          WORKDIR /backend
-          RUN gremlins unleash --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
-          EOF
+          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash .
