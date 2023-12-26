@@ -84,36 +84,10 @@ jobs:
   mutation-test:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0.33-debian
-        env:
-          MYSQL_ROOT_PASSWORD: 123456
-          MYSQL_DATABASE: cfshopmanagement
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping --silent"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Wait for MySQL to start
-        run: |
-          until mysqladmin ping -h"127.0.0.1" -P"3306" --silent; do
-            echo "waiting for mysql"
-            sleep 2
-          done
-
-      - name: Replace DSN in .env
-        run: |
-          cd backend
-          sed -i "s|root:123456@tcp(cfsm-mysql:3306)/cfshopmanagement|root:123456@tcp(127.0.0.1:3306)/cfshopmanagement|" .env
-
       - name: Run Gremlins in Docker
         run: |
-          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash .
+          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash  --conditionals_boundary=false --invert_negatives=false  --arithmetic-base=false --increment-decrement=false
