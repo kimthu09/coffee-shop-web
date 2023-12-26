@@ -27,7 +27,7 @@ func (data *SupplierCreate) Validate() *common.AppError {
 	if !common.ValidatePhone(data.Phone) {
 		return ErrSupplierPhoneInvalid
 	}
-	if common.ValidatePositiveNumber(data.Debt) {
+	if common.ValidatePositiveNumberInt(data.Debt) {
 		return ErrSupplierInitDebtInvalid
 	}
 	return nil

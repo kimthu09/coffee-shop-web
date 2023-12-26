@@ -15,7 +15,7 @@ func (data *RecipeDetailUpdate) Validate() *common.AppError {
 	if !common.ValidateNotNilId(&data.IngredientId) {
 		return ErrRecipeDetailIngredientIdInvalid
 	}
-	if common.ValidateNotPositiveNumber(data.AmountNeed) {
+	if common.ValidateNotPositiveNumberInt(data.AmountNeed) {
 		return ErrRecipeDetailAmountNeedIsNotPositiveNumber
 	}
 	return nil

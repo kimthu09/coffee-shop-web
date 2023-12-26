@@ -23,10 +23,10 @@ func (data *SizeFoodCreate) Validate() *common.AppError {
 	if common.ValidateEmptyString(data.Name) {
 		return ErrSizeFoodNameEmpty
 	}
-	if common.ValidateNegativeNumber(data.Cost) {
+	if common.ValidateNegativeNumberInt(data.Cost) {
 		return ErrSizeFoodCostIsNegativeNumber
 	}
-	if common.ValidateNegativeNumber(data.Price) {
+	if common.ValidateNegativeNumberInt(data.Price) {
 		return ErrSizeFoodPriceIsNegativeNumber
 	}
 	if data.Recipe == nil {
