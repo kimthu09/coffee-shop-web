@@ -441,114 +441,6 @@ export const importNotes: ImportNote[] = [
   },
 ];
 
-export const exportNotes: ExportNote[] = [
-  {
-    id: "PX001",
-    reason: "Het han",
-    createAt: new Date(),
-    createBy: "NV002",
-  },
-  {
-    id: "PX002",
-    reason: "Hu",
-    createAt: new Date(2023, 9, 8),
-    createBy: "NV002",
-  },
-  {
-    id: "PX003",
-    reason: "Het han",
-    createAt: new Date(2023, 10, 1),
-    createBy: "NV002",
-  },
-];
-
-export const staffs: Staff[] = [
-  {
-    id: "NV01",
-    name: "Nguyen Van Ba",
-    role: "Quan ly",
-  },
-  {
-    id: "NV02",
-    name: "Nguyen Van C",
-    role: "Thu ngan",
-  },
-  {
-    id: "NV03",
-    name: "Nguyen Van D",
-    role: "Thu ngan",
-  },
-];
-export const roles: Role[] = [
-  {
-    id: "1",
-    name: "Quan ly",
-  },
-  {
-    id: "2",
-    name: "Thu ngan",
-  },
-];
-export const roleFunctions: RoleFunction[] = [
-  {
-    id: "1",
-    name: "Tinh nang ban hang",
-  },
-  {
-    id: "2",
-    name: "Tong quan",
-  },
-  {
-    id: "3",
-    name: "Quan ly nhan vien",
-  },
-  {
-    id: "4",
-    name: "Quan ly hoa don",
-  },
-  {
-    id: "5",
-    name: "Bao cao",
-  },
-  {
-    id: "6",
-    name: "Quan ly khach hang",
-  },
-  {
-    id: "7",
-    name: "Quan ly kho",
-  },
-];
-export const customers: Customer[] = [
-  {
-    id: "KH001",
-    name: "Nguyen Thi Hue",
-    phone: "098123456",
-    email: "hue@gmail.com",
-    point: 0,
-  },
-  {
-    id: "KH002",
-    name: "Nguyen Thi Hoa",
-    phone: "098123456",
-    point: 2,
-  },
-  {
-    id: "KH003",
-    name: "Nguyen Thi Lan",
-    phone: "098123456",
-    email: "lan@gmail.com",
-    point: 10,
-  },
-  {
-    id: "KH004",
-    name: "Nguyen Thi Hong",
-    phone: "098123456",
-    email: "hong@gmail.com",
-    point: 8,
-  },
-];
-
 export const statuses = [
   {
     isActive: true,
@@ -561,41 +453,10 @@ export const statuses = [
 ];
 export const sidebarItems: SidebarItem[] = [
   {
-    title: "Quản lý sản phẩm",
-    href: "/product-manage",
-    icon: LuHome,
-    submenu: true,
-    subMenuItems: [
-      { title: "Danh sách mặt hàng", href: "/product-manage" },
-      { title: "Danh mục", href: "/product-manage/category" },
-    ],
-  },
-  {
     title: "Quản lý kho",
     href: "/stock-manage",
     icon: MdOutlineWarehouse,
     submenu: true,
-    subMenuItems: [
-      { title: "Danh sách tồn kho", href: "/stock-manage" },
-      { title: "Nhập kho", href: "/stock-manage/import" },
-      { title: "Xuất kho", href: "/stock-manage/export" },
-      { title: "Kiểm kho", href: "/stock-manage/check" },
-    ],
-  },
-  {
-    title: "Quản lý nhân viên",
-    href: "/staff",
-    icon: GoPeople,
-    submenu: true,
-    subMenuItems: [
-      { title: "Danh sách nhân viên", href: "/staff" },
-      { title: "Phân quyền nhân viên", href: "/staff/role" },
-    ],
-  },
-  {
-    title: "Quản lý khách hàng",
-    href: "/customer",
-    icon: GoPerson,
-    submenu: false,
+    subMenuItems: [{ title: "Nhập kho", href: "/stock-manage/import" }],
   },
 ];

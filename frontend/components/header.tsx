@@ -20,7 +20,7 @@ const Header = () => {
               className={`flex align-middle justify-center items-center p-[4px] h-[40px] w-[40px]  rounded-xl bg-orange-100 `}
             >
               <Image
-                src="/logo.svg"
+                src="/android-chrome-192x192.png"
                 alt="logo"
                 className="sidebar__logo"
                 width={36}
