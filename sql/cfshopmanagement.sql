@@ -344,31 +344,92 @@ INSERT INTO `Feature` (`id`, `description`, `groupName`) VALUES
 
 
 
+INSERT INTO `ImportNote` (`id`, `supplierId`, `totalPrice`, `status`, `createdBy`, `closedBy`, `createdAt`, `closedAt`) VALUES
+('PN001', 'SupCake0001', 2035000, 'Done', 'g3W21A7SR', 'g3W21A7SR', '2023-11-26 04:27:41', '2023-12-26 05:19:16');
+INSERT INTO `ImportNote` (`id`, `supplierId`, `totalPrice`, `status`, `createdBy`, `closedBy`, `createdAt`, `closedAt`) VALUES
+('PN002', 'SupCoffe0001', 2410000, 'InProgress', 'g3W21A7SR', NULL, '2023-12-01 04:32:04', NULL);
+INSERT INTO `ImportNote` (`id`, `supplierId`, `totalPrice`, `status`, `createdBy`, `closedBy`, `createdAt`, `closedAt`) VALUES
+('PN003', 'SupIceCr0001', 609500, 'InProgress', 'g3W21A7SR', NULL, '2023-12-26 04:37:49', NULL);
+INSERT INTO `ImportNote` (`id`, `supplierId`, `totalPrice`, `status`, `createdBy`, `closedBy`, `createdAt`, `closedAt`) VALUES
+('PN004', 'SupPearl0001', 2499000, 'Cancel', 'g3W21A7SR', 'g3W21A7SR', '2023-12-22 04:43:03', '2023-12-26 05:23:07'),
+('PN005', 'SupMilk0001', 706000, 'Cancel', 'g3W21A7SR', 'g3W21A7SR', '2023-10-08 04:45:50', '2023-12-26 05:19:36'),
+('PN006', 'SupCacao0001', 1198000, 'Done', 'g3W21A7SR', 'g3W21A7SR', '2023-09-08 05:04:14', '2023-12-26 05:20:04'),
+('PN007', 'SupOTea0001', 415000, 'InProgress', 'g3W21A7SR', NULL, '2023-12-26 05:08:05', NULL),
+('PN008', 'SupCake0001', 1188000, 'InProgress', 'g3W21A7SR', NULL, '2023-12-26 05:11:35', NULL),
+('PN009', 'SupPearl0001', 621000, 'InProgress', 'g3W21A7SR', NULL, '2023-12-26 05:12:35', NULL),
+('PN010', 'SupTea0001', 363000, 'Done', 'g3W21A7SR', 'g3W21A7SR', '2023-12-10 05:13:11', '2023-12-26 05:20:25'),
+('PN011', 'SupMilk0001', 320000, 'Done', 'g3W21A7SR', 'g3W21A7SR', '2023-08-06 05:15:18', '2023-12-26 05:21:04');
 
-
-
+INSERT INTO `ImportNoteDetail` (`importNoteId`, `ingredientId`, `price`, `amountImport`, `totalUnit`) VALUES
+('PN001', 'Ing0001', 45, 5000, 225000);
+INSERT INTO `ImportNoteDetail` (`importNoteId`, `ingredientId`, `price`, `amountImport`, `totalUnit`) VALUES
+('PN001', 'Ing0004', 45, 10000, 450000);
+INSERT INTO `ImportNoteDetail` (`importNoteId`, `ingredientId`, `price`, `amountImport`, `totalUnit`) VALUES
+('PN001', 'Ing0009', 920, 1000, 920000);
+INSERT INTO `ImportNoteDetail` (`importNoteId`, `ingredientId`, `price`, `amountImport`, `totalUnit`) VALUES
+('PN001', 'Ing0010', 58, 5000, 290000),
+('PN001', 'Ing0014', 150, 1000, 150000),
+('PN002', 'Ing0002', 230, 5000, 1150000),
+('PN002', 'Ing0013', 370, 3000, 1110000),
+('PN002', 'Ing0018', 150, 1000, 150000),
+('PN003', 'Ing0003', 25, 5000, 125000),
+('PN003', 'Ing0005', 2500, 20, 50000),
+('PN003', 'Ing0006', 120, 1000, 120000),
+('PN003', 'Ing0007', 1200, 200, 240000),
+('PN003', 'Ing0008', 42, 1000, 42000),
+('PN003', 'Ing0012', 65, 500, 32500),
+('PN004', 'Ing0011', 1250, 900, 1125000),
+('PN004', 'Ing0016', 80, 4500, 360000),
+('PN004', 'Ing0017', 1300, 780, 1014000),
+('PN005', 'Ing0001', 45, 6000, 270000),
+('PN005', 'Ing0003', 24, 5000, 120000),
+('PN005', 'Ing0005', 2600, 10, 26000),
+('PN005', 'Ing0010', 58, 5000, 290000),
+('PN006', 'Ing0002', 230, 2000, 460000),
+('PN006', 'Ing0006', 110, 5000, 550000),
+('PN006', 'Ing0009', 940, 200, 188000),
+('PN007', 'Ing0003', 25, 5000, 125000),
+('PN007', 'Ing0019', 250, 600, 150000),
+('PN007', 'Ing020', 70, 2000, 140000),
+('PN008', 'Ing0001', 45, 10000, 450000),
+('PN008', 'Ing0003', 25, 2000, 50000),
+('PN008', 'Ing0004', 45, 5000, 225000),
+('PN008', 'Ing0005', 2500, 30, 75000),
+('PN008', 'Ing0006', 120, 1200, 144000),
+('PN008', 'Ing0014', 150, 1200, 180000),
+('PN008', 'Ing0016', 80, 800, 64000),
+('PN009', 'Ing0004', 45, 5000, 225000),
+('PN009', 'Ing0007', 1200, 200, 240000),
+('PN009', 'Ing0010', 58, 2000, 116000),
+('PN009', 'Ing0016', 80, 500, 40000),
+('PN010', 'Ing0019', 250, 1200, 300000),
+('PN010', 'Ing020', 70, 900, 63000),
+('PN011', 'Ing0003', 24, 10000, 240000),
+('PN011', 'Ing0008', 40, 2000, 80000);
 
 INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
-('Ing0001', 'Đường', 500, 'Weight', 5000);
+('Ing0001', 'Đường', 5500, 'Weight', 45);
 INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
-('Ing0002', 'Hạt Cà Phê', 1000, 'Weight', 15000);
+('Ing0002', 'Hạt Cà Phê', 3000, 'Weight', 230);
 INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
-('Ing0003', 'Sữa', 200, 'Volume', 10000);
+('Ing0003', 'Sữa', 10200, 'Volume', 25);
 INSERT INTO `Ingredient` (`id`, `name`, `amount`, `measureType`, `price`) VALUES
-('Ing0004', 'Bột Bánh', 300, 'Weight', 9000),
+('Ing0004', 'Bột Bánh', 10300, 'Weight', 45),
 ('Ing0005', 'Trứng', 50, 'Unit', 2500),
-('Ing0006', 'Sô Cô La', 200, 'Weight', 12000),
-('Ing0007', 'Tinh Dầu Vanilla', 10, 'Volume', 30000),
-('Ing0008', 'Nước Dừa', 500, 'Volume', 8000),
-('Ing0009', 'Bột Matcha', 50, 'Weight', 25000),
-('Ing0010', 'Đường Nâu', 300, 'Weight', 7000),
-('Ing0011', 'Dầu Olive', 150, 'Volume', 15000),
-('Ing0012', 'Nước Cốt Dừa', 300, 'Volume', 10000),
-('Ing0013', 'Hạt Hạnh Nhân', 120, 'Weight', 22000),
-('Ing0014', 'Bơ', 80, 'Weight', 18000),
-('Ing0016', 'Bột Baking Soda', 10, 'Weight', 5000),
-('Ing0017', 'Dầu Hạt Dẻ Cười', 30, 'Volume', 30000),
-('Ing0018', 'Hạt Hồ Lô', 50, 'Weight', 15000);
+('Ing0006', 'Sô Cô La', 5200, 'Weight', 120),
+('Ing0007', 'Tinh Dầu Vanilla', 10, 'Volume', 1200),
+('Ing0008', 'Nước Dừa', 2500, 'Volume', 42),
+('Ing0009', 'Bột Matcha', 1250, 'Weight', 920),
+('Ing0010', 'Đường Nâu', 5300, 'Weight', 58),
+('Ing0011', 'Dầu Olive', 150, 'Volume', 1250),
+('Ing0012', 'Nước Cốt Dừa', 300, 'Volume', 65),
+('Ing0013', 'Hạt Hạnh Nhân', 120, 'Weight', 370),
+('Ing0014', 'Bơ', 1080, 'Weight', 150),
+('Ing0016', 'Bột Baking Soda', 10, 'Weight', 80),
+('Ing0017', 'Dầu Hạt Dẻ Cười', 30, 'Volume', 1300),
+('Ing0018', 'Hạt Hồ Lô', 50, 'Weight', 150),
+('Ing0019', 'Trà Ô long', 1200, 'Weight', 250),
+('Ing020', 'Trà Đen', 900, 'Weight', 70);
 
 
 
@@ -446,19 +507,28 @@ INSERT INTO `ShopGeneral` (`id`, `name`, `email`, `phone`, `address`, `wifiPass`
 
 
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
-('SupCacao0001', 'NCC Cacao', 'cacao@gmail.com', '0905555555', -50000);
+('SupCacao0001', 'NCC Cacao', 'cacao@gmail.com', '0905555555', -1248000);
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
-('SupCake0001', 'NCC Bánh', 'banh@gmail.com', '0943334445', 0);
+('SupCake0001', 'NCC Bánh', 'banh@gmail.com', '0943334445', -2035000);
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
 ('SupCoffe0001', 'NCC Cà Phê', 'caphe@gmail.com', '0901234567', -80000);
 INSERT INTO `Supplier` (`id`, `name`, `email`, `phone`, `debt`) VALUES
 ('SupHoney0001', 'NCC Mật Ong', 'matong@gmail.com', '0927777777', -2000),
 ('SupIceCr0001', 'NCC Kem', 'kem@gmail.com', '0999999999', -60000),
-('SupMilk0001', 'NCC Sữa Tuyệt trùng', 'suatuyettrung@gmail.com', '0919876543', -5000),
+('SupMilk0001', 'NCC Sữa Tuyệt trùng', 'suatuyettrung@gmail.com', '0919876543', -325000),
 ('SupOTea0001', 'NCC Trà Ôlong', 'olong@gmail.com', '0922333445', -30000),
 ('SupPearl0001', 'NCC Trân Châu', 'tranchau@gmail.com', '0911122334', -3500),
 ('SupSugar0001', 'NCC Đường', 'duong@gmail.com', '0921112223', -30000),
-('SupTea0001', 'NCC Trà', 'tra@gmail.com', '0922233445', -20000);
+('SupTea0001', 'NCC Trà', 'tra@gmail.com', '0922233445', -383000);
+
+INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
+('PN001', 'SupCake0001', -2035000, -2035000, 'Debt', '2023-12-26 05:16:43', 'g3W21A7SR');
+INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
+('PN006', 'SupCacao0001', -1198000, -1248000, 'Debt', '2023-12-26 05:17:40', 'g3W21A7SR');
+INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
+('PN010', 'SupTea0001', -363000, -383000, 'Debt', '2023-12-26 05:17:23', 'g3W21A7SR');
+INSERT INTO `SupplierDebt` (`id`, `supplierId`, `amount`, `amountLeft`, `type`, `createdAt`, `createdBy`) VALUES
+('PN011', 'SupMilk0001', -320000, -325000, 'Debt', '2023-12-26 05:15:59', 'g3W21A7SR');
 
 
 DELIMITER //
