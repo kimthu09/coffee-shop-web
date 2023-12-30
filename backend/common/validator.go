@@ -14,7 +14,7 @@ func ValidatePhone(s string) bool {
 		return false
 	}
 
-	pattern := `\d`
+	pattern := `^[0-9]+$`
 
 	regex := regexp.MustCompile(pattern)
 

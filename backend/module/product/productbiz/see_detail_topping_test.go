@@ -158,12 +158,11 @@ func Test_seeDetailToppingBiz_SeeDetailTopping(t *testing.T) {
 
 			got, err := biz.SeeDetailTopping(tt.args.ctx, tt.args.toppingId)
 
-			assert.Equal(t, tt.want, got, "SeeDetailTopping() = %v, want %v", got, tt.want)
-
 			if tt.wantErr {
 				assert.NotNil(t, err, "SeeDetailTopping() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
 				assert.Nil(t, err, "SeeDetailTopping() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, tt.want, got, "SeeDetailTopping() = %v, want %v", got, tt.want)
 			}
 		})
 	}

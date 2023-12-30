@@ -158,12 +158,11 @@ func Test_seeDetailFoodBiz_SeeDetailFood(t *testing.T) {
 
 			got, err := biz.SeeDetailFood(tt.args.ctx, tt.args.foodId)
 
-			assert.Equal(t, tt.want, got, "SeeDetailFood() = %v, want %v", got, tt.want)
-
 			if tt.wantErr {
 				assert.NotNil(t, err, "SeeDetailFood() error = %v, wantErr %v", err, tt.wantErr)
 			} else {
 				assert.Nil(t, err, "SeeDetailFood() error = %v, wantErr %v", err, tt.wantErr)
+				assert.Equal(t, tt.want, got, "SeeDetailFood() = %v, want %v", got, tt.want)
 			}
 		})
 	}

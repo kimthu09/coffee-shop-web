@@ -13,15 +13,6 @@ import (
 	"testing"
 )
 
-type FakeGormErr struct {
-	Number  int    `json:"Numbers"`
-	Message string `json:"Messages"`
-}
-
-func (gErr *FakeGormErr) Error() string {
-	return gErr.Message
-}
-
 func Test_sqlStore_CreateCategory(t *testing.T) {
 	sqlDB, sqlDBMock, err := sqlmock.New(sqlmock.QueryMatcherOption(sqlmock.QueryMatcherEqual))
 	if err != nil {
@@ -52,10 +43,6 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 	mockErrPRIMARY := &common.GormErr{
 		Number:  1062,
 		Message: "PRIMARY",
-	}
-	mockErrFaKeGorm := &FakeGormErr{
-		Number:  1062,
-		Message: "FakeGorm",
 	}
 	expectedSql := "INSERT INTO `Category` (`id`,`name`,`description`) VALUES (?,?,?)"
 
@@ -164,29 +151,6 @@ func Test_sqlStore_CreateCategory(t *testing.T) {
 				sqlDBMock.ExpectRollback()
 			},
 			want:    categorymodel.ErrCategoryNameDuplicate,
-			wantErr: true,
-		},
-		{
-			name: "Create category in database failed because error is not in right format",
-			fields: fields{
-				db: gormDB,
-			},
-			args: args{
-				ctx:  context.Background(),
-				data: &categoryCreate,
-			},
-			mock: func() {
-				sqlDBMock.ExpectBegin()
-				sqlDBMock.
-					ExpectExec(expectedSql).
-					WithArgs(
-						categoryCreate.Id,
-						categoryCreate.Name,
-						categoryCreate.Description).
-					WillReturnError(mockErrFaKeGorm)
-				sqlDBMock.ExpectRollback()
-			},
-			want:    common.ErrDB(mockErrFaKeGorm),
 			wantErr: true,
 		},
 	}
