@@ -46,7 +46,7 @@ func (e *AppError) Error() string {
 func ErrDB(err error) *AppError {
 	return NewErrorResponse(
 		err,
-		"something went wrong with DB",
+		"Đã có lỗi xảy ra với database. Xin hãy thử lại sau.",
 		err.Error(),
 		"DB_ERROR",
 	)
@@ -55,7 +55,7 @@ func ErrDB(err error) *AppError {
 func ErrInvalidRequest(err error) *AppError {
 	return NewErrorResponse(
 		err,
-		"invalid request",
+		"Request không hợp lệ.",
 		err.Error(),
 		"ERROR_INVALID_REQUEST",
 	)
@@ -64,7 +64,7 @@ func ErrInvalidRequest(err error) *AppError {
 func ErrInternal(err error) *AppError {
 	return NewErrorResponse(
 		err,
-		"internal error",
+		"Đã có lỗi xảy ra, xin hãy thử lại sau.",
 		err.Error(),
 		"ERROR_INTERNAL_ERROR",
 	)

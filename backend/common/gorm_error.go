@@ -19,10 +19,7 @@ func (gErr *GormErr) Error() string {
 func GetGormErr(appErr error) *GormErr {
 	var byteErr, _ = json.Marshal(appErr)
 	var newError GormErr
-	err := json.Unmarshal(byteErr, &newError)
-	if err != nil {
-		return nil
-	}
+	json.Unmarshal(byteErr, &newError)
 	return &newError
 }
 
