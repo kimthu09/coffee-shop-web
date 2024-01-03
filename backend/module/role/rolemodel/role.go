@@ -9,7 +9,7 @@ import (
 type Role struct {
 	Id           string           `json:"id" gorm:"column:id;"`
 	Name         string           `json:"name" gorm:"column:name;"`
-	RoleFeatures ListRoleFeatures `json:"features,omitempty"`
+	RoleFeatures ListRoleFeatures `json:"features"`
 }
 
 func (*Role) TableName() string {
