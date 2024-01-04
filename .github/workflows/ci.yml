@@ -96,7 +96,7 @@ jobs:
 
           echo "Total Mutation Score: $MUTATION_SCORE%"
 
-          if [ $(echo "$MUTATION_SCORE < 80" | bc) -ne 0 ]; then
+          if [ $(echo "$MUTATION_SCORE < 81" | bc) -ne 0 ]; then
             echo "Mutation score is below 80%"
             exit 1
           fi
