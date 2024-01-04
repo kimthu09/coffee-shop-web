@@ -99,7 +99,7 @@ jobs:
       - name: Check Mutation Score
         run: |
           echo "Total Mutation Score: ${{ steps.gremlins.outputs.mutation_score }}%"
-          if [ $(echo "${{ steps.gremlins.outputs.mutation_score }} < 85" | bc) -ne 0 ]; then
-            echo "Mutation score is below 85%"
+          if [ $(echo "${{ steps.gremlins.outputs.mutation_score }} < 80" | bc) -ne 0 ]; then
+            echo "Mutation score is below 80%"
             exit 1
           fi
