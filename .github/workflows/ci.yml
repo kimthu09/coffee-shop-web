@@ -89,16 +89,17 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run Gremlins in Docker
+        id: gremlins
         run: |
           docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash | tee mutation_output.txt
-
           MUTATION_SCORE=$(grep 'Mutator coverage' mutation_output.txt | awk '{print substr($3, 1, length($3)-1)}')
+          echo "Total Mutation Score: $MUTATION_SCORE%"
+          echo "::set-output name=mutation_score::$MUTATION_SCORE"
 
       - name: Check Mutation Score
         run: |
-          echo "Total Mutation Score: $MUTATION_SCORE%"
-
-          if [ $(echo "$MUTATION_SCORE < 81" | bc) -ne 0 ]; then
-            echo "Mutation score is below 81%"
+          echo "Total Mutation Score: ${{ steps.gremlins.outputs.mutation_score }}%"
+          if [ $(echo "${{ steps.gremlins.outputs.mutation_score }} < 85" | bc) -ne 0 ]; then
+            echo "Mutation score is below 85%"
             exit 1
           fi
