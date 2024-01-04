@@ -91,3 +91,29 @@ jobs:
       - name: Run Gremlins in Docker
         run: |
           docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash
+
+      - name: Capture Mutation Test Output
+        id: mutation_output
+        run: |
+          output=$(docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins unleash)
+          echo "::set-output name=mutation_result::$output"
+
+      - name: Check Mutation Score
+        run: |
+          # Use the output from the previous step
+          output="${{ steps.mutation_output.outputs.mutation_result }}"
+          echo "$output"
+
+          # Extract the mutation score
+          score=$(echo "$output" | grep 'Mutator coverage' | awk '{print $3}' | sed 's/%//')
+
+          # Define the threshold
+          threshold=81
+
+          # Check if the mutation score is below the threshold
+          if [ $(echo "$score < $threshold" | bc) -ne 0 ]; then
+            echo "Mutation score is below the threshold: $score%"
+            exit 1
+          else
+            echo "Mutation score meets the threshold: $score%"
+          fi
