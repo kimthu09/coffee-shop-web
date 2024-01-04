@@ -90,10 +90,7 @@ jobs:
 
       - name: Run Gremlins in Docker
         run: |
-          cd backend
-
-          go install github.com/go-gremlins/gremlins/cmd/gremlins@v0.5.0
-          gremlins unleash > mutation_output.txt
+          docker run --rm -v ${{ github.workspace }}/backend:/app -w /app gogremlins/gremlins gremlins unleash | tee mutation_output.txt
 
           MUTATION_SCORE=$(grep 'Mutator coverage' mutation_output.txt | awk '{print substr($3, 1, length($3)-1)}')
 
