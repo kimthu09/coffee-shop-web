@@ -69,7 +69,7 @@ export function SidebarNav() {
                   }`}
                 >
                   <Image
-                    src="/logo.svg"
+                    src="/android-chrome-192x192.png"
                     alt="logo"
                     className="sidebar__logo"
                     width={80}
